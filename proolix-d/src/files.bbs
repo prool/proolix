@@ -1,0 +1,10 @@
+BM              Boot Manager
+BOOT            Boot sector
+COMMAND         Commands & utilities
+KERNEL          Kernel
+INCLUDE         Includes (*.h)
+ANNOUNCE.DOC    Announce (uncomplete)
+GIST.DOC        Gistogramm
+HISTORY.DOC     Proolix history (in Russian)
+FILES.BBS       files descriptions
+

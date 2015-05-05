@@ -1,0 +1,43 @@
+GAS LISTING sayr.s 			page 1
+
+
+   1              	# 1 "sayr.S"
+   2              	# 1 "<built-in>"
+   1              	    .code16
+   0              	
+   0              	
+   2              	    .text
+   3              	    
+   4              	    .global sayr_proc
+   5              	
+   6              	sayr_proc: # proc       Ver 0.0.2 19-Oct-2004
+   7              	                        # Процедура вывода строки при помощи функций BIOS
+   8              	                        # Вход: %DS:%si - ASCIIZ строка.
+   9              	                        # REGS SAVED !!!
+  10              	# В графических режимах не работает
+  11 0000 50       		pushw	%ax
+  12              		
+  13              	#       cld
+  14              	sayr_l1:
+  15 0001 AC       	        lodsb
+  16 0002 08C0     	        orb     %al,%al
+  17 0004 7406     	        jz      sayrret
+  18 0006 B40E     	        movb    $0x0e,%ah
+  19 0008 CD10     	        int     $0x10
+  20 000a EBF5     	        jmp     sayr_l1
+  21              	sayrret:
+  22 000c 58       		popw	%ax
+  23 000d C3       	        ret
+GAS LISTING sayr.s 			page 2
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sayr.S
+                            *ABS*:00000000 <command line>
+                            *ABS*:00000000 <built-in>
+                            *ABS*:00000000 sayr.S
+              sayr.S:6      .text:00000000 sayr_proc
+              sayr.S:14     .text:00000001 sayr_l1
+              sayr.S:21     .text:0000000c sayrret
+
+NO UNDEFINED SYMBOLS

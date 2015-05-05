@@ -1,0 +1,91 @@
+GAS LISTING ohw.s 			page 1
+
+
+   1              	# 1 "ohw.S"
+   2              	# 1 "<built-in>"
+   1              	    .code16
+   0              	
+   0              	
+   2              	    .text
+   3              	    
+   4              	    .global ohw
+   5              	    .global ohb
+   6              	    
+   7              	ohw: #     proc
+   8              	
+   9              	#       Вывод слова в HEX-виде. Вход: слово в %ax.
+  10              	#       Все регистры сохраняются.
+  11              	#       Вызывает подпрограмму ohb
+  12              	
+  13 0000 50       	        pushw    %ax      # Сохр. ради %al.
+  14 0001 88E0     	        movb     %ah,%al
+  15 0003 E8FEFF   	        call    ohb
+  16 0006 58       	        popw     %ax              # Восст. %al.
+  17 0007 E8FEFF   	        call    ohb
+  18 000a C3       	        ret
+  19              	# ohw     endp
+  20              	ohb: #     proc
+  21              	
+  22              	# Procedure output hex byte Ver 0.1.1 6 Dec 93 via BIOS
+  23              	# Input: %al - byte
+  24              	# All regs. reserved ;)
+  25              	
+  26              	# Not worked in graph mode. bl - bg color ???
+  27              	
+  28 000b 50       	        pushw    %ax
+  29 000c 51       	        pushw    %cx
+  30 000d 52       	        pushw    %dx
+  31              	
+  32 000e 88C2     	        movb     %al,%dl
+  33 0010 B104     	        movb     $4,%cl
+  34 0012 D2E8     	        shrb     %cl,%al
+  35 0014 E80B00   	        call    ohb1
+  36              	
+  37 0017 88D0     	        movb    %dl,%al
+  38 0019 240F     	        andb    $0xf,%al
+  39 001b E80400   	        call    ohb1
+  40              	
+  41 001e 5A       	        popw     %dx
+  42 001f 59       	        popw     %cx
+  43 0020 58       	        popw     %ax
+  44              	
+  45 0021 C3       	        ret
+  46              	
+  47              	# ohb     endp
+  48              	
+  49              	ohb1: #    proc    # Regs not saved !!!
+  50 0022 50       	        pushw    %ax
+  51              	
+  52 0023 3C09     	        cmpb     $9,%al
+  53 0025 7704     	        ja      l_1    # %al > 9
+GAS LISTING ohw.s 			page 2
+
+
+  54              	        # %al <= 9
+  55 0027 0430     	        addb     $0x30,%al	# addb '0',%al
+  56 0029 EB02     	        jmp     l_out
+  57              	
+  58 002b 0437     	l_1:   addb     $0x37,%al #  addb    'A'-10,%al 
+  59 002d B40E     	l_out: movb     $0xe,%ah
+  60 002f CD10     	        int     $0x10
+  61              	
+  62 0031 58       	        popw     %ax
+  63              	
+  64 0032 C3       	        ret
+  65              	# ohb1    endp
+  66              	
+GAS LISTING ohw.s 			page 3
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 ohw.S
+                            *ABS*:00000000 <command line>
+                            *ABS*:00000000 <built-in>
+                            *ABS*:00000000 ohw.S
+               ohw.S:7      .text:00000000 ohw
+               ohw.S:20     .text:0000000b ohb
+               ohw.S:49     .text:00000022 ohb1
+               ohw.S:58     .text:0000002b l_1
+               ohw.S:59     .text:0000002d l_out
+
+NO UNDEFINED SYMBOLS

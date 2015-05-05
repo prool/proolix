@@ -1,0 +1,232 @@
+ÚÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ÉÍÍÍÍÍÍÍÍ» ³File: CPUTYPE.DOC ³Subject: CPU/FPU feature detection library.  ³
+³ÌÍÍÍÍÍÍÍÍÊ»ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ºÖÄÖÄÒÄÒ· º³Date: 20/06/94 ³       Copyright(c) 1993,94 by B-coolWare.      ³
+³ºÓÄĞÄĞÄ½ÓÄº³Version: 1.14  ³ This document should not be changed in any way ³
+³ÈÍÍÍÍÍÍÍÍÍ¼³Revision:01/11 ³and should be distributed with related software.³
+ÀÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+ Document no.: LR-0006.94.93M01.11
+
+                                    Contents
+
+                               License Agreement.
+
+                    Appendix A. Library Features and Notes.
+
+                              Appendix B. Credits.
+
+                        Appendix C. Authenticity check.
+
+                        Appendix D. History of changes.
+
+
+    Too-Much-In-One-So-Don't-Get-Lost(tm) CPU/FPU feature detection library
+                                    License.
+
+ This license regards to the Too-Much-In-One-So-Don't-Get-Lost(tm) CPU/FPU
+   detection library version 1.14 dated 20/06/94, mentioned hereafter as
+   "source code". It describes your rites, obligations and liabilities as for
+   this source code. It took much time to gather all information used to
+   produce this code, so the main purpose of this license is to grant anyone
+   free access to it. Use it free, give away to anyone, but please do not
+   sell or lease it - it's my work, and if you think someone should be paid
+   for it, you're not the rite person anyway.
+
+ This one goes like this:
+
+ This source code is freeware and thus you have legal rites to copy, distribu-
+   te, modify and use entire code or parts of it in either commercial or non-
+   commercial software, provided that you do not charge additional fee for
+   distribution/incorporation of this code or its parts in your own products.
+   If you do so, your rites automatically void and you'll be liable for
+   violation of the Russian Copyright Law for Computer Programs and Databases
+   as well as other laws and international provisions. Parties that acquire
+   this source code from you will still have their rites for the source code as
+   long as they comply with this license. The source code SHOULD be distributed
+   along with this license and you should document any changes made to it
+   either in source files or in additional documents. The code cannot be
+   distributed partially, you should include all files that builds the library
+   plus any additional files needed to compile it in the distribution
+   archive/set. Regardless of the extent of modifications made by you to this
+   source code, it will remain freeware, and you should provide a way for
+   anyone to obtain his own copy as of original, so as of modified code.
+
+ This source code is provided AS IS with no express or implied warranties,
+   including any implied warranties of fitness for particular purpose. If you
+   modify the source code included herein, please add a notification about it
+   and complete description of what and how you modified, so that subsequent
+   users of this code will know that they use not original but rather modified
+   version of the code.
+
+ In case of any damage caused by use or misuse of this code or any other kind
+   of decease including loss of business profits or valuable information,
+   author shall not be liable for it. I expressly disclaim any warranties
+   regarding to the quality of this code, or its errorlessness.
+
+ Author reserves the rite to change this code entirely or partially without
+   notification to its users. He also reserves the rite to use this code in
+   any manner in any commercial or non-commercial software of any kind and
+   give it away to anyone who ask.
+
+
+    If you have any questions, suggestions or usable information on how to
+              improve this product, feel free to contact author at
+
+ e-mail (preferrable):
+
+ 2:5028/52.6@fidonet
+ bob@ymz.yaroslavl.su (Relcom@Internet)
+ do ye think me should arrive on CompuServe? :)
+
+ phones:
+
+ +7-(0852)-276-548 (9:00am to 6:00pm, Moscow Time) voice\data 14400/V.32b
+ +7-(0852)-238-663 (8:00pm to 10:00pm,Moscow Time) voice
+
+ please don't call earlier or later - gimme a break...
+
+ paper mail:
+
+ 150031, 10/4/13,
+ Dobrynina Str.,
+ Yaroslavl,
+ Russia
+
+ Vladimir M. Zakharychev (‚« ¤¨¬¨à ‡ å àëç¥¢)
+
+ Calls and letters both in English and in Russian are welcome. Please do not
+ speak/write in any other language if you want to be answered. Letter bombs
+ will be returned to sender :)
+
+
+ Appendix A. Library Features and Notes.
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ The Too-Much-In-One-So-Don't-Get-Lost(tm) CPU/FPU feature detection library
+ allows you to distinguish between following CPUs:
+
+ Intel 8088,8086,80188,80186,80286,80386DX,80386SX,i486DX,i486SX,Pentium and
+ any succeeding CPUs (when they become available),
+ NEC V20 and V30,
+ Cyrix 486SLC, 486DLC and M1 (586),
+ IBM 386SL - I was told that this chip's identification doesn't work :(.
+
+ FPUs:
+
+ Intel 8087,80287,80287XL - not 100% reliable,80387 and 487 internal,
+ Cyrix 2C87,3C87 and 4C87,
+ IIT 2C87 and 3C87,
+ Weitek 1167;
+
+ determine whether or not the processor is in V86 mode (for DOS programs only)-
+ generally this one just tests for PM flag and assumes V86 if it is set for DOS
+ + PM combination automatically leads to V86;
+
+ determine 386dx chip step (B0 or earlier,B1,D0 or later) -
+  this one tests for known bugs in chips of these steps, it does not reset CPU
+  to look at EAX value;
+
+ determine CPU clock speed (for all listed processors, was not checked on some
+ models and may require some adjustments).
+
+ Note 1:
+
+ AMD Am386SX/40 and Am386DX/40 - can be identified as such by using CPU_Type
+ in conjunction with Speed: if CPU is identified as Intel 386 and its clock is
+ more than 33MHz then this is definitely an AMD chip - Intel doesn't produce
+ 40MHz 386s while AMD does. However this method is not implemented in CPU_Type
+ routine because speed computing requires some floating point calculations and
+ I don't want to insert FPU instructions in the code because there may be no
+ FPU... You may implement this method in your high-level routine reporting
+ CPU type if you want (and as I did :). Also you may conclude i486DX2 if it is
+ identified as 486DX and has CPU clock of 66 MHz - afaik Intel do not produce
+ DX chips with such clock frequencies. However I cannot quarantee this is true
+ and don't use this method by myself.
+
+ Note 2:
+
+ The source code is commented so I didn't include its description here. I think
+ there'll be no problem using it. You might encounter problems adapting the
+ source code to use it in languages other than assembler, but that depends on
+ your qualification. I wrote this one for professionals...
+
+
+ Appendix B. Credits.
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ This appendix contains names and netmail addresses of people who contributed
+  to this product in any way, either by adding any methods or by fixing
+  existing methods given incorrect results. If you do such additions or fixes,
+  please contact me and send modified version of the code so that I'll be able
+  to incorporate it in next releases.
+
+ 1. Igor Dral of 50/321@fidonet
+    who helped me lot in cleaning the code of bugs, testing, etc. Thanx, pal!
+
+ 2. YOUR NAME MIGHT BE HERE...
+
+
+ Appendix C. Authenticity check.
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Original issue of the source code as of version 1.13c include:
+
+ File         Size   Description
+ ------------ ------ ----------------------------------------------------------
+ CPU_TYPE.ASH 18035  Main library module
+ DOSINOUT.ASH 1049   DOS Input/Output routines
+ LSTRING.ASH  1057   Lstring macro to define Pascal-style length,data strings
+ UNIDEF.INC   5593   Macros
+ CPU.ASM      1148   Sample program demonstrating usage of CPU_TYPE.ASH
+ CPUSPEED.ASM 4876   CPU clock speed determination routine
+
+
+ Appendix D. History of changes.
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ TMIOSDGL(tm) version 1.10d was the first version publicly released.
+
+ Differences between version 1.10d and version 1.11:
+
+ - changed 80287XL determination logic: now this conclusion is made if CPU
+   is 80286 and FPU tests as 80387;
+ - added IIT (Integrated Information Technology, Inc.) xC87 math coprocessors
+   detection;
+ - fixed bug in 386 stepping detection routine.
+
+ Differences between versions 1.11 and 1.11b:
+
+ - fixed bug that caused FPU_Type routine to hang on 486s: they don't handle
+   IIT bank switching instructions at all, stopping CPU.
+
+ Differences between versions 1.11b and 1.12:
+
+ - distinguish between Cyrix 486SLC and 486DLC made reliable;
+ - code distinguishing between 386sx and 386dx that used bug in dx chips
+    deleted (it was commented out in previous versions) - current method is
+    absolutely reliable;
+ - code slightly optimized to reduce size.
+
+ Differences between versions 1.12 and 1.12b:
+
+ - some slight modifications made to CPUSPEED.ASM module to prevent invalid
+   computation of clock frequency for unknown CPUs.
+
+ Differences between versions 1.12b and 1.13:
+
+ - added 386sl detection routine, but wasn't checked yet: at least it doesn't
+   hang the PC :);
+ - distinguishing between i486sx and i486dx finally made reliable;
+ - code slightly optimized;
+ - CPUSPEED.ASM enhanced and recommented to reflect new CPU type addition.
+
+ Differences between versions 1.13 and 1.14:
+
+ - reduced source file size of CPUSPEED.ASM;
+ - Test_Buffer routine made reentrant ( at last! :);
+ - added newer 386dx and 486dx recognition ( ID flag of EFLAGS is flippable and
+   CPUID instruction works on new 386dx's and 486dx's so I took precaution of
+   this situation);
+ - described method of identifying AMD's 40MHz 386s and a little bit tricky
+   method of identifying i486DX2/66 chips;
+ - added method of identifying Cyrix M1 (586) chip - was not checked yet;
+ - 386SL detection code commented out, but still present - maybe it works on
+   some chipsets...
+
+                          << end of CPUTYPE.DOC >>

@@ -1,0 +1,49 @@
+ALLOC.C Allocate memory subprograms
+APP.C Assembler preprocessor
+APP.COM Assembler preprocessor
+BIOS.C bios programs
+C0.ASM Kernel startup code
+CAT.C cat - int. command
+CMOS.ASM CMOS timer support
+CONV.C see stdlib.h
+CS0.LIB obj modules from Turbo C 2.0 library cs.lib (long int support etc)
+CTYPE.C see stdlib.h
+DE.C Disk edit for Proolix
+E.C e - debug int command
+GENTBL.C Generate system call table - syskern.asm
+INT5DUMP.ASM Register dump
+IO.C I/O procedures
+KEY.ASM gets() by Igor Sazonov (for "%"-shell like c-shell ;)
+LS.C ls - internal command
+MAKEFILE Makefile ;)
+MEM.C See mem.h
+MEMD.C memd - memory dump, internal command
+MSH.C msh (mouse shell ;) - XProolix for mouse without keyboard
+NOCMOS.ASM Real clock timer without CMOS (on XT only) support
+OHB.ASM Output Hex Byte
+OHW.ASM Output Hex Word
+PROCESS.C Process' procedures
+REGDUMP.ASM Register dump
+SAYR.ASM Output ASCIIZ string via BIOS
+SH.C sh - shell (prompt "$")
+STDIO.C see stdio.h
+STDLIB.C see stdlib.h
+STRCHR.C string support procedures
+STRDUP.C string support procedures
+STRING.C string support procedures
+STRLEN.C string support procedures
+SYSCALL.C system call
+SYSCALL.TBL Source General Main Table of System Calls
+TIME.C Dostime package. For compatible with MSDOS
+VEC.C vec - int.command (show interrupt vectors)
+absread.c       absread()
+abswrite.c      abswrite()
+bootread.c      bootread()
+bootred0.asm    bootread0()
+char_in.c       character input routines
+char_out.c      character output routines
+cluread.c       CluRead() - cluster read
+cold.asm        cold() - cold reboot
+reboot.asm      reboot() - hot reboot
+comport.asm     serial port routines
+exitw.asm Assembler utility for Proolix

@@ -1,0 +1,93 @@
+GAS LISTING saycsip.s 			page 1
+
+
+   1              	# 1 "saycsip.S"
+   2              	# 1 "<built-in>"
+   1              		.code16
+   0              	
+   0              	
+   2              		.include "macros.S"
+   1              	    .macro	print str
+   2              	        pushw	%si
+   3              	        movw	$\str,%si
+   4              	        call	sayr_proc
+   5              	        popw	%si
+   6              	    .endm
+   7              	    
+   8              	    .macro	putch chr
+   9              	          pushw   %ax
+  10              		  
+  11              		  movb $0x0e,%ah
+  12              		  movb \chr,%al
+  13              		  
+  14              		  int  $0x10
+  15              	          popw    %ax
+  16              	    .endm
+  17              	
+  18              	.macro newline
+  19              	    putch $13 ; putch $10
+  20              	.endm
+   3              		.text
+   4              		.global print_registers
+   5              	print_registers: # proc    ; REGS SAVED
+   6 0000 50       	        pushw %ax
+   7              	
+   8 0001 56BE4400 	        print    s0
+   8      E8FEFF5E 
+   9 0009 0E       	        pushw   %CS
+  10 000a 58       	        popw    %ax
+  11 000b E8FEFF   	        call    ohw
+  12              	
+  13 000e 56BE4A00 	        print    s_ss
+  13      E8FEFF5E 
+  14 0016 8CD0     	        movw    %SS,%ax
+  15 0018 E8FEFF   	        call    ohw
+  16              	
+  17 001b 56BE4F00 	        print    s_sp
+  17      E8FEFF5E 
+  18 0023 89E0     	        movw     %SP,%ax
+  19 0025 E8FEFF   	        call    ohw
+  20              	
+  21 0028 56BE5400 	        print    s_ds
+  21      E8FEFF5E 
+  22 0030 8CD8     	        movw     %DS,%ax
+  23 0032 E8FEFF   	        call    ohw
+  24              	
+  25 0035 56BE5900 	        print    s_es
+  25      E8FEFF5E 
+  26 003d 8CC0     	        movw     %ES,%ax
+  27 003f E8FEFF   	        call    ohw
+  28              	
+GAS LISTING saycsip.s 			page 2
+
+
+  29 0042 58       	        popw    %ax
+  30 0043 C3       	        ret
+  31 0044 0D0A     	s0:     .byte      13,10
+  32 0046 43533D00 		.asciz	"CS="
+  33 004a 2053533D 	s_ss:    .asciz      " SS="
+  33      00
+  34 004f 2053503D 	s_sp:    .asciz      " SP="
+  34      00
+  35 0054 2044533D 	s_ds:    .asciz      " DS="
+  35      00
+  36 0059 2045533D 	s_es:    .asciz      " ES="
+  36      00
+GAS LISTING saycsip.s 			page 3
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 saycsip.S
+                            *ABS*:00000000 <command line>
+                            *ABS*:00000000 <built-in>
+                            *ABS*:00000000 saycsip.S
+           saycsip.S:5      .text:00000000 print_registers
+           saycsip.S:31     .text:00000044 s0
+           saycsip.S:33     .text:0000004a s_ss
+           saycsip.S:34     .text:0000004f s_sp
+           saycsip.S:35     .text:00000054 s_ds
+           saycsip.S:36     .text:00000059 s_es
+
+UNDEFINED SYMBOLS
+sayr_proc
+ohw

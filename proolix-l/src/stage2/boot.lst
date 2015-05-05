@@ -1,0 +1,1397 @@
+GAS LISTING boot.s 			page 1
+
+
+   1              	# 1 "boot.S"
+   2              	# 1 "<built-in>"
+   1              	# Proolix-l stage2 main program
+   0              	
+   0              	
+   2              	# usage 'make install' for install stage2 to diskette /dev/fd0
+   3              	 
+   4              	        .code16
+   5              		.include "macros.S"
+   1              	    .macro	print str
+   2              	        pushw	%si
+   3              	        movw	$\str,%si
+   4              	        call	sayr_proc
+   5              	        popw	%si
+   6              	    .endm
+   7              	    
+   8              	    .macro	putch chr
+   9              	          pushw   %ax
+  10              		  
+  11              		  movb $0x0e,%ah
+  12              		  movb \chr,%al
+  13              		  
+  14              		  int  $0x10
+  15              	          popw    %ax
+  16              	    .endm
+  17              	
+  18              	.macro newline
+  19              	    putch $13 ; putch $10
+  20              	.endm
+   6              		
+   7              	STRLEN	=	80
+   8              	Drive	=	0	# Загрузочный диск A: (FDD 0, /dev/fd0) 
+   9              	KernelSeg	=	0x60
+  10              		
+  11              		.text
+  12              	.global _start
+  13              	_start:
+  14              	
+  15 0000 50B40EB0 	    putch	$'-'
+  15      2DCD1058 
+  16 0008 56BE9606 	    print	str1
+  16      E8FEFF5E 
+  17 0010 E8FEFF   	    call	print_registers
+  18 0013 50B40EB0 	    newline
+  18      0DCD1058 
+  18      50B40EB0 
+  18      0ACD1058 
+  19              	    # command cycle
+  20              	l_revert:
+  21 0023 56BEC006 	    print prompt
+  21      E8FEFF5E 
+  22              	    
+  23 002b BBF605   	    movw	$keystroke,%bx
+  24 002e E83605   	    call	getstr
+  25              	    
+  26              	    # analiz of keystroke
+  27              	    
+GAS LISTING boot.s 			page 2
+
+
+  28 0031 803EF605 	    cmpb $0,keystroke
+  28      00
+  29 0036 74EB     	    je l_revert # empty keystroke
+  30              	    
+  31              	    ### command c1
+  32 0038 31DB     	    xorw %bx,%bx
+  33              	c1_0:  
+  34 003a 8A872007 	    movb c1_s(%bx),%al
+  35 003e 3887F605 	    cmpb %al,keystroke(%bx)
+  36 0042 7515     	    jne	c1_1
+  37 0044 8A97F605 	    mov keystroke(%bx),%dl
+  38 0048 08C2     	    orb %al,%dl
+  39 004a 7403     	    jz c1_2
+  40 004c 43       	    incw %bx
+  41 004d EBEB     	    jmp c1_0
+  42              	c1_2:	# this command
+  43 004f 56BE4B07 	    print s_help
+  43      E8FEFF5E 
+  44 0057 EBCA     	    jmp l_revert
+  45              	c1_1:	#    no this command
+  46              	    ###
+  47              	    
+  48              	    ### command c2
+  49 0059 31DB     	    xorw %bx,%bx
+  50              	c2_0:  
+  51 005b 8A872507 	    movb c2_s(%bx),%al
+  52 005f 3887F605 	    cmpb %al,keystroke(%bx)
+  53 0063 751C     	    jne	c2_1
+  54 0065 8A97F605 	    movb keystroke(%bx),%dl
+  55 0069 08C2     	    orb %al,%dl
+  56 006b 7403     	    jz c2_2
+  57 006d 43       	    incw %bx
+  58 006e EBEB     	    jmp c2_0
+  59              	c2_2:	# this command
+  60 0070 B84000   	        movw    $0x40,%ax
+  61 0073 8ED8     	        movw    %ax,%ds
+  62 0075 BB7200   	        movw    $0x72,%bx
+  63 0078 C7073412 	        movw    $0x1234,(%bx)
+  64              	
+  65 007c EA       	        .byte   0xea            # JMP   F000:FFF0
+  66 007d F0FF00F0 	        .word   0xfff0,0xf000
+  67              		
+  68              	c2_1:	#    no this command
+  69              	    ###
+  70              	    
+  71              	    ### command c3
+  72 0081 31DB     	    xorw %bx,%bx
+  73              	c3_0:  
+  74 0083 8A872C07 	    movb c3_s(%bx),%al
+  75 0087 3887F605 	    cmpb %al,keystroke(%bx)
+  76 008b 751C     	    jne	c3_1
+  77 008d 8A97F605 	    movb keystroke(%bx),%dl
+  78 0091 08C2     	    orb %al,%dl
+  79 0093 7403     	    jz c3_2
+  80 0095 43       	    incw %bx
+  81 0096 EBEB     	    jmp c3_0
+  82              	c3_2:	# this command
+GAS LISTING boot.s 			page 3
+
+
+  83 0098 B84000   	        movw    $0x40,%ax
+  84 009b 8ED8     	        movw    %ax,%ds
+  85 009d BB7200   	        movw    $0x72,%bx
+  86 00a0 C7072143 	        movw    $0x4321,(%bx)
+  87              	
+  88 00a4 EA       	        .byte   0xea            # JMP   F000:FFF0
+  89 00a5 F0FF00F0 	        .word   0xfff0,0xf000
+  90              		
+  91              	c3_1:	#    no this command
+  92              	    ###
+  93              	    
+  94              	    ### command c4
+  95 00a9 31DB     	    xorw %bx,%bx
+  96              	c4_0:  
+  97 00ab 8A873107 	    movb c4_s(%bx),%al
+  98 00af 3887F605 	    cmpb %al,keystroke(%bx)
+  99 00b3 752A     	    jne	c4_1
+ 100 00b5 8A97F605 	    movb keystroke(%bx),%dl
+ 101 00b9 08C2     	    orb %al,%dl
+ 102 00bb 7403     	    jz c4_2
+ 103 00bd 43       	    incw %bx
+ 104 00be EBEB     	    jmp c4_0
+ 105              	c4_2:	# this command
+ 106 00c0 31C0     	        xorw    %ax,%ax
+ 107 00c2 8EC0     	        movw    %ax,%ES
+ 108              	
+ 109              	        # Read MBR
+ 110 00c4 BA8000   	        movw    $0x0080,%dx  # dl-drive, dh-head
+ 111              	l_read_mbr_:
+ 112 00c7 B90100   		movw	$0x0001,%cx  # cl - sector, ch - track
+ 113              	
+ 114 00ca B80102   		movw	$0x0201,%ax  # al - sectors count, ah - function (read)
+ 115              	
+ 116 00cd BB007C   	        movw     $0x7c00,%bx
+ 117 00d0 CD13     	        int     $0x13
+ 118 00d2 90       	        nop
+ 119 00d3 7205     	        jc      c4_reboot
+ 120              	
+ 121              	        # jmp    0:7c00
+ 122 00d5 EA       	        .byte      0xea
+ 123 00d6 007C     	        .word      0x7c00
+ 124 00d8 0000     	        .word      0
+ 125              	
+ 126              	c4_reboot:# jmp  ffff:0	# ffff:0 = ffff0
+ 127 00da EA       	        .byte      0xea
+ 128 00db 0000     	        .word      0
+ 129 00dd FFFF     	        .word      0xffff
+ 130              		
+ 131              	c4_1:	#    no this command
+ 132              	    ###
+ 133              	    
+ 134              	    ### command c5
+ 135 00df 31DB     	    xorw %bx,%bx
+ 136              	c5_0:  
+ 137 00e1 8A873607 	    movb c5_s(%bx),%al
+ 138 00e5 3887F605 	    cmpb %al,keystroke(%bx)
+ 139 00e9 7514     	    jne	c5_1
+GAS LISTING boot.s 			page 4
+
+
+ 140 00eb 8A97F605 	    movb keystroke(%bx),%dl
+ 141 00ef 08C2     	    orb %al,%dl
+ 142 00f1 7403     	    jz c5_2
+ 143 00f3 43       	    incw %bx
+ 144 00f4 EBEB     	    jmp c5_0
+ 145              	c5_2:	# this command
+ 146 00f6 31C0     	        xorw    %ax,%ax
+ 147 00f8 8EC0     	        movw    %ax,%ES
+ 148              	
+ 149              	        # Read MBR
+ 150 00fa BA8100   	        movw    $0x0081,%dx  # dl-drive, dh-head
+ 151 00fd EBC8     		jmp	l_read_mbr_
+ 152              		
+ 153              	c5_1:	#    no this command
+ 154              	    ###
+ 155              	    
+ 156              	    ### command c6
+ 157 00ff 31DB     	    xorw %bx,%bx
+ 158              	0:  
+ 159 0101 8A873B07 	    movb c6_s(%bx),%al
+ 160 0105 3887F605 	    cmpb %al,keystroke(%bx)
+ 161 0109 0F859C00 	    jne	8f
+ 162 010d 8A97F605 	    movb keystroke(%bx),%dl
+ 163 0111 08C2     	    orb %al,%dl
+ 164 0113 7403     	    jz 1f
+ 165 0115 43       	    incw %bx
+ 166 0116 EBE9     	    jmp 0b
+ 167              	1:	# this command
+ 168              	    #
+ 169 0118 50B40EB0 		newline
+ 169      0DCD1058 
+ 169      50B40EB0 
+ 169      0ACD1058 
+ 170              	        # Вычисления
+ 171 0128 A0E608   	        movb    FatCnt,%al
+ 172 012b 98       	        cbw
+ 173 012c 8B0EEB08 	        movw    FatSize,%cx
+ 174 0130 F7E1     		mulw    %cx      # %ax*%cx -> %dx:%ax
+ 175 0132 0306E408 	        addw    ResSecs,%ax
+ 176              	        # %ax - Root Beginning Sector
+ 177 0136 A3F908   	        movw    %ax,StartClu
+ 178 0139 50       	        PUSHW   %ax
+ 179              	
+ 180 013a A1E708   	        movw    RootSiz,%ax
+ 181 013d B92000   	        movw    $32,%cx
+ 182 0140 F7E1     	        mulw    %cx
+ 183              	
+ 184 0142 8B0EE108 	        movw    SectSiz,%cx
+ 185 0146 F7F1     	        divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
+ 186 0148 09D2     	        orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
+ 187 014a 7401     	        jz      2f        # сектор (последний неполный сектор root'а)
+ 188 014c 40       	        incw    %ax
+ 189              	2:
+ 190              	        # %ax - Root Size in Sectors
+ 191 014d 0106F908 	        addw    %ax,StartClu
+ 192 0151 89C1     	        movw    %ax,%cx
+ 193 0153 A3FB08   	        movw    %ax,RootSize
+GAS LISTING boot.s 			page 5
+
+
+ 194              		    # print	s_lines
+ 195              		    # putch	$':'
+ 196              		    # movw		%cx,%ax
+ 197              		    # call	ohw
+ 198 0156 58       	        POPW    %ax      # %ax - Root Bg Sec
+ 199              		    # putch	$','
+ 200              		    # call	ohw
+ 201              	3:      # Загрузка корневого каталога посекторно и посекторный вывод списка
+ 202              		# файлов
+ 203 0157 51       	        pushw   %cx
+ 204              	
+ 205 0158 50       	        pushw   %ax
+ 206 0159 BB0000   	        movw    $Buff,%bx
+ 207 015c B200     	        movb    $Drive,%dl
+ 208 015e 50       	        pushw   %ax
+ 209 015f E86603   	        call    SecRead
+ 210 0162 7308     	        jnc     4f
+ 211 0164 50B40EB0 		putch	$'E' # error
+ 211      45CD1058 
+ 212              	4:	
+ 213 016c 58       	        popw    %ax
+ 214 016d B91000   	        movw    $16,%cx   # root entryes in 1 sector
+ 215 0170 51       	5:              pushw   %cx
+ 216 0171 53       			pushw	%bx
+ 217              	
+ 218 0172 8A07     			movb	(%bx),%al
+ 219 0174 08C0     			orb	%al,%al
+ 220 0176 7422     			jz	7f
+ 221 0178 3CE5     			cmpb	$0xE5,%al
+ 222 017a 741E     			je	7f
+ 223 017c B90B00   	                movw    $11,%cx
+ 224              	
+ 225 017f 50B40E8A 	6:          	putch	(%bx)
+ 225      07CD1058 
+ 226 0187 43       				incw	%bx		
+ 227 0188 E2F5     				loop	6b
+ 228              			
+ 229 018a 50B40EB0 			newline
+ 229      0DCD1058 
+ 229      50B40EB0 
+ 229      0ACD1058 
+ 230              	7:		
+ 231 019a 5B       			popw	%bx
+ 232 019b 59       	                popw    %cx
+ 233 019c 83C320   	                addw    $32,%bx
+ 234 019f E2CF     	                loop    5b
+ 235              	
+ 236 01a1 58       	        popw    %ax
+ 237 01a2 40       	        incw    %ax
+ 238              	
+ 239 01a3 59       	        popw    %cx
+ 240              		# putch	$'s'
+ 241 01a4 E2B1     	        loop    3b
+ 242              	        # end of load root dir
+ 243 01a6 E97AFE   		jmp	l_revert
+ 244              	     
+ 245              	8:	#    no this command
+GAS LISTING boot.s 			page 6
+
+
+ 246              	    ###
+ 247              	    
+ 248              	    
+ 249              	    ### command c7
+ 250 01a9 31DB     	    xorw %bx,%bx
+ 251              	0:  
+ 252 01ab 8A873E07 	    movb c7_s(%bx),%al
+ 253 01af 3887F605 	    cmpb %al,keystroke(%bx)
+ 254 01b3 0F85FB00 	    jne	8f
+ 255 01b7 8A97F605 	    movb keystroke(%bx),%dl
+ 256 01bb 08C2     	    orb %al,%dl
+ 257 01bd 7403     	    jz 1f
+ 258 01bf 43       	    incw %bx
+ 259 01c0 EBE9     	    jmp 0b
+ 260              	1:	# this command
+ 261              	    #
+ 262 01c2 56BEC506 	    print	s_filename
+ 262      E8FEFF5E 
+ 263 01ca BB4606   	    movw	$Filename,%bx
+ 264 01cd E89703   	    call	getstr
+ 265 01d0 50B40EB0 		newline
+ 265      0DCD1058 
+ 265      50B40EB0 
+ 265      0ACD1058 
+ 266              	        # Вычисления
+ 267 01e0 A0E608   	        movb    FatCnt,%al
+ 268 01e3 98       	        cbw
+ 269 01e4 8B0EEB08 	        movw    FatSize,%cx
+ 270 01e8 F7E1     		mulw    %cx      # %ax*%cx -> %dx:%ax
+ 271 01ea 0306E408 	        addw    ResSecs,%ax
+ 272              	        # %ax - Root Beginning Sector
+ 273 01ee A3F908   	        movw    %ax,StartClu
+ 274 01f1 50       	        PUSHW   %ax
+ 275              	
+ 276 01f2 A1E708   	        movw    RootSiz,%ax
+ 277 01f5 B92000   	        movw    $32,%cx
+ 278 01f8 F7E1     	        mulw    %cx
+ 279              	
+ 280 01fa 8B0EE108 	        movw    SectSiz,%cx
+ 281 01fe F7F1     	        divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
+ 282 0200 09D2     	        orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
+ 283 0202 7401     	        jz      2f        # сектор (последний неполный сектор root'а)
+ 284 0204 40       	        incw    %ax
+ 285              	2:
+ 286              	        # %ax - Root Size in Sectors
+ 287 0205 0106F908 	        addw    %ax,StartClu
+ 288 0209 89C1     	        movw    %ax,%cx
+ 289 020b A3FB08   	        movw    %ax,RootSize
+ 290              		    # print	s_lines
+ 291              		    # putch	$':'
+ 292              		    # movw		%cx,%ax
+ 293              		    # call	ohw
+ 294 020e 58       	        POPW    %ax      # %ax - Root Bg Sec
+ 295              		    # putch	$','
+ 296              		    # call	ohw
+ 297              	3:      # Загрузка корневого каталога посекторно и посекторный поиск в нем
+ 298              		# искомого файла
+GAS LISTING boot.s 			page 7
+
+
+ 299 020f 51       	        pushw   %cx
+ 300              	
+ 301 0210 50       	        pushw   %ax
+ 302 0211 BB0000   	        movw    $Buff,%bx
+ 303 0214 B200     	        movb    $Drive,%dl
+ 304 0216 50       	        pushw   %ax
+ 305 0217 E8AE02   	        call    SecRead
+ 306 021a 7308     	        jnc     4f
+ 307 021c 50B40EB0 		putch	$'E' # error
+ 307      45CD1058 
+ 308              	4:	
+ 309 0224 58       	        popw    %ax
+ 310 0225 B91000   	        movw    $16,%cx   # root entryes in 1 sector
+ 311 0228 51       	5:              pushw   %cx
+ 312 0229 53       			pushw	%bx
+ 313              	
+ 314 022a 8A07     			movb	(%bx),%al
+ 315 022c 08C0     			orb	%al,%al
+ 316 022e 7404     			jz	7f
+ 317 0230 3CE5     			cmpb	$0xE5,%al
+ 318 0232 7400     			je	7f
+ 319              			# сравниваем найденное имя файла с эталонным
+ 320              	7:		
+ 321 0234 B90B00   	                movw    $11,%cx
+ 322 0237 89DF     	                movw    %bx,%di
+ 323 0239 BE4606   			movw    $Filename,%si
+ 324 023c F3A6     	                rep     cmpsb
+ 325 023e 7417     	                je      9f
+ 326              			
+ 327 0240 5B       			popw	%bx
+ 328 0241 59       	                popw    %cx
+ 329 0242 83C320   	                addw    $32,%bx
+ 330 0245 E2E1     	                loop    5b
+ 331              	
+ 332 0247 58       	        popw    %ax
+ 333 0248 40       	        incw    %ax
+ 334              	
+ 335 0249 59       	        popw    %cx
+ 336              		# putch	$'s'
+ 337 024a E2C3     	        loop    3b
+ 338              	        # end of load root dir
+ 339 024c 56BEFA06 		print	s_file_not_found
+ 339      E8FEFF5E 
+ 340 0254 E9CCFD   		jmp	l_revert
+ 341              		
+ 342              	9:
+ 343              	###===
+ 344              	        # HАШЛИ !
+ 345 0257 59       	        popw    %cx
+ 346              	        # Found file
+ 347              	        # %bx - file dir record
+ 348              	        # word ptr (%bx+0x1a) - 1st cluster
+ 349 0258 8B471A   	        movw    0x1a(%bx),%ax    # %ax - 1st cluster
+ 350              	
+ 351              	        # Загрузка FAT в ОЗУ
+ 352 025b 50       	        PUSHW   %ax      # save %ax with 1st clu no
+ 353              	
+GAS LISTING boot.s 			page 8
+
+
+ 354 025c A1E408   	        movw    ResSecs,%ax
+ 355 025f BB0000   	        movw    $FATaddr,%bx
+ 356 0262 8B0EEB08 	        movw    FatSize,%cx
+ 357              	
+ 358              	        # Загрузка ядра покластерно (по цепочке из FATа)
+ 359              	        # Загрузка FAT
+ 360 0266 B200     	0:      movb    $Drive,%dl
+ 361 0268 50       	        pushw   %ax
+ 362 0269 E85C02   	        call    SecRead
+ 363 026c 730C     	        jnc     1f
+ 364              		# FAT read error
+ 365 026e 56BE0D07 		print	s_fat_err
+ 365      E8FEFF5E 
+ 366 0276 58       		popw	%ax	# restore stack
+ 367 0277 E9A9FD   		jmp	l_revert
+ 368              	1:	
+ 369 027a 58       	        popw    %ax
+ 370 027b 81C30002 	        addw    $512,%bx
+ 371 027f 40       	        incw    %ax      # Next sector!
+ 372              	
+ 373              	#       pushw   %ax
+ 374              	#       CHR1    'F'
+ 375              	#       popw    %ax
+ 376              	
+ 377 0280 E2E4     	        loop    0b
+ 378              	
+ 379 0282 A0E308   	        movb    ClustSiz,%al
+ 380 0285 98       	        cbw
+ 381 0286 8B16E108 	        movw    SectSiz,%dx
+ 382 028a F7E2     	        mul     %dx
+ 383 028c 89C1     	        movw    %ax,%cx   # Cluster Size in Bytes
+ 384              	
+ 385 028e 58       	        POPW    %ax      # restore %ax (1st clu no)
+ 386 028f BB0000   	1:      movw    $Buff,%bx
+ 387 0292 B200     	        movb    $Drive,%dl
+ 388 0294 E87502   	        call    CluRead
+ 389              		# print cluster
+ 390 0297 51       		    pushw	%cx
+ 391 0298 53       		    pushw	%bx
+ 392 0299 50       		    pushw	%ax
+ 393              		    
+ 394 029a 8A07     	2:	    movb	(%bx),%al
+ 395 029c 50B40E88 		    putch	%al
+ 395      C0CD1058 
+ 396 02a4 43       		    incw	%bx
+ 397 02a5 E2F3     		    loop	2b
+ 398              		    
+ 399 02a7 58       		    popw	%ax
+ 400 02a8 5B       		    popw	%bx
+ 401 02a9 59       		    popw	%cx
+ 402              		# end of 'print cluster'
+ 403              	#          pushw   %ax
+ 404              	#	   movw $0x0e00+176,%ax
+ 405              	#          int  $0x10
+ 406              	#          popw    %ax
+ 407 02aa E88602   	        call    NextClu # set %ax
+ 408 02ad 73E0     	        jnc     1b
+GAS LISTING boot.s 			page 9
+
+
+ 409              		# end of file
+ 410 02af E971FD   		jmp	l_revert
+ 411              	
+ 412              	###===	
+ 413              	     
+ 414              	8:	#    no this command
+ 415              	    ###
+ 416              	    
+ 417              	    ### command c8
+ 418 02b2 31DB     	    xorw %bx,%bx
+ 419              	0:  
+ 420 02b4 8A874207 	    movb c8_s(%bx),%al
+ 421 02b8 3887F605 	    cmpb %al,keystroke(%bx)
+ 422 02bc 0F85ED00 	    jne	8f
+ 423 02c0 8A97F605 	    movb keystroke(%bx),%dl
+ 424 02c4 08C2     	    orb %al,%dl
+ 425 02c6 7403     	    jz 1f
+ 426 02c8 43       	    incw %bx
+ 427 02c9 EBE9     	    jmp 0b
+ 428              	1:	# this command
+ 429              	    #
+ 430 02cb 56BEC506 	    print	s_filename
+ 430      E8FEFF5E 
+ 431 02d3 BB4606   	    movw	$Filename,%bx
+ 432 02d6 E88E02   	    call	getstr
+ 433 02d9 50B40EB0 		newline
+ 433      0DCD1058 
+ 433      50B40EB0 
+ 433      0ACD1058 
+ 434              	        # Вычисления
+ 435 02e9 A0E608   	        movb    FatCnt,%al
+ 436 02ec 98       	        cbw
+ 437 02ed 8B0EEB08 	        movw    FatSize,%cx
+ 438 02f1 F7E1     		mulw    %cx      # %ax*%cx -> %dx:%ax
+ 439 02f3 0306E408 	        addw    ResSecs,%ax
+ 440              	        # %ax - Root Beginning Sector
+ 441 02f7 A3F908   	        movw    %ax,StartClu
+ 442 02fa 50       	        PUSHW   %ax
+ 443              	
+ 444 02fb A1E708   	        movw    RootSiz,%ax
+ 445 02fe B92000   	        movw    $32,%cx
+ 446 0301 F7E1     	        mulw    %cx
+ 447              	
+ 448 0303 8B0EE108 	        movw    SectSiz,%cx
+ 449 0307 F7F1     	        divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
+ 450 0309 09D2     	        orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
+ 451 030b 7401     	        jz      2f        # сектор (последний неполный сектор root'а)
+ 452 030d 40       	        incw    %ax
+ 453              	2:
+ 454              	        # %ax - Root Size in Sectors
+ 455 030e 0106F908 	        addw    %ax,StartClu
+ 456 0312 89C1     	        movw    %ax,%cx
+ 457 0314 A3FB08   	        movw    %ax,RootSize
+ 458              		    # print	s_lines
+ 459              		    # putch	$':'
+ 460              		    # movw		%cx,%ax
+ 461              		    # call	ohw
+GAS LISTING boot.s 			page 10
+
+
+ 462 0317 58       	        POPW    %ax      # %ax - Root Bg Sec
+ 463              		    # putch	$','
+ 464              		    # call	ohw
+ 465              	3:      # Загрузка корневого каталога посекторно и посекторный поиск в нем
+ 466              		# искомого файла
+ 467 0318 51       	        pushw   %cx
+ 468              	
+ 469 0319 50       	        pushw   %ax
+ 470 031a BB0000   	        movw    $Buff,%bx
+ 471 031d B200     	        movb    $Drive,%dl
+ 472 031f 50       	        pushw   %ax
+ 473 0320 E8A501   	        call    SecRead
+ 474 0323 7308     	        jnc     4f
+ 475 0325 50B40EB0 		putch	$'E' # error
+ 475      45CD1058 
+ 476              	4:	
+ 477 032d 58       	        popw    %ax
+ 478 032e B91000   	        movw    $16,%cx   # root entryes in 1 sector
+ 479 0331 51       	5:              pushw   %cx
+ 480 0332 53       			pushw	%bx
+ 481              	
+ 482 0333 8A07     			movb	(%bx),%al
+ 483 0335 08C0     			orb	%al,%al
+ 484 0337 7404     			jz	7f
+ 485 0339 3CE5     			cmpb	$0xE5,%al
+ 486 033b 7400     			je	7f
+ 487              			# сравниваем найденное имя файла с эталонным
+ 488              	7:		
+ 489 033d B90B00   	                movw    $11,%cx
+ 490 0340 89DF     	                movw    %bx,%di
+ 491 0342 BE4606   			movw    $Filename,%si
+ 492 0345 F3A6     	                rep     cmpsb
+ 493 0347 7417     	                je      9f
+ 494              			
+ 495 0349 5B       			popw	%bx
+ 496 034a 59       	                popw    %cx
+ 497 034b 83C320   	                addw    $32,%bx
+ 498 034e E2E1     	                loop    5b
+ 499              	
+ 500 0350 58       	        popw    %ax
+ 501 0351 40       	        incw    %ax
+ 502              	
+ 503 0352 59       	        popw    %cx
+ 504              		# putch	$'s'
+ 505 0353 E2C3     	        loop    3b
+ 506              	        # end of load root dir
+ 507 0355 56BEFA06 		print	s_file_not_found
+ 507      E8FEFF5E 
+ 508 035d E9C3FC   		jmp	l_revert
+ 509              		
+ 510              	9:
+ 511              	###===
+ 512              	        # HАШЛИ !
+ 513 0360 59       	        popw    %cx
+ 514              	        # Found file
+ 515              	        # %bx - file dir record
+ 516              	        # word ptr (%bx+0x1a) - 1st cluster
+GAS LISTING boot.s 			page 11
+
+
+ 517 0361 8B471A   	        movw    0x1a(%bx),%ax    # %ax - 1st cluster
+ 518              	
+ 519              	        # Загрузка FAT в ОЗУ
+ 520 0364 50       	        PUSHW   %ax      # save %ax with 1st clu no
+ 521              	
+ 522 0365 A1E408   	        movw    ResSecs,%ax
+ 523 0368 BB0000   	        movw    $FATaddr,%bx
+ 524 036b 8B0EEB08 	        movw    FatSize,%cx
+ 525              	
+ 526              	        # Загрузка ядра покластерно (по цепочке из FATа)
+ 527              	        # Загрузка FAT
+ 528 036f B200     	0:      movb    $Drive,%dl
+ 529 0371 50       	        pushw   %ax
+ 530 0372 E85301   	        call    SecRead
+ 531 0375 730C     	        jnc     1f
+ 532              		# FAT read error
+ 533 0377 56BE0D07 		print	s_fat_err
+ 533      E8FEFF5E 
+ 534 037f 58       		popw	%ax	# restore stack
+ 535 0380 E9A0FC   		jmp	l_revert
+ 536              	1:	
+ 537 0383 58       	        popw    %ax
+ 538 0384 81C30002 	        addw    $512,%bx
+ 539 0388 40       	        incw    %ax      # Next sector!
+ 540              	
+ 541              	#       pushw   %ax
+ 542              	#       CHR1    'F'
+ 543              	#       popw    %ax
+ 544              	
+ 545 0389 E2E4     	        loop    0b
+ 546              	
+ 547 038b B92000   	        movw    $32,%cx   # 16-chars strings in cluster (cluster size=512)
+ 548              	
+ 549 038e 58       	        POPW    %ax      # restore %ax (1st clu no)
+ 550 038f BB0000   	1:      movw    $Buff,%bx
+ 551 0392 B200     	        movb    $Drive,%dl
+ 552 0394 E87501   	        call    CluRead
+ 553              		# print cluster
+ 554 0397 51       		    pushw	%cx
+ 555 0398 53       		    pushw	%bx
+ 556 0399 50       		    pushw	%ax
+ 557              		    
+ 558              	2:	    
+ 559              		    # print 16 chars in hex mode, %bx - addr
+ 560              		    
+ 561 039a E8FD01   		    call	print16
+ 562 039d 83C310   		    add		$16,%bx
+ 563              		    
+ 564 03a0 E2F8     		    loop	2b
+ 565              		    
+ 566 03a2 58       		    popw	%ax
+ 567 03a3 5B       		    popw	%bx
+ 568 03a4 59       		    popw	%cx
+ 569              		# end of 'print cluster'
+ 570              	#          pushw   %ax
+ 571              	#	   movw $0x0e00+176,%ax
+ 572              	#          int  $0x10
+GAS LISTING boot.s 			page 12
+
+
+ 573              	#          popw    %ax
+ 574 03a5 E88B01   	        call    NextClu # set %ax
+ 575 03a8 73E5     	        jnc     1b
+ 576              		# end of file
+ 577 03aa E976FC   		jmp	l_revert
+ 578              	
+ 579              	###===	
+ 580              	     
+ 581              	8:	#    no this command
+ 582              	    ###
+ 583              	    
+ 584              	    
+ 585              	    ### command c9
+ 586 03ad 31DB     	    xorw %bx,%bx
+ 587              	0:  
+ 588 03af 8A874707 	    movb c9_s(%bx),%al
+ 589 03b3 3887F605 	    cmpb %al,keystroke(%bx)
+ 590 03b7 0F850201 	    jne	8f
+ 591 03bb 8A97F605 	    movb keystroke(%bx),%dl
+ 592 03bf 08C2     	    orb %al,%dl
+ 593 03c1 7403     	    jz 1f
+ 594 03c3 43       	    incw %bx
+ 595 03c4 EBE9     	    jmp 0b
+ 596              	1:	# this command
+ 597              	    #
+ 598 03c6 56BEC506 	    print	s_filename
+ 598      E8FEFF5E 
+ 599 03ce BB4606   	    movw	$Filename,%bx
+ 600 03d1 E89301   	    call	getstr
+ 601 03d4 50B40EB0 		newline
+ 601      0DCD1058 
+ 601      50B40EB0 
+ 601      0ACD1058 
+ 602              	        # Вычисления
+ 603 03e4 A0E608   	        movb    FatCnt,%al
+ 604 03e7 98       	        cbw
+ 605 03e8 8B0EEB08 	        movw    FatSize,%cx
+ 606 03ec F7E1     		mulw    %cx      # %ax*%cx -> %dx:%ax
+ 607 03ee 0306E408 	        addw    ResSecs,%ax
+ 608              	        # %ax - Root Beginning Sector
+ 609 03f2 A3F908   	        movw    %ax,StartClu
+ 610 03f5 50       	        PUSHW   %ax
+ 611              	
+ 612 03f6 A1E708   	        movw    RootSiz,%ax
+ 613 03f9 B92000   	        movw    $32,%cx
+ 614 03fc F7E1     	        mulw    %cx
+ 615              	
+ 616 03fe 8B0EE108 	        movw    SectSiz,%cx
+ 617 0402 F7F1     	        divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
+ 618 0404 09D2     	        orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
+ 619 0406 7401     	        jz      2f        # сектор (последний неполный сектор root'а)
+ 620 0408 40       	        incw    %ax
+ 621              	2:
+ 622              	        # %ax - Root Size in Sectors
+ 623 0409 0106F908 	        addw    %ax,StartClu
+ 624 040d 89C1     	        movw    %ax,%cx
+ 625 040f A3FB08   	        movw    %ax,RootSize
+GAS LISTING boot.s 			page 13
+
+
+ 626              		    # print	s_lines
+ 627              		    # putch	$':'
+ 628              		    # movw		%cx,%ax
+ 629              		    # call	ohw
+ 630 0412 58       	        POPW    %ax      # %ax - Root Bg Sec
+ 631              		    # putch	$','
+ 632              		    # call	ohw
+ 633              	3:      # Загрузка корневого каталога посекторно и посекторный поиск в нем
+ 634              		# искомого файла
+ 635 0413 51       	        pushw   %cx
+ 636              	
+ 637 0414 50       	        pushw   %ax
+ 638 0415 BB0000   	        movw    $Buff,%bx
+ 639 0418 B200     	        movb    $Drive,%dl
+ 640 041a 50       	        pushw   %ax
+ 641 041b E8AA00   	        call    SecRead
+ 642 041e 7308     	        jnc     4f
+ 643 0420 50B40EB0 		putch	$'E' # error
+ 643      45CD1058 
+ 644              	4:	
+ 645 0428 58       	        popw    %ax
+ 646 0429 B91000   	        movw    $16,%cx   # root entryes in 1 sector
+ 647 042c 51       	5:              pushw   %cx
+ 648 042d 53       			pushw	%bx
+ 649              	
+ 650 042e 8A07     			movb	(%bx),%al
+ 651 0430 08C0     			orb	%al,%al
+ 652 0432 7404     			jz	7f
+ 653 0434 3CE5     			cmpb	$0xE5,%al
+ 654 0436 7400     			je	7f
+ 655              			# сравниваем найденное имя файла с эталонным
+ 656              	7:		
+ 657 0438 B90B00   	                movw    $11,%cx
+ 658 043b 89DF     	                movw    %bx,%di
+ 659 043d BE4606   			movw    $Filename,%si
+ 660 0440 F3A6     	                rep     cmpsb
+ 661 0442 7417     	                je      9f
+ 662              			
+ 663 0444 5B       			popw	%bx
+ 664 0445 59       	                popw    %cx
+ 665 0446 83C320   	                addw    $32,%bx
+ 666 0449 E2E1     	                loop    5b
+ 667              	
+ 668 044b 58       	        popw    %ax
+ 669 044c 40       	        incw    %ax
+ 670              	
+ 671 044d 59       	        popw    %cx
+ 672              		# putch	$'s'
+ 673 044e E2C3     	        loop    3b
+ 674              	        # end of load root dir
+ 675 0450 56BEFA06 		print	s_file_not_found
+ 675      E8FEFF5E 
+ 676 0458 E9C8FB   		jmp	l_revert
+ 677              		
+ 678              	9:
+ 679              	###===
+ 680              	        # HАШЛИ !
+GAS LISTING boot.s 			page 14
+
+
+ 681 045b 59       	        popw    %cx
+ 682              	        # Found file
+ 683              	        # %bx - file dir record
+ 684              	        # word ptr (%bx+0x1a) - 1st cluster
+ 685 045c 8B471A   	        movw    0x1a(%bx),%ax    # %ax - 1st cluster
+ 686              	
+ 687              	        # Загрузка FAT в ОЗУ
+ 688 045f 50       	        PUSHW   %ax      # save %ax with 1st clu no
+ 689              	
+ 690 0460 A1E408   	        movw    ResSecs,%ax
+ 691 0463 BB0000   	        movw    $FATaddr,%bx
+ 692 0466 8B0EEB08 	        movw    FatSize,%cx
+ 693              	
+ 694              	        # Загрузка ядра покластерно (по цепочке из FATа)
+ 695              	        # Загрузка FAT
+ 696 046a B200     	0:      movb    $Drive,%dl
+ 697 046c 50       	        pushw   %ax
+ 698 046d E85800   	        call    SecRead
+ 699 0470 730C     	        jnc     1f
+ 700              		# FAT read error
+ 701 0472 56BE0D07 		print	s_fat_err
+ 701      E8FEFF5E 
+ 702 047a 58       		popw	%ax	# restore stack
+ 703 047b E9A5FB   		jmp	l_revert
+ 704              	1:	
+ 705 047e 58       	        popw    %ax
+ 706 047f 81C30002 	        addw    $512,%bx
+ 707 0483 40       	        incw    %ax      # Next sector!
+ 708              	
+ 709              	#       pushw   %ax
+ 710              	#       CHR1    'F'
+ 711              	#       popw    %ax
+ 712              	
+ 713 0484 E2E4     	        loop    0b
+ 714              	
+ 715 0486 A0E308   	        movb    ClustSiz,%al
+ 716 0489 98       	        cbw
+ 717 048a 8B16E108 	        movw    SectSiz,%dx
+ 718 048e F7E2     	        mul     %dx
+ 719 0490 89C1     	        movw    %ax,%cx   # Cluster Size in Bytes
+ 720              		
+ 721 0492 B86000   		movw	$KernelSeg,%ax
+ 722 0495 8EC0     		movw	%ax,%ES
+ 723              	
+ 724 0497 58       	        POPW    %ax      # restore %ax (1st clu no)
+ 725 0498 31DB     	        xorw    %bx,%bx
+ 726 049a B200     	1:      movb    $Drive,%dl
+ 727 049c E86D00   	        call    CluRead	# read to %ES:%bx
+ 728              	#          pushw   %ax
+ 729              	#	   movw $0x0e00+176,%ax
+ 730              	#          int  $0x10
+ 731              	#          popw    %ax
+ 732 049f E89100   	        call    NextClu # set %ax
+ 733 04a2 7206     	        jc      9f
+ 734 04a4 81C30002 		addw	$512,%bx	# 512 - cluster size in bytes (ad hoc cluster=1 sector)
+ 735 04a8 EBF0     		jmp	1b
+ 736              		# end of file
+GAS LISTING boot.s 			page 15
+
+
+ 737              	9:	
+ 738              		# start kernel
+ 739 04aa B86000   	        movw    $KernelSeg,%ax
+ 740 04ad 8ED8     	        movw    %ax,%DS
+ 741 04af 8EC0     		movw	%ax,%ES
+ 742 04b1 FA       	        cli
+ 743 04b2 8ED0     	        movw    %ax,%SS
+ 744 04b4 BCFEFF   	        movw    $0xfffe,%SP
+ 745 04b7 FB       	        sti
+ 746              	
+ 747 04b8 EA       	        .byte      0xea    # JMP KernelSeg:0000
+ 748 04b9 00006000 	        .word      0x0000,KernelSeg
+ 749              	
+ 750              	###===	
+ 751              	     
+ 752              	8:	#    no this command
+ 753              	    ###
+ 754              	    
+ 755              	    
+ 756              	#invalid command
+ 757              	    
+ 758 04bd 56BEE606 	    print s_inv
+ 758      E8FEFF5E 
+ 759              	    
+ 760 04c5 E95BFB   	    jmp l_revert
+ 761              	
+ 762              	SecRead: # proc    # ver 0.0.1   3-Nov-94 (for FDD boot)
+ 763              	
+ 764              	                # Read absolute sectors
+ 765              	                # Input: %ax - abs sec number
+ 766              	                #        %dl - drive (for int 0x13 Fn=2)
+ 767              	                #        ES:%bx - buffer
+ 768              	                #        DS - data segment reg
+ 769              	
+ 770              	                # Use global variables:
+ 771              	                # word ptr HeadCnt
+ 772              	                # word ptr TrkSecs
+ 773              	
+ 774              	                # Output: cf=1 if error
+ 775              	                # NO ALL REGS SAVED !!!
+ 776              	
+ 777              	#       pushw    %ax
+ 778 04c8 53       	        pushw    %bx
+ 779 04c9 51       	        pushw    %cx
+ 780 04ca 52       	        pushw    %dx
+ 781 04cb 56       	        pushw    %si
+ 782 04cc 57       	        pushw    %di
+ 783              	 
+ 784 04cd 89DE     	        movw    %bx,%si   # save %bx & %dx
+ 785 04cf 89D7     	        movw    %dx,%di
+ 786              	
+ 787 04d1 50       	        PUSHW    %ax
+ 788              	
+ 789 04d2 A1EF08   	        movw    HeadCnt,%ax
+ 790 04d5 8B0EED08 	        movw    TrkSecs,%cx
+ 791 04d9 F7E1     	        mulw     %cx      # %dx:%ax := HeadCnt * TrkSecs
+ 792 04db 89C3     	        movw    %ax,%bx  # %bx = HeadCnt * TrkSecs
+GAS LISTING boot.s 			page 16
+
+
+ 793              	
+ 794 04dd 58       	        POPW     %ax
+ 795 04de 31D2     	        xorw     %dx,%dx   # %dx:%ax - Abs Sec No
+ 796 04e0 F7F3     	        div     %bx # %ax=Track=AbsSec/(HeadCnt*TrkSecs); %dx - mod (Sec on Cyl)
+ 797              	
+ 798 04e2 89C3     	        movw    %ax,%bx   # %bx - track no
+ 799              	
+ 800 04e4 89D0     	        movw    %dx,%ax
+ 801 04e6 31D2     	        xorw    %dx,%dx   # %dx:%ax - module (Sec on Cyl)
+ 802 04e8 F7F1     	        div     %cx # Head=[%dx:%ax]/TrkSecs;%ax - Head; mod (%dx) - Sec on Head-1
+ 803 04ea 42       	        incw    %dx # %dx - Sec on Head
+ 804              	
+ 805 04eb B90100   	        movw    $1,%cx
+ 806              	l_loop:
+ 807 04ee 51       	        pushw    %cx
+ 808              	
+ 809 04ef 88D1     	        movb     %dl,%cl    # sector
+ 810 04f1 88DD     	        movb     %bl,%ch    # track ; Warning: track < 255 !!!
+ 811 04f3 89F3     	        movw     %si,%bx    # Restore %bx - offset for buff
+ 812 04f5 89FA     	        movw     %di,%dx    # Restore %dl - drive no
+ 813 04f7 88C6     	        movb     %al,%dh    # head
+ 814 04f9 B80102   	        movw     $0x201,%ax # Fn=02, Read 1 sector
+ 815 04fc CD13     	        int      $0x13
+ 816 04fe 7305     	        jnc     l_break
+ 817              	
+ 818 0500 59       	        popw     %cx
+ 819 0501 E2EB     	        loop    l_loop
+ 820 0503 EB01     	        jmp     l_ret
+ 821              	l_break:
+ 822 0505 59       	        popw     %cx
+ 823              	l_ret:
+ 824 0506 5F       	        popw     %di
+ 825 0507 5E       	        popw     %si
+ 826 0508 5A       	        popw     %dx
+ 827 0509 59       	        popw     %cx
+ 828 050a 5B       	        popw     %bx
+ 829              	#       popw     %ax
+ 830              	
+ 831 050b C3       	        ret
+ 832              	# SecRead endp
+ 833              	
+ 834              	CluRead: # proc    # Read cluster
+ 835              	                # Input: %ax - cluster number
+ 836              	                #        %dl - drive (for int 0x13 Fn=2)
+ 837              	                #        ES:%bx - buffer
+ 838              	                #        DS - data segment reg
+ 839              	
+ 840              	                # Use global variables:
+ 841              	                # StartClu      .word      0       # Number sector of 1st cluster
+ 842              	                # ClustSiz      .byte      2
+ 843              	                # SectSiz       .word
+ 844              	
+ 845              	                # ALL REGS SAVED !!!
+ 846              	
+ 847 050c 50       	        pushw    %ax
+ 848 050d 53       	        pushw    %bx
+ 849 050e 51       	        pushw    %cx
+GAS LISTING boot.s 			page 17
+
+
+ 850              	
+ 851              	        # Sector = StartClu + ((Clu-2) * ClustSiz)
+ 852 050f 53       	        PUSHW    %bx
+ 853 0510 52       	        PUSHW    %dx
+ 854 0511 48       	        decw     %ax      # %ax:=%ax-2
+ 855 0512 48       	        decw     %ax      #
+ 856 0513 89C3     	        movw    %ax,%bx
+ 857 0515 A0E308   	        movb    ClustSiz,%al
+ 858 0518 98       	        cbw
+ 859 0519 89C1     	        movw    %ax,%cx
+ 860 051b F7E3     	        mul     %bx
+ 861 051d 0306F908 	        addw    StartClu,%ax
+ 862              	        # %ax - sector
+ 863 0521 5A       	        POPW     %dx      # Restore %dl
+ 864 0522 5B       	        POPW     %bx
+ 865              	        # %cx - ClustSiz
+ 866              	loop4:
+ 867 0523 50       	        pushw    %ax
+ 868 0524 E8A1FF   	        call    SecRead
+ 869              	        # jc      l_err
+ 870 0527 58       	        popw     %ax
+ 871 0528 031EE108 	        addw    SectSiz,%bx
+ 872 052c 40       	        incw     %ax
+ 873 052d E2F4     	        loop    loop4
+ 874              	
+ 875 052f 59       	        popw     %cx
+ 876 0530 5B       	        popw     %bx
+ 877 0531 58       	        popw     %ax
+ 878              	
+ 879 0532 C3       	        ret
+ 880              	# CluRead endp
+ 881              	
+ 882              	NextClu: # proc # Input: %ax - cluster no
+ 883              	                # Output: %ax - next cluster from FAT
+ 884              	                # cf=1 if EOF
+ 885              	                # Use global var:
+ 886              	                # FATaddr               .word      0
+ 887              	                # REGS SAVED !
+ 888              	
+ 889 0533 53       	        pushw    %bx
+ 890 0534 51       	        pushw    %cx
+ 891 0535 52       	        pushw    %dx
+ 892 0536 56       	        pushw    %si
+ 893 0537 57       	        pushw    %di
+ 894              	
+ 895 0538 89C7     	        movw    %ax,%di
+ 896 053a BB0300   	        movw    $3,%bx
+ 897 053d F7E3     	        mul     %bx      # %dx:%ax := %ax * %bx
+ 898 053f D1E8     	        shrw    $1,%ax   # %ax := %ax /2
+ 899              	        # %ax - addr in FAT
+ 900 0541 89C6     	        movw    %ax,%si
+ 901 0543 BB0000   	        movw    $FATaddr,%bx
+ 902 0546 8B00     	        movw    (%bx,%si),%ax
+ 903 0548 F7C70100 	        testw   $1,%di
+ 904 054c 7406     	        jz      lbl5
+ 905 054e B104     	        movb    $4,%cl
+ 906 0550 D3E8     	        shrw    %cl,%ax
+GAS LISTING boot.s 			page 18
+
+
+ 907 0552 EB03     	        jmp     lbl6
+ 908 0554 25FF0F   	lbl5:   andw    $0xfff,%ax
+ 909              	lbl6:
+ 910              	#       cmpw    $0xfff,%ax
+ 911              	#       je      l_cf
+ 912              	#       cmpw    $0xff7,%ax
+ 913              	#       je      l_cf
+ 914 0557 3B06E908 	        cmpw    TotSecs,%ax
+ 915 055b 7707     	        ja      l_cf # $$$
+ 916              	
+ 917 055d F8       	        clc
+ 918              	l_ret1:
+ 919 055e 5F       	        popw     %di
+ 920 055f 5E       	        popw     %si
+ 921 0560 5A       	        popw     %dx
+ 922 0561 59       	        popw     %cx
+ 923 0562 5B       	        popw     %bx
+ 924              	
+ 925 0563 C3       	        ret
+ 926 0564 F9       	l_cf:   stc
+ 927 0565 EBF7     	        jmp     l_ret1
+ 928              	# NextClu endp
+ 929              	
+ 930              	getstr:	# read of string from console
+ 931              		# input: %bx - string buffer address
+ 932              	
+ 933 0567 50       	    pushw	%ax
+ 934 0568 53       	    pushw	%bx
+ 935 0569 56       	    pushw	%si
+ 936              	    
+ 937 056a 89DE     	    movw	%bx,%si	# %si - string buffer address
+ 938 056c 31DB     	    xorw %bx,%bx # string index
+ 939              	    
+ 940              	9:
+ 941              	
+ 942 056e 30E4     	    xorb %ah,%ah
+ 943 0570 CD16     	    int $0x16	# getch to %al
+ 944              	    
+ 945 0572 3C0D     	    cmpb $0x0d,%al
+ 946 0574 741D     	    je	1f
+ 947              	    
+ 948 0576 8800     	    movb %al,(%bx,%si)
+ 949              	    
+ 950 0578 50B40E88 	    putch %al # echo
+ 950      C0CD1058 
+ 951              	    
+ 952 0580 43       	    incw %bx
+ 953              	    
+ 954 0581 83FB50   	    cmpw $STRLEN,%bx
+ 955 0584 7402     	    je 0f
+ 956 0586 EBE6     	    jmp 9b
+ 957              	    
+ 958              	0:
+ 959 0588 56BED206 	    print s_too_len_str
+ 959      E8FEFF5E 
+ 960 0590 C60400   	    movb $0,(%si)
+ 961              	    
+GAS LISTING boot.s 			page 19
+
+
+ 962              	1:
+ 963 0593 C60000   	    movb $0,(%bx,%si)
+ 964              	    
+ 965 0596 5E       	    popw	%si
+ 966 0597 5B       	    popw	%bx
+ 967 0598 58       	    popw	%ax
+ 968 0599 C3       	    ret
+ 969              	    
+ 970              	# end of getstr
+ 971              	
+ 972              	print16:	# print of 16 chars in hex and ascii mode
+ 973              			# input: %bx - string addr
+ 974              			# regs saved
+ 975 059a 50       	    pushw	%ax
+ 976 059b 53       	    pushw	%bx
+ 977 059c 51       	    pushw	%cx
+ 978 059d 52       	    pushw	%dx
+ 979              	    
+ 980 059e 89DA     	    movw	%bx,%dx	# save %bx
+ 981              	    
+ 982 05a0 B91000   	    movw	$16,%cx
+ 983              	1:
+ 984 05a3 8A07     	    movb	(%bx),%al
+ 985 05a5 E8FEFF   	    call	ohb
+ 986 05a8 50B40EB0 	    putch	$' '
+ 986      20CD1058 
+ 987 05b0 43       	    incw	%bx
+ 988 05b1 E2F0     	    loop	1b
+ 989              	    
+ 990 05b3 50B40EB0 	    putch		$' '
+ 990      20CD1058 
+ 991 05bb 89D3     	    movw	%dx,%bx # restore %bx
+ 992              	    
+ 993 05bd B91000   	    movw	$16,%cx
+ 994              	2:
+ 995 05c0 8A07     	    movb	(%bx),%al
+ 996 05c2 3C20     	    cmpb	$' ',%al
+ 997 05c4 720A     	    jb		3f
+ 998 05c6 50B40E88 	    putch	%al
+ 998      C0CD1058 
+ 999 05ce EB08     	    jmp		4f
+ 1000 05d0 50B40EB0 	3:  putch	$'.'
+ 1000      2ECD1058 
+ 1001              	4:
+ 1002 05d8 43       	    incw	%bx
+ 1003 05d9 E2E5     	    loop	2b    
+ 1004              	    
+ 1005 05db 50B40EB0 	    newline
+ 1005      0DCD1058 
+ 1005      50B40EB0 
+ 1005      0ACD1058 
+ 1006 05eb BBF605   	    movw	$keystroke,%bx
+ 1007 05ee E876FF   	    call	getstr
+ 1008              	    
+ 1009 05f1 5A       	    popw	%dx
+ 1010 05f2 59       	    popw	%cx
+ 1011 05f3 5B       	    popw	%bx
+GAS LISTING boot.s 			page 20
+
+
+ 1012 05f4 58       	    popw	%ax
+ 1013              	    
+ 1014 05f5 C3       	    ret
+ 1015              	
+ 1016 05f6 00000000 	keystroke: .fill STRLEN,1,0
+ 1016      00000000 
+ 1016      00000000 
+ 1016      00000000 
+ 1016      00000000 
+ 1017 0646 00000000 	Filename:  .fill STRLEN,1,0
+ 1017      00000000 
+ 1017      00000000 
+ 1017      00000000 
+ 1017      00000000 
+ 1018              	
+ 1019 0696 0D0A     	str1:	.byte		13,10
+ 1020 0698 50726F6F 		.ascii		"Proolix-l stage2. Use 'help' for help"
+ 1020      6C69782D 
+ 1020      6C207374 
+ 1020      61676532 
+ 1020      2E205573 
+ 1021 06bd 0D0A00   		.byte 		13,10,0
+ 1022 06c0 0D0A     	prompt:	.byte	13,10
+ 1023 06c2 3E2000   		.asciz		"> "
+ 1024              	s_filename:
+ 1025 06c5 0D0A     		.byte	13,10
+ 1026 06c7 46696C65 		.asciz	"Filename? "	
+ 1026      6E616D65 
+ 1026      3F2000
+ 1027 06d2 546F6F20 	s_too_len_str: .ascii "Too length string"
+ 1027      6C656E67 
+ 1027      74682073 
+ 1027      7472696E 
+ 1027      67
+ 1028 06e3 0D0A00   		.byte 13,10,0
+ 1029 06e6 0D0A     	s_inv:	.byte 13,10
+ 1030 06e8 496E7661 		.ascii "Invalid command"	
+ 1030      6C696420 
+ 1030      636F6D6D 
+ 1030      616E64
+ 1031 06f7 0D0A00   		.byte 13,10,0
+ 1032              	s_file_not_found:
+ 1033 06fa 0D0A     		.byte 13,10
+ 1034 06fc 46696C65 		.ascii "File not found"	
+ 1034      206E6F74 
+ 1034      20666F75 
+ 1034      6E64
+ 1035 070a 0D0A00   		.byte 13,10,0
+ 1036              	s_fat_err:
+ 1037 070d 0D0A     		.byte 13,10
+ 1038 070f 46415420 		.ascii "FAT read error"	
+ 1038      72656164 
+ 1038      20657272 
+ 1038      6F72
+ 1039 071d 0D0A00   		.byte 13,10,0
+ 1040 0720 68656C70 	c1_s: .asciz "help"
+ 1040      00
+GAS LISTING boot.s 			page 21
+
+
+ 1041 0725 7265626F 	c2_s: .asciz "reboot"
+ 1041      6F7400
+ 1042 072c 636F6C64 	c3_s: .asciz "cold"
+ 1042      00
+ 1043 0731 68646430 	c4_s: .asciz "hdd0"
+ 1043      00
+ 1044 0736 68646431 	c5_s: .asciz "hdd1"
+ 1044      00
+ 1045 073b 6C7300   	c6_s: .asciz "ls"
+ 1046 073e 63617400 	c7_s: .asciz "cat"
+ 1047 0742 68636174 	c8_s: .asciz "hcat"
+ 1047      00
+ 1048 0747 72756E00 	c9_s: .asciz "run"
+ 1049 074b 0D0A0D0A 	s_help: .byte 13,10,13,10
+ 1050 074f 50726F6F 	.ascii "Proolix-l stage2 commands:"
+ 1050      6C69782D 
+ 1050      6C207374 
+ 1050      61676532 
+ 1050      20636F6D 
+ 1051 0769 0D0A     	.byte 13,10
+ 1052 076b 68656C70 	.ascii "help - this help ;)"
+ 1052      202D2074 
+ 1052      68697320 
+ 1052      68656C70 
+ 1052      203B29
+ 1053 077e 0D0A     	.byte 13,10
+ 1054 0780 6C73202D 	.ascii "ls - list of files (kernels)"
+ 1054      206C6973 
+ 1054      74206F66 
+ 1054      2066696C 
+ 1054      65732028 
+ 1055 079c 0D0A     	.byte 13,10
+ 1056 079e 7265626F 	.ascii "reboot - hot reboot"
+ 1056      6F74202D 
+ 1056      20686F74 
+ 1056      20726562 
+ 1056      6F6F74
+ 1057 07b1 0D0A     	.byte 13,10
+ 1058 07b3 636F6C64 	.ascii "cold - cold reboot"
+ 1058      202D2063 
+ 1058      6F6C6420 
+ 1058      7265626F 
+ 1058      6F74
+ 1059 07c5 0D0A     	.byte 13,10
+ 1060 07c7 68646430 	.ascii "hdd0 - load OS from HDD 0"
+ 1060      202D206C 
+ 1060      6F616420 
+ 1060      4F532066 
+ 1060      726F6D20 
+ 1061 07e0 0D0A     	.byte 13,10
+ 1062 07e2 68646431 	.ascii "hdd1 - load OS from HDD 1 (if present)"
+ 1062      202D206C 
+ 1062      6F616420 
+ 1062      4F532066 
+ 1062      726F6D20 
+ 1063 0808 0D0A     	.byte 13,10
+ 1064 080a 63617420 	.ascii "cat - output file to console (text mode)"
+GAS LISTING boot.s 			page 22
+
+
+ 1064      2D206F75 
+ 1064      74707574 
+ 1064      2066696C 
+ 1064      6520746F 
+ 1065 0832 0D0A     	.byte 13,10
+ 1066 0834 68636174 	.ascii "hcat - output file to console (hex mode)"
+ 1066      202D206F 
+ 1066      75747075 
+ 1066      74206669 
+ 1066      6C652074 
+ 1067 085c 0D0A     	.byte 13,10
+ 1068 085e 72756E20 	.ascii "run - load and run kernel"
+ 1068      2D206C6F 
+ 1068      61642061 
+ 1068      6E642072 
+ 1068      756E206B 
+ 1069 0877 0D0A     	.byte 13,10
+ 1070 0879 0D0A     	.byte 13,10
+ 1071 087b 57697468 	.ascii "With best regards, Prool. http://prool.kharkov.org/proolix/"
+ 1071      20626573 
+ 1071      74207265 
+ 1071      67617264 
+ 1071      732C2050 
+ 1072 08b6 0D0A00   	.byte 13,10,0
+ 1073              		
+ 1074 08b9 44454255 	s_debug:	.asciz "DEBUG"	
+ 1074      4700
+ 1075 08bf 526F6F74 	s_lines:	.asciz "Root size in sectors, root bg sec"	
+ 1075      2073697A 
+ 1075      6520696E 
+ 1075      20736563 
+ 1075      746F7273 
+ 1076              	
+ 1077 08e1 0002     	SectSiz:         .word      512
+ 1078 08e3 01       	ClustSiz:        .byte      1
+ 1079 08e4 0100     	ResSecs:         .word      1
+ 1080 08e6 02       	FatCnt:          .byte      2
+ 1081 08e7 E000     	RootSiz:         .word      224
+ 1082 08e9 400B     	TotSecs:         .word      2880
+ 1083 08eb 0900     	FatSize:         .word      9
+ 1084 08ed 1200     	TrkSecs:         .word      18
+ 1085 08ef 0200     	HeadCnt:         .word      2
+ 1086 08f1 00000000 	HidnSec:         .word      0,0
+ 1087 08f5 00000000 	BigNo:           .word      0,0       # Big total no of sectors
+ 1088 08f9 0000     	StartClu:        .word      0       
+ 1089 08fb 0000     	RootSize:        .word      0
+ 1090              	# end of boot.S file
+GAS LISTING boot.s 			page 23
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 boot.S
+                            *ABS*:00000000 <command line>
+                            *ABS*:00000000 <built-in>
+                            *ABS*:00000000 boot.S
+                            *ABS*:00000050 STRLEN
+                            *ABS*:00000000 Drive
+                            *ABS*:00000060 KernelSeg
+              boot.S:13     .text:00000000 _start
+              boot.S:1019   .text:00000696 str1
+              boot.S:20     .text:00000023 l_revert
+              boot.S:1022   .text:000006c0 prompt
+              boot.S:1016   .text:000005f6 keystroke
+              boot.S:930    .text:00000567 getstr
+              boot.S:33     .text:0000003a c1_0
+              boot.S:1040   .text:00000720 c1_s
+              boot.S:45     .text:00000059 c1_1
+              boot.S:42     .text:0000004f c1_2
+              boot.S:1049   .text:0000074b s_help
+              boot.S:50     .text:0000005b c2_0
+              boot.S:1041   .text:00000725 c2_s
+              boot.S:68     .text:00000081 c2_1
+              boot.S:59     .text:00000070 c2_2
+              boot.S:73     .text:00000083 c3_0
+              boot.S:1042   .text:0000072c c3_s
+              boot.S:91     .text:000000a9 c3_1
+              boot.S:82     .text:00000098 c3_2
+              boot.S:96     .text:000000ab c4_0
+              boot.S:1043   .text:00000731 c4_s
+              boot.S:131    .text:000000df c4_1
+              boot.S:105    .text:000000c0 c4_2
+              boot.S:111    .text:000000c7 l_read_mbr_
+              boot.S:126    .text:000000da c4_reboot
+              boot.S:136    .text:000000e1 c5_0
+              boot.S:1044   .text:00000736 c5_s
+              boot.S:153    .text:000000ff c5_1
+              boot.S:145    .text:000000f6 c5_2
+              boot.S:1045   .text:0000073b c6_s
+              boot.S:1080   .text:000008e6 FatCnt
+              boot.S:1083   .text:000008eb FatSize
+              boot.S:1079   .text:000008e4 ResSecs
+              boot.S:1088   .text:000008f9 StartClu
+              boot.S:1081   .text:000008e7 RootSiz
+              boot.S:1077   .text:000008e1 SectSiz
+              boot.S:1089   .text:000008fb RootSize
+              boot.S:762    .text:000004c8 SecRead
+              boot.S:1046   .text:0000073e c7_s
+              boot.S:1024   .text:000006c5 s_filename
+              boot.S:1017   .text:00000646 Filename
+              boot.S:1032   .text:000006fa s_file_not_found
+              boot.S:1036   .text:0000070d s_fat_err
+              boot.S:1078   .text:000008e3 ClustSiz
+              boot.S:834    .text:0000050c CluRead
+              boot.S:882    .text:00000533 NextClu
+              boot.S:1047   .text:00000742 c8_s
+              boot.S:972    .text:0000059a print16
+              boot.S:1048   .text:00000747 c9_s
+GAS LISTING boot.s 			page 24
+
+
+              boot.S:1029   .text:000006e6 s_inv
+              boot.S:1085   .text:000008ef HeadCnt
+              boot.S:1084   .text:000008ed TrkSecs
+              boot.S:806    .text:000004ee l_loop
+              boot.S:821    .text:00000505 l_break
+              boot.S:823    .text:00000506 l_ret
+              boot.S:866    .text:00000523 loop4
+              boot.S:908    .text:00000554 lbl5
+              boot.S:909    .text:00000557 lbl6
+              boot.S:1082   .text:000008e9 TotSecs
+              boot.S:926    .text:00000564 l_cf
+              boot.S:918    .text:0000055e l_ret1
+              boot.S:1027   .text:000006d2 s_too_len_str
+              boot.S:1074   .text:000008b9 s_debug
+              boot.S:1075   .text:000008bf s_lines
+              boot.S:1086   .text:000008f1 HidnSec
+              boot.S:1087   .text:000008f5 BigNo
+
+UNDEFINED SYMBOLS
+sayr_proc
+print_registers
+Buff
+FATaddr
+ohb

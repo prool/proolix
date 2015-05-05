@@ -1,0 +1,32 @@
+absread (int drive, ...)
+
+int drive = [char major, char minor]
+
+major                   minor
+
+0 (уже реализовано)     0       a: HDD1
+                        1       b:
+                        2       c:
+                        3
+                        4       d:
+                        5
+                        6       e:
+----------------NEW---------------------
+1 HDD1                  0       full HDD
+                        1       c:
+                        2
+                        3       d:
+                        ...
+2 HDD2                  0
+                        1
+                        2
+3 HDD3
+4 HDD4
+5 CDROM1
+6 CDROM2
+7 CDROM3
+8 CDROM4
+9 RAM disk              0
+                        1
+                        2
+10 null device

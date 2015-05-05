@@ -1,0 +1,46 @@
+Proolix commands (internal & external):
+
+ScrollLock - rus/lat
+
+shutdown - shutdown & reboot
+ver - version
+clear, cls - clear screen
+l  - list files (internal command). Use l -? for help
+ls - list files (external). Use ls -? for help
+mount [digit|dos_drive_letter] - mount new device (new disk)
+E [arg...] - show arguments (internal)
+e - show arguments (external)
+mem - memory map
+memd - memory dump (use /? subcommand for memd help)
+fcb - show FCB list
+alloc <size_bytes> - allocate memory block
+garbage - garbage collection (memory blocks optimize - squeeze)
+free <paragrahe_hex_adr> - free memory block
+open <name> - open file
+Cat - copy file (files) to stdout (CATenate files) (internal)
+cat - (external)
+vec - show interrupt vectors
+Xonix - running one xonix on screen (save screen surf) (internal)
+xonix - (external)
+int0 - simulate interrupt 0
+de - disk editor
+echo - echo arguments
+env, set - show environment
+date - show current date & time
+timer [-y] [-n] - set time on/off
+setmore [-y] [-n] - set more on/off
+buf - show cache buffers' status
+rm [files...] - delete (ReMove) file (files)
+mv file1 file2 - rename files: file1 to file2 (MoVe file link)
+cp file1 file2 - CoPy files: file1 to file2 (external)
+Cp - (internal cp)
+cd dir - change directory
+md dir - make directory
+pwd - print work directory
+touch - touch file (external)
+more file - show file
+start - start scheduler (with bugs!)
+
+Files:
+files.bbs - all files description (ASCII text)
+memmap.doc - memory map

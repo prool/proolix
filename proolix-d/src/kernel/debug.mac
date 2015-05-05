@@ -1,0 +1,18 @@
+        extrn   debugl:near
+        extrn   debuge:near
+
+debug   macro   P1,P2
+        ifidn   <P1>,<L>
+        push    ax
+        mov     ax,P2
+        call    debugl
+        pop     ax
+        else
+                ifidn <P1>,<E>
+                mov     al,'E'
+                else
+                mov     al,'B'
+                endif
+        call    debuge
+        endif
+        endm

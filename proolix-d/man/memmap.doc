@@ -1,0 +1,29 @@
+Memory map for Proolix (80x86 real mode)
+
+00000 - 1FF  Vectors
+00200 - 3FF free area (stack of boot sector)
+00400 - 4FF ROM BIOS data
+00500 Kernel PSP
+00600 Kernel Begin              (see KERNEL_BEGIN in boot.c)
+07C00 =0:7C00 (=0070:7500) Boot sector
+07E00                      Boot sector end
+xxxxx Kernel end
+
+xxxxx+1 Begin of dynamic memory allocate area
+
+30500 (=3050:0000) /boot (boot manager) (see boots.asm, PSPSeg constant)
+
+MemTop (f.e. 9FFFF) End   of dynamic memory allocate area
+
+A0000 EGA (in graph modes)
+B0000 MDA, Hercules 1st videopage
+B8000 CGA, EGA, VGA 1st videopage (mode=3, symbol mode)
+C8000 Additional ROM modules (2K blocks)
+E0000 End of addtn ROM
+E0000 Bg  AT ROM BIOS
+EFFFF End AT ROM BIOS
+F6000 ROM Basic
+FE000 ROM BIOS, POST
+FFFF0 JMP - COLD REBOOT
+FFFF5 BIOS version/date (ASCII)
+FFFFE PC/XT/AT identefication byte

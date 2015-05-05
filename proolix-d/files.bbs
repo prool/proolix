@@ -1,0 +1,8 @@
+FILE_ID.DIZ description
+INSTALLD.BAT install Proolix to HDD (D:)
+INSTALLF.BAT install Proolix to FDD (A:)
+INSTALLH.BAT install Proolix to HDD (C:)
+MKBOOT.BAT make proolix boot sector
+README.1ST read me
+SUPPORT.TXT proolix support
+tt.bat install Proolix to FDD (A:)
