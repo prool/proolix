@@ -3,10 +3,6 @@ proolix
 
 Simple POSIX-compatible OS for i8086
 
-Будет выложено в течении нескольких дней
-
-Coming soon...
-
 ---
 
 Proolix состоит из двух проектов:
@@ -21,5 +17,7 @@ Prool, 18.11.2014
 
 -- 
 Proolix files here http://prool.kharkov.org/proolix/
+
 Proolix maillist http://subscribe.ru/catalog/comp.soft.othos.proolix/
+
 Prool page http://prool.kharkov.org
