@@ -1,5 +1,4 @@
 # Proolix-l stage2
-# usage 'make install' for install stage2 to diskette /dev/fd0
 
 LD = ld
 AS = as
@@ -8,9 +7,6 @@ CPP = cpp
 boot: boot.o saycsip.o ohw.o sayr.o end.o
 	$(LD) -M -Ttext 0x0 -s --oformat binary -o $@ $< saycsip.o ohw.o sayr.o end.o > map.lst
 	chmod a-x boot
-
-install: boot
-	cp boot /mnt/floppy
 
 boot.o: boot.s
 	$(AS) -a=boot.lst -o $@ $<

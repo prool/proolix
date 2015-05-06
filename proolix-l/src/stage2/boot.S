@@ -1,5 +1,4 @@
 # Proolix-l stage2 main program
-# usage 'make install' for install stage2 to diskette /dev/fd0
  
         .code16
 	.include "macros.S"
@@ -1018,7 +1017,7 @@ keystroke: .fill STRLEN,1,0
 Filename:  .fill STRLEN,1,0
 
 str1:	.byte		13,10
-	.ascii		"Proolix-l stage2. Use 'help' for help"
+	.ascii		"Proolix-l stage2. Ver 6-May-2015. Use 'help' for help"
 	.byte 		13,10,0
 prompt:	.byte	13,10
 	.asciz		"> "
