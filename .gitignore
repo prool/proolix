@@ -31,3 +31,5 @@
 # from prool:
 # compilation listings
 *.lst
+# asm compiler files
+*.s
