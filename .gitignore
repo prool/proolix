@@ -33,3 +33,5 @@
 *.lst
 # asm compiler files
 *.s
+# binaries
+boot
