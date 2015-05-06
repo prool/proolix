@@ -1,40 +1,38 @@
 # Proolix-l boot sector for diskette 1.44 M 3"
-# for install boot sector to diskette /dev/fd0 usage 'make install'
 
 /*
 # FDD Boot sector ver. 0.0.5.1 21-Oct-2004 for OS Proolix-l
 # by Serge Pustovoitoff, 1993-2004
 
-# При отладке бута учитывались многочисленные полезные замечания, которые
-# сделали Алекс Семеняка и Юрий Белотицкий
+# п÷я─п╦ п╬я┌п╩п╟п╢п╨п╣ п╠я┐я┌п╟ я┐я┤п╦я┌я▀п╡п╟п╩п╦я│я▄ п╪п╫п╬пЁп╬я┤п╦я│п╩п╣п╫п╫я▀п╣ п©п╬п╩п╣п╥п╫я▀п╣ п╥п╟п╪п╣я┤п╟п╫п╦я▐, п╨п╬я┌п╬я─я▀п╣
+# я│п╢п╣п╩п╟п╩п╦ п░п╩п╣п╨я│ п║п╣п╪п╣п╫я▐п╨п╟ п╦ п╝я─п╦п╧ п▒п╣п╩п╬я┌п╦я├п╨п╦п╧
 
 # History in stack order
 # 0.0.5.1 21-Oct-2004
-# 0.0.5.0 12-Oct-2004 - переделано под Linux (tasm->as)
+# 0.0.5.0 12-Oct-2004 - п©п╣я─п╣п╢п╣п╩п╟п╫п╬ п©п╬п╢ Linux (tasm->as)
 ################################################################################
-# 0.0.4.0 20-Apr-96 загружаемый файл /boot может быть сжат pklite'ом
+# 0.0.4.0 20-Apr-96 п╥п╟пЁя─я┐п╤п╟п╣п╪я▀п╧ я└п╟п╧п╩ /boot п╪п╬п╤п╣я┌ п╠я▀я┌я▄ я│п╤п╟я┌ pklite'п╬п╪
 # 0.0.3.1 24-Mar-96 replace chr1 '.' -> char1  176
 # 0.0.3.1 12-Mar-96 PSPSeg (stage2_seg) = 0x3050
 # 0.0.3.0 25-Feb-96 PSPSeg = 0x1050
-# 0.0.3.0 10-Jan-96 - загружаем не /kernel, а /boot (см. файл history,
-# запись 0.0.1.4 10-Jan-96
+# 0.0.3.0 10-Jan-96 - п╥п╟пЁя─я┐п╤п╟п╣п╪ п╫п╣ /kernel, п╟ /boot (я│п╪. я└п╟п╧п╩ history,
+# п╥п╟п©п╦я│я▄ 0.0.1.4 10-Jan-96
 # 0.0.2.3 16-Sep-95
-# 0.0.2.2 15-Sep-95 - разветвление на FDD и HDD бут сектора
-# 0.0.2.1 25-Feb-95 - до этого история не велась... (см. также общую историю
-# в файле kernel/history.doc
+# 0.0.2.2 15-Sep-95 - я─п╟п╥п╡п╣я┌п╡п╩п╣п╫п╦п╣ п╫п╟ FDD п╦ HDD п╠я┐я┌ я│п╣п╨я┌п╬я─п╟
+# 0.0.2.1 25-Feb-95 - п╢п╬ я█я┌п╬пЁп╬ п╦я│я┌п╬я─п╦я▐ п╫п╣ п╡п╣п╩п╟я│я▄... (я│п╪. я┌п╟п╨п╤п╣ п╬п╠я┴я┐я▌ п╦я│я┌п╬я─п╦я▌
+# п╡ я└п╟п╧п╩п╣ kernel/history.doc
 
-# Смещение, связанное с тем, что во время компиляции
-# адресом начала является 0, а во время
-# выполнения 0x7c00
+# п║п╪п╣я┴п╣п╫п╦п╣, я│п╡я▐п╥п╟п╫п╫п╬п╣ я│ я┌п╣п╪, я┤я┌п╬ п╡п╬ п╡я─п╣п╪я▐ п╨п╬п╪п©п╦п╩я▐я├п╦п╦
+# п╟п╢я─п╣я│п╬п╪ п╫п╟я┤п╟п╩п╟ я▐п╡п╩я▐п╣я┌я│я▐ 0, п╟ п╡п╬ п╡я─п╣п╪я▐
+# п╡я▀п©п╬п╩п╫п╣п╫п╦я▐ 0x7c00
 */
 off     =     0x7c00
+SecSize	=	512
 
-Drive   =     0       # Загрузочный диск A: (FDD 0)
+Drive   =     0       # п≈п╟пЁя─я┐п╥п╬я┤п╫я▀п╧ п╢п╦я│п╨ A: (FDD 0)
 
-stage2_seg          =     0x3050       # Сегментный адрес, куда будет
-                                       # загружен stage2
-
-FATaddr         =     Buff
+stage2_seg          =     0x3050       # п║п╣пЁп╪п╣п╫я┌п╫я▀п╧ п╟п╢я─п╣я│, п╨я┐п╢п╟ п╠я┐п╢п╣я┌
+                                       # п╥п╟пЁя─я┐п╤п╣п╫ stage2
 
         .code16
 	.text
@@ -43,7 +41,7 @@ FATaddr         =     Buff
 _start:
 
 Begin:          jmp     start
-# Таблица параметров диска
+# п╒п╟п╠п╩п╦я├п╟ п©п╟я─п╟п╪п╣я┌я─п╬п╡ п╢п╦я│п╨п╟
                  .byte      0x90     # NOP
 OEM:             .ascii     "Proolix "
 SectSiz:         .word      512
@@ -74,17 +72,17 @@ start:
 #        pushw   %CS
 #        popw    %DS
 #        sayr    OEM+off
-# Значения регистров после загрузки boot-сектора
+# п≈п╫п╟я┤п╣п╫п╦я▐ я─п╣пЁп╦я│я┌я─п╬п╡ п©п╬я│п╩п╣ п╥п╟пЁя─я┐п╥п╨п╦ boot-я│п╣п╨я┌п╬я─п╟
 # CS:IP = 0:7C00 SS=30 SP=F6 ES=0
 
-# /* 0:0 - 0:200 - таблица прерываний */
-# Стек: c 30:F6 (0:3F6) растет к 0 (0:200-0:400 - стек)
+# /* 0:0 - 0:200 - я┌п╟п╠п╩п╦я├п╟ п©я─п╣я─я▀п╡п╟п╫п╦п╧ */
+# п║я┌п╣п╨: c 30:F6 (0:3F6) я─п╟я│я┌п╣я┌ п╨ 0 (0:200-0:400 - я│я┌п╣п╨)
 # ROM BIOS area 0:400-0:500
 
 #       cli
-        # Модификация diskette param table (взято из бута MSDOS 6.0)
+        # п°п╬п╢п╦я└п╦п╨п╟я├п╦я▐ diskette param table (п╡п╥я▐я┌п╬ п╦п╥ п╠я┐я┌п╟ MSDOS 6.0)
 
-# нужен ли в нижеследующей команде префикс ES: ?
+# п╫я┐п╤п╣п╫ п╩п╦ п╡ п╫п╦п╤п╣я│п╩п╣п╢я┐я▌я┴п╣п╧ п╨п╬п╪п╟п╫п╢п╣ п©я─п╣я└п╦п╨я│ ES: ?
 	lds  %es:(0x78),%si # DS:si - vector diskette param table
 
 /*
@@ -118,81 +116,75 @@ start:
         pushw   %CS
         popw    %DS
 
-        # Вычисления
-        movb    FatCnt+off,%al
-        cbw
-        movw    FatSize+off,%cx
-	mulw    %cx      # %ax*%cx -> %dx:%ax
-        addw    ResSecs+off,%ax
-        # %ax - Root Beginning Sector
-        movw    %ax,StartClu+off
-        PUSHW   %ax
+	movw	$0xe00+'1',%ax
+        int     $0x10
 
-        movw    RootSiz+off,%ax
-        movw    $32,%cx
-        mulw    %cx
+	movw	$0x1,%cx
 
-        movw    SectSiz+off,%cx
-        divw    %cx      # %dx:%ax / %cx -> %ax; mod -> %dx
-        orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
-        jz      l_ll    # сектор (последний неполный сектор root'а)
-        inc     %ax
-l_ll:
-        # %ax - Root Size in Sectors
-        addw    %ax,StartClu+off
-        movw    %ax,%cx
-        movw    %ax,RootSize+off
-        POPW    %ax      # %ax - Root Bg Sec
-loop1:  # Загрузка корневого каталога посекторно и посекторный поиск в нем
-        # имени ядра
+	movw	$0x00,%ax
+	movw	%ax,LoadAdr+off
+
+	movw	$0x1,%ax # !!!
+	movw	%ax,Sektor+off
+
+	movw	$0x3050,%ax
+	pushw	%ax
+	popw	%ES
+
+loop1:  # п≈п╟пЁя─я┐п╥п╨п╟ п©п╬я│п╣п╨я┌п╬я─п╫п╬
         pushw   %cx
 
-        pushw   %ax
-        movw    $Buff+off,%bx
+        movw    LoadAdr+off,%bx
         movb    $Drive,%dl
-        pushw   %ax
+	movw	Sektor+off,%ax
         call    SecRead
         jc      l_err
-        popw    %ax
 
-#               pushw   %ax
-#               CHR1    'R'
-#               popw    %ax
+	movw	$0xe00+'R',%ax
+        int     $0x10
 
-        movw    $16,%cx   # root entryes in 1 sector
-loop2:          pushw   %cx
+	movw	Sektor+off,%ax
+	inc	%ax
+	movw	%ax,Sektor+off
 
-                movw    $11,%cx
-                movw    %bx,%di
-		movw    $Lbl+off,%si
-                rep     cmpsb
-                je      l_found
+	movw	LoadAdr+off,%ax
+	add	$0x200,%ax
+	movw	%ax,LoadAdr+off
 
-                popw    %cx
-                addw    $32,%bx
-                loop    loop2
-
-        popw    %ax
-        incw    %ax
 
         popw    %cx
         loop    loop1
-        # end of load root dir
-        # HЕ HАШЛИ ЯДРА
 
+	movw	$0xe00+'S',%ax
+        int     $0x10
+
+	# EXEC!
+	
+        movw    $0x3050,%ax
+        movw    %ax,%DS
+        cli
+        movw    %ax,%SS
+        movw    $0xfffe,%SP
+        sti
+
+        .byte      0xea    # JMP 3050:0000
+        .word      0x0000,0x3050
 l_err:
-#       CHR1    'E'
-        call    ohw
+	movw	$0xe00+'E',%ax
+        int     $0x10
+l_stop_err:	jmp	l_stop_err
+
+;        call    ohw
         xorb    %ah,%ah
         int     $0x16
         int     $0x19
 #Vis:    jmp     short Vis
 
 sayr_proc: # proc       Ver 0.0.1 9-Dec-93
-                        # Процедура вывода строки при помощи функций BIOS
-                        # Вход: %DS:%si - ASCIIZ строка.
+                        # п÷я─п╬я├п╣п╢я┐я─п╟ п╡я▀п╡п╬п╢п╟ я│я┌я─п╬п╨п╦ п©я─п╦ п©п╬п╪п╬я┴п╦ я└я┐п╫п╨я├п╦п╧ BIOS
+                        # п▓я┘п╬п╢: %DS:%si - ASCIIZ я│я┌я─п╬п╨п╟.
                         # NO REG SAVED !!!
-# В графических режимах не работает
+# п▓ пЁя─п╟я└п╦я┤п╣я│п╨п╦я┘ я─п╣п╤п╦п╪п╟я┘ п╫п╣ я─п╟п╠п╬я┌п╟п╣я┌
 #       cld
 sayr_l1:
         lodsb
@@ -205,96 +197,6 @@ sayrret:
         ret
 # sayr_proc       endp
 
-l_found:        # HАШЛИ !
-        popw    %cx
-        # Found kernel
-        # %bx - kernel dir record
-        # word ptr (%bx+0x1a) - 1st cluster
-        movw    0x1a(%bx),%ax    # %ax - 1st cluster
-
-        # Загрузка FAT в ОЗУ
-        PUSHW   %ax      # save %ax with 1st clu no
-
-        movw    ResSecs+off,%ax
-        movw    $FATaddr+off,%bx
-        movw    FatSize+off,%cx
-
-        # Загрузка ядра покластерно (по цепочке из FATа)
-        # Загрузка FAT
-loop3:  movb    $Drive,%dl
-        pushw   %ax
-        call    SecRead
-        jc      l_err
-        popw    %ax
-        addw    $512,%bx
-        incw    %ax      # Next sector!
-
-#       pushw   %ax
-#       CHR1    'F'
-#       popw    %ax
-
-        loop    loop3
-
-        movb    ClustSiz+off,%al
-        cbw
-        movw    SectSiz+off,%dx
-        mul     %dx
-        movw    %ax,%cx   # Cluster Size in Bytes
-
-        POPW    %ax      # restore %ax (1st clu no)
-        movw    $stage2_seg,%bx
-        movw    %bx,%ES
-        xorw    %bx,%bx
-l2:     movb    $Drive,%dl
-        call    CluRead
-          pushw   %ax
-	  movw $0x0e00+176,%ax
-	  int  $0x10
-          popw    %ax
-        addw    %cx,%bx
-        call    NextClu # set %ax
-        jnc     l2
-
-        # EXEC!       
-	
-#       sayr    OEM+off
-
-        movw    $stage2_seg,%ax
-        movw    %ax,%DS
-        cli
-        movw    %ax,%SS
-        movw    $0xfffe,%SP
-        sti
-
-        .byte      0xea    # JMP stage2_seg:0000
-        .word      0x0000,stage2_seg
-
-NextClu: # proc # Input: %ax - cluster no
-                # Output: %ax - next cluster from FAT
-                # cf=1 if EOF
-                # Use global var:
-                # FATaddr               .word      0
-                # REGS SAVED !
-
-        pushw    %bx
-        pushw    %cx
-        pushw    %dx
-        pushw    %si
-        pushw    %di
-
-        movw    %ax,%di
-        movw    $3,%bx
-        mul     %bx      # %dx:%ax := %ax * %bx
-        shrw    $1,%ax   # %ax := %ax /2
-        # %ax - addr in FAT
-        movw    %ax,%si
-        movw    $FATaddr+off,%bx
-        movw    (%bx,%si),%ax
-        testw   $1,%di
-        jz      lbl5
-        movb    $4,%cl
-        shrw    %cl,%ax
-        jmp     lbl6
 lbl5:   andw    $0xfff,%ax
 lbl6:
 #       cmpw    $0xfff,%ax
@@ -439,14 +341,14 @@ obhod:
 
 ohw: #     proc
 
-#       Вывод слова в HEX-виде. Вход: слово в %ax.
-#       Все регистры сохраняются.
-#       Вызывает подпрограмму ohb
+#       п▓я▀п╡п╬п╢ я│п╩п╬п╡п╟ п╡ HEX-п╡п╦п╢п╣. п▓я┘п╬п╢: я│п╩п╬п╡п╬ п╡ %ax.
+#       п▓я│п╣ я─п╣пЁп╦я│я┌я─я▀ я│п╬я┘я─п╟п╫я▐я▌я┌я│я▐.
+#       п▓я▀п╥я▀п╡п╟п╣я┌ п©п╬п╢п©я─п╬пЁя─п╟п╪п╪я┐ ohb
 
-        pushw    %ax      # Сохр. ради %al.
+        pushw    %ax      # п║п╬я┘я─. я─п╟п╢п╦ %al.
         movb     %ah,%al
         call    ohb
-        popw     %ax              # Восст. %al.
+        popw     %ax              # п▓п╬я│я│я┌. %al.
         call    ohb
         ret
 # ohw     endp
@@ -497,4 +399,7 @@ l_out: movb     $0xe,%ah
         ret
 # ohb1    endp
 
-Buff:
+Sektor:	.word
+LoadAdr:	.word
+Konec:	.word	0xDEAD
+

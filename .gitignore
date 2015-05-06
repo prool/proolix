@@ -35,3 +35,8 @@
 *.s
 # binaries
 boot
+analyzeboot
+patchboot
+makediskette
+stage2
+boots
