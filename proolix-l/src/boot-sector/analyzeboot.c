@@ -108,9 +108,10 @@ if (argc!=2)
   return 1;
   }
 
-/* read original boot sector */  
+/* read original boot sector */
+for (i=0;i<256;i++) c[i]=0;
 if ((h1=open(argv[1],0))<=0) {printf(S2,argv[1]); return 2; }
-if (read(h1,c,512)!=512) {printf(S3,argv[1]); return 3; }
+if (read(h1,c,512)==0) {printf(S3,argv[1]); return 3; }
 
 out_boot(c);
 

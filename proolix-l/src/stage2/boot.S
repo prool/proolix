@@ -1,5 +1,3 @@
-# Proolix-l stage2 main program
- 
         .code16
 	.include "macros.S"
 	
@@ -184,7 +182,7 @@ c5_1:	#    no this command
         movw    SectSiz,%cx
         divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
         orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
-        jz      2f        # сектор (последний неполный сектор root'а)
+        jz      2f        # сектор (последний неполный сектор rootа)
         incw    %ax
 2:
         # %ax - Root Size in Sectors
@@ -280,7 +278,7 @@ c5_1:	#    no this command
         movw    SectSiz,%cx
         divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
         orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
-        jz      2f        # сектор (последний неполный сектор root'а)
+        jz      2f        # сектор (последний неполный сектор rootа)
         incw    %ax
 2:
         # %ax - Root Size in Sectors
@@ -448,7 +446,7 @@ c5_1:	#    no this command
         movw    SectSiz,%cx
         divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
         orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
-        jz      2f        # сектор (последний неполный сектор root'а)
+        jz      2f        # сектор (последний неполный сектор rootа)
         incw    %ax
 2:
         # %ax - Root Size in Sectors
@@ -616,7 +614,7 @@ c5_1:	#    no this command
         movw    SectSiz,%cx
         divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
         orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
-        jz      2f        # сектор (последний неполный сектор root'а)
+        jz      2f        # сектор (последний неполный сектор rootа)
         incw    %ax
 2:
         # %ax - Root Size in Sectors
@@ -747,13 +745,29 @@ c5_1:	#    no this command
         .byte      0xea    # JMP KernelSeg:0000
         .word      0x0000,KernelSeg
 
-###===	
-     
 8:	#    no this command
-    ###
-    
-    
+
+# c10 begin
+    ### command c10
+    xorw %bx,%bx
+0:  
+    movb c10_s(%bx),%al
+    cmpb %al,keystroke(%bx)
+    jne	8f
+    movb keystroke(%bx),%dl
+    orb %al,%dl
+    jz 1f
+    incw %bx
+    jmp 0b
+1:	# this command
+	print s_test
+	call	f1
+	jmp l_revert
+# c10 end
+
+# add new command here
 #invalid command
+8:
     
     print s_inv
     
@@ -1046,12 +1060,13 @@ c6_s: .asciz "ls"
 c7_s: .asciz "cat"
 c8_s: .asciz "hcat"
 c9_s: .asciz "run"
+c10_s: .asciz "test"
 s_help: .byte 13,10,13,10
 .ascii "Proolix-l stage2 commands:"
 .byte 13,10
 .ascii "help - this help ;)"
 .byte 13,10
-.ascii "ls - list of files (kernels)"
+.ascii "ls - list of files"
 .byte 13,10
 .ascii "reboot - hot reboot"
 .byte 13,10
@@ -1065,11 +1080,15 @@ s_help: .byte 13,10,13,10
 .byte 13,10
 .ascii "hcat - output file to console (hex mode)"
 .byte 13,10
-.ascii "run - load and run kernel"
+.ascii "run - load and run binary file"
 .byte 13,10
 .byte 13,10
-.ascii "With best regards, Prool. http://prool.kharkov.org/proolix/"
+.ascii "With best regards, Prool. http://prool.kharkov.org/proolix"
 .byte 13,10,0
+
+s_test:	.byte 13,10
+	.ascii " *** test of C functions *** "
+	.byte 13,10,0
 	
 s_debug:	.asciz "DEBUG"	
 s_lines:	.asciz "Root size in sectors, root bg sec"	

@@ -4,12 +4,22 @@ LD = ld
 AS = as
 CPP = cpp
 
-boot: boot.o saycsip.o ohw.o sayr.o end.o
-	$(LD) -M -Ttext 0x0 -s --oformat binary -o $@ $< saycsip.o ohw.o sayr.o end.o > map.lst
+LDFLAGS = -m elf_i386
+ASFLAG = --32
+
+boot: boot.o saycsip.o ohw.o sayr.o end.o libc.o
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o $@ $< saycsip.o ohw.o sayr.o end.o libc.o > map.lst
 	chmod a-x boot
 
+libc.o:		libc.c
+	gcc -m32 -c libc.c
+#	$(AS) $(ASFLAG) -a=libc.lst -o libc.o libc.s
+
+libc.s:		libc.c
+	gcc -m16 -S libc.c
+
 boot.o: boot.s
-	$(AS) -a=boot.lst -o $@ $<
+	$(AS) $(ASFLAG) -a=boot.lst -o $@ $<
 
 boot.s: boot.S macros.S defines.h
 	$(CPP) -traditional $< -o $@
@@ -19,19 +29,19 @@ clean:
 saycsip.s: saycsip.S macros.S defines.h
 	$(CPP) -traditional $< -o $@
 saycsip.o: saycsip.s
-	$(AS) -a=saycsip.lst -o $@ $<
+	$(AS) $(ASFLAG) -a=saycsip.lst -o $@ $<
 
 ohw.s: ohw.S defines.h
 	$(CPP) -traditional $< -o $@
 ohw.o: ohw.s
-	$(AS) -a=ohw.lst -o $@ $<
+	$(AS) $(ASFLAG) -a=ohw.lst -o $@ $<
 
 sayr.s: sayr.S
 	$(CPP) -traditional $< -o $@
 sayr.o: sayr.s
-	$(AS) -a=sayr.lst -o $@ $<
+	$(AS) $(ASFLAG) -a=sayr.lst -o $@ $<
 
 end.s: end.S
 	$(CPP) -traditional $< -o $@
 end.o: end.s
-	$(AS) -a=end.lst -o $@ $<
+	$(AS) $(ASFLAG) -a=end.lst -o $@ $<
