@@ -14,6 +14,24 @@ _start:
     print	str1
     call	print_registers
     newline
+
+    # intercept of int 21h (MSDOS interrupt)
+
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+#    movw	$0xDEAD,%ax
+    pushw	%CS
+    popw	%ax
+    movw	$0x86,%si
+    movw	%ax,%ES:(%si)
+#    movw	$0xBEEF,%ax
+    lea		int21p,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
     # command cycle
 l_revert:
     print prompt
@@ -817,6 +835,23 @@ c5_1:	#    no this command
 8:	#    no this command
 # c13 end
 
+# command c14 begin
+    xorw %bx,%bx
+0:  
+    movb c14_s(%bx),%al
+    cmpb %al,keystroke(%bx)
+    jne	8f
+    movb keystroke(%bx),%dl
+    orb %al,%dl
+    jz 1f
+    incw %bx
+    jmp 0b
+1:	# this command
+	int $0x21
+	jmp l_revert
+8:	#    no this command
+# c14 end
+
 # add new command before here
 
 # invalid command
@@ -1047,7 +1082,8 @@ print_vec:
 	mov	$0x81,%cx	# cycle counter (from 0x22 to 0)
 	xor	%dl,%dl		# vector counter (from 0 to 0x22)
 	movw	$2,%si		# address of word (from 0, 2 words for 1 vector)
-	movw	%si,%ES		# ES:=0
+	xorw	%ax,%ax
+	movw	%ax,%ES		# ES:=0
 1:	# begin of cycle
 	mov	%dl,%al
 	call ohb
@@ -1123,18 +1159,25 @@ print16:	# print of 16 chars in hex and ascii mode
     
     ret
 
+int21p:
+    print s_int21
+#    putch $'I'
+    iret
+
 keystroke: .fill STRLEN,1,0
 Filename:  .fill STRLEN,1,0
 
 str1:	.byte		13,10
 	.ascii		"Proolix-l stage2. (c) 1993-2015, Prool, GPLv2. <prooix@gmail.com>"
+	.byte		13,10
 	.ascii		"www.prool.kharkov.org github.com/prool/proolix"
 	.byte 		13,10
 	.ascii		"Compiled ",__DATE__," ",__TIME__
 	.byte 		13,10
 	.ascii		"Use 'help' for help"
 	.byte 		13,10,0
-s_vectors:	.ascii	"Interrupt vectors"
+s_vectors: .byte 13,10
+	.ascii	"Interrupt vectors"
 	.byte 13,10,0
 prompt:	.byte	13,10
 	.asciz		"> "
@@ -1167,6 +1210,10 @@ c10_s: .asciz "test"
 c11_s: .asciz "reg"
 c12_s: .asciz "reg32"
 c13_s: .asciz "vec"
+c14_s: .asciz "int21"
+s_int21: .byte 13,10
+	.ascii	" Interrupt 21h! "
+	.byte 13,10,0
 s_help: .byte 13,10,13,10
 .ascii "Proolix-l stage2 commands:"
 .byte 13,10
