@@ -12,7 +12,7 @@ Utility for make proolix-l diskette image for VirtualBox
 
 #define S1 "This program makes Proolix-l bootable diskette\n\nusage: makediskette emptydiskette.img bootsector.bin\n\
 \n"
-#define S1a "emptydiskette.img + bootsector.bin + stage2 -> emptydiskette.img\n\n"
+#define S1a "emptydiskette.img + bootsector.bin -> emptydiskette.img\n\n"
 #define S2 "can't open %s\n"
 #define S3 "can't read %s\n"
 #define S4 "can't write %s\n"
@@ -27,7 +27,7 @@ printf ("argc=%i\n",argc);
 for (i=0;i<argc; i++) printf ("argv[%i]=%s\n",i,argv[i]);
 #endif
 
-if (argc!=4)
+if (argc!=3)
   {
   printf (S1);
   printf (S1a);
@@ -58,6 +58,7 @@ c[511]=0xaa;
 if ((h3=open(argv[1],O_RDWR/*S_IRUSR*/))<=0) {printf(S2,argv[1]); return 5; }
 if (write(h3,c,512)!=512) {printf(S4,argv[1]); return 6; }
 
+#if 0
 // write stage 2
 
 if ((h4=open(argv[3],0))<=0) {printf(S2,argv[3]); return 5; }
@@ -66,6 +67,7 @@ while(1)
 	if (read(h4,c2,512)<=0) {printf("EOF\n"); break; }
 	if (write(h3,c2,512)!=512) {printf(S4,argv[1]); return 6; }
 	}
+#endif
 
 if (close(h3)==-1) {printf(S5,argv[1]); return 7; }
 return 0;

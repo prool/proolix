@@ -4,7 +4,7 @@ boots.S - boot sector source
 boots - boot sector binary
 *.c - various utilities
 e.img - binary image of diskette with old version of Proolix-l
-diskette - binary image of diskette with current version of Proolix-l
+diskette.img - binary image of diskette with current version of Proolix-l
 
 Installation of boot sector to diskette:
 

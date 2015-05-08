@@ -3,7 +3,7 @@
 	
 	
 STRLEN	=	80
-Drive	=	0	# Загрузочный диск A: (FDD 0, /dev/fd0) 
+Drive	=	0	# drive A: (FDD 0, /dev/fd0) 
 KernelSeg	=	0x60
 	
 	.text
@@ -761,13 +761,65 @@ c5_1:	#    no this command
     jmp 0b
 1:	# this command
 	print s_test
-	call	f1
+	#call	f1
 	jmp l_revert
+8:	#    no this command
 # c10 end
 
-# add new command here
-#invalid command
-8:
+# command c11 begin
+    xorw %bx,%bx
+0:  
+    movb c11_s(%bx),%al
+    cmpb %al,keystroke(%bx)
+    jne	8f
+    movb keystroke(%bx),%dl
+    orb %al,%dl
+    jz 1f
+    incw %bx
+    jmp 0b
+1:	# this command
+	call	print_registers
+	jmp l_revert
+8:	#    no this command
+# c11 end
+
+# command c12 begin
+    xorw %bx,%bx
+0:  
+    movb c12_s(%bx),%al
+    cmpb %al,keystroke(%bx)
+    jne	8f
+    movb keystroke(%bx),%dl
+    orb %al,%dl
+    jz 1f
+    incw %bx
+    jmp 0b
+1:	# this command
+	call	print_reg32
+	jmp l_revert
+8:	#    no this command
+# c12 end
+
+# command c13 begin
+    xorw %bx,%bx
+0:  
+    movb c13_s(%bx),%al
+    cmpb %al,keystroke(%bx)
+    jne	8f
+    movb keystroke(%bx),%dl
+    orb %al,%dl
+    jz 1f
+    incw %bx
+    jmp 0b
+1:	# this command
+	call	print_vec
+	jmp l_revert
+8:	#    no this command
+# c13 end
+
+# add new command before here
+
+# invalid command
     
     print s_inv
     
@@ -983,6 +1035,50 @@ getstr:	# read of string from console
     
 # end of getstr
 
+print_vec:
+	pushw %ax
+	pushw %bx
+	pushw %cx
+	pushw %dx
+	pushw %ES
+
+	print s_vectors
+
+	mov	$0x81,%cx	# cycle counter (from 0x22 to 0)
+	xor	%dl,%dl		# vector counter (from 0 to 0x22)
+	movw	$2,%si		# address of word (from 0, 2 words for 1 vector)
+	movw	%si,%ES		# ES:=0
+1:	# begin of cycle
+	mov	%dl,%al
+	call ohb
+	putch $' '
+	movw %ES:(%si),%ax
+	call ohw
+	putch $':'
+	decw	%si
+	decw	%si
+	movw %ES:(%si),%ax
+	call ohw
+	putch $' '
+
+	incw %si # si+=6 ;-)
+	incw %si
+	incw %si
+	incw %si
+	incw %si
+	incw %si
+
+	incb %dl
+	loop 1b
+	# end of cycle
+
+	popw %ES
+	popw %dx
+	popw %cx
+	popw %bx
+	popw %ax
+	ret # end if print_vec
+
 print16:	# print of 16 chars in hex and ascii mode
 		# input: %bx - string addr
 		# regs saved
@@ -1031,8 +1127,15 @@ keystroke: .fill STRLEN,1,0
 Filename:  .fill STRLEN,1,0
 
 str1:	.byte		13,10
-	.ascii		"Proolix-l stage2. Ver 6-May-2015. Use 'help' for help"
+	.ascii		"Proolix-l stage2. (c) 1993-2015, Prool, GPLv2. <prooix@gmail.com>"
+	.ascii		"www.prool.kharkov.org github.com/prool/proolix"
+	.byte 		13,10
+	.ascii		"Compiled ",__DATE__," ",__TIME__
+	.byte 		13,10
+	.ascii		"Use 'help' for help"
 	.byte 		13,10,0
+s_vectors:	.ascii	"Interrupt vectors"
+	.byte 13,10,0
 prompt:	.byte	13,10
 	.asciz		"> "
 s_filename:
@@ -1061,6 +1164,9 @@ c7_s: .asciz "cat"
 c8_s: .asciz "hcat"
 c9_s: .asciz "run"
 c10_s: .asciz "test"
+c11_s: .asciz "reg"
+c12_s: .asciz "reg32"
+c13_s: .asciz "vec"
 s_help: .byte 13,10,13,10
 .ascii "Proolix-l stage2 commands:"
 .byte 13,10
@@ -1081,6 +1187,14 @@ s_help: .byte 13,10,13,10
 .ascii "hcat - output file to console (hex mode)"
 .byte 13,10
 .ascii "run - load and run binary file"
+.byte 13,10
+.ascii "test - test of C function call"
+.byte 13,10
+.ascii "reg - print registers"
+.byte 13,10
+.ascii "reg32 - print 32 bit registers"
+.byte 13,10
+.ascii "vec - print interrupts vector"
 .byte 13,10
 .byte 13,10
 .ascii "With best regards, Prool. http://prool.kharkov.org/proolix"

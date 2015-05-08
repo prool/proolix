@@ -4,6 +4,22 @@
     
     .global ohw
     .global ohb
+    .global ohd
+
+ohd: # Вывод длинного слова (%eax, то есть 8 байт) в hex виде
+	# Регистры сохранены
+	pushl	%eax
+	pushl	%ecx
+	
+	pushl	%eax
+	movb	$16,%cl
+	shr	%cl,%eax
+	call ohw
+	popl	%eax
+	call ohw
+	popl	%ecx
+	popl	%eax
+	ret
     
 ohw: #     proc
 

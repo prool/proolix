@@ -7,7 +7,7 @@
 .global Buff
 .global FATaddr
 
-Buff:	.byte	# buffer for 1 cluster
+Buff:	.space		512	# buffer for 1 cluster
 
-FATaddr	=	Buff+512*1	# buffer for FAT
+FATaddr:	.space	9*512# buffer for FAT
 				# в данном случае размер FAT - 9 секторов

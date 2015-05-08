@@ -5,7 +5,7 @@ LD = ld
 AS = as
 CPP = cpp
 
-boots: boots.o patchboot analyzeboot
+boots: boots.o patchboot analyzeboot makediskette
 	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
 	chmod a-x boots
 
