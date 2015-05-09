@@ -39,5 +39,6 @@ analyzeboot
 patchboot
 makediskette
 boots
+cmd1
 # working files
 aaa

@@ -66,3 +66,11 @@ c0.s: c0.S
 	$(CPP) -traditional $< -o $@
 c0.o: c0.s
 	$(AS) $(ASFLAG) -a=c0.lst -o $@ $<
+
+cmd1: cmd1.o saycsip.o ohw.o sayr.o
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o $@ $< saycsip.o ohw.o sayr.o> cmd1-map.lst
+	chmod a-x cmd1
+cmd1.s: cmd1.S
+	$(CPP) -traditional $< -o $@
+cmd1.o: cmd1.s
+	$(AS) $(ASFLAG) -a=cmd1.lst -o $@ $<
