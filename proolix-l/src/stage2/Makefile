@@ -7,7 +7,7 @@ CPP = cpp
 LDFLAGS = -m elf_i386
 ASFLAG = --32
 
-boot: boot.o saycsip.o ohw.o sayr.o end.o libc.o lib2.o
+boot: boot.o saycsip.o ohw.o sayr.o end.o libc.o lib2.o cmd1
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o $@ $< saycsip.o ohw.o sayr.o end.o > map.lst
 	chmod a-x boot
 

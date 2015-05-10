@@ -10,6 +10,6 @@ _start:
     call	print_registers
     newline
 
-l_stop:	jmp l_stop
+    int	$0x20
 
 str1:	.asciz	"CMD1 run! "

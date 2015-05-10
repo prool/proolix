@@ -28,10 +28,38 @@ _start:
 #    movw	$0xDEAD,%ax
     pushw	%CS
     popw	%ax
-    movw	$0x86,%si
+    movw	$0x86,%si	# 21*4+2
     movw	%ax,%ES:(%si)
 #    movw	$0xBEEF,%ax
     lea		int21p,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 20h (DOS 1+ - TERMINATE PROGRAM)
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x82,%si	# 20*4+2
+    movw	%ax,%ES:(%si)
+    lea		int20p,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 24h DOS 1+ - CRITICAL ERROR HANDLER
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x24*2+2,%si
+    movw	%ax,%ES:(%si)
+    lea		int24p,%ax
     decw	%si
     decw	%si
     movw	%ax,%ES:(%si)
@@ -283,6 +311,10 @@ c5_1:	#    no this command
     print	s_filename
     movw	$Filename,%bx
     call	getstr
+
+    cmpb $0,Filename
+    je l_revert # empty filename
+
 	newline
         # Вычисления
         movb    FatCnt,%al
@@ -452,6 +484,9 @@ c5_1:	#    no this command
     movw	$Filename,%bx
     call	getstr
 	newline
+    cmpb $0,Filename
+    je l_revert # empty filename
+
         # Вычисления
         movb    FatCnt,%al
         cbw
@@ -620,6 +655,9 @@ c5_1:	#    no this command
     movw	$Filename,%bx
     call	getstr
 	newline
+    cmpb $0,Filename
+    je l_revert # empty filename
+
         # Вычисления
         movb    FatCnt,%al
         cbw
@@ -874,6 +912,9 @@ c5_1:	#    no this command
     movw	$Filename,%bx
     call	getstr
 	newline
+    cmpb $0,Filename
+    je l_revert # empty filename
+
         # Вычисления
         movb    FatCnt,%al
         cbw
@@ -1010,7 +1051,7 @@ c5_1:	#    no this command
 	jmp	1b
 	# end of file
 9:	
-	# start kernel
+	# start
         movw    $KernelSeg-0x10,%ax
         movw    %ax,%DS
 	movw	%ax,%ES
@@ -1018,6 +1059,17 @@ c5_1:	#    no this command
         movw    %ax,%SS
         movw    $0xfffe,%SP
         sti
+
+	xorw	%si,%si
+	movw	$0x20CD,(%si) # First word of PSP (int 20h)
+	incw	%si
+	incw	%si
+	movw	$0x9FFF,(%si) # Second word of PSP: memory top (for lzexe, pklite, etc)
+	incw	%si
+	incw	%si
+	movb	DOS_CUR_DRIVE,%al
+	xorb	%ah,%ah
+	movw	%ax,(%si) # 3rd word: current device
 
         .byte      0xea    # JMP KernelSeg:0000
         .word      0x0100,KernelSeg-0x10
@@ -1332,11 +1384,31 @@ print16:	# print of 16 chars in hex and ascii mode
     
     ret
 
+int24p:
+    pushw	%CS
+    popw	%DS # DS:=CS
+	print l_crit
+	jmp	l_msdos_exit
+l_crit:	.asciz	" DOS CRITICAL ERROR "
+
+
+int20p:
+    pushw	%CS
+    popw	%DS # DS:=CS
+	jmp	l_msdos_exit
+
 int21p:
     pushw	%DS
 
+	pushw	%cx
+	pushw	%DS
+	popw	%cx
+
     pushw	%CS
     popw	%DS # DS:=CS
+
+	movw	%cx,DOS_DS
+	popw	%cx
 
 # int21h (MSDOS system call) commands (in AH register):
 
@@ -1345,9 +1417,37 @@ int21p:
     orb		%ah,%ah
     jz		l_msdos_exit
 
+# AH=9 DOS 1+ - WRITE STRING TO STANDARD OUTPUT
+	cmpb	$0x9,%ah
+	jz	l_dos_9
+
+# AH=19 DOS 1+ - GET CURRENT DEFAULT DRIVE
+	cmpb	$0x19,%ah
+	jz	l_dos_19
+
+# AH=25 DOS 1+ - SET INTERRUPT VECTOR
+	cmpb	$0x25,%ah
+	jz	l_dos_25
+
+# AH=30 DOS 2+ - GET DOS VERSION
+	cmpb	$0x30,%ah
+	jz	l_dos_30
+
 # AH=33 DOS 2+ - EXTENDED BREAK CHECKING
     cmpb	$0x33,%ah
     jz		l_dos_33
+
+# AH=35 DOS 2+ - GET INTERRUPT VECTOR
+	cmpb	$0x35,%ah
+	jz	l_dos_35
+
+# AH=47 DOS 2+ - CWD - GET CURRENT DIRECTORY
+	cmpb	$0x47,%ah
+	jz	l_dos_47
+
+# AH=58 DOS 5+ - GET OR SET UMB LINK STATE
+	cmpb	$0x58,%ah
+	jz	l_dos_58
 
     print	s_int21
     call	print_registers
@@ -1362,6 +1462,78 @@ l_end_of_int21:
     movw	%ax,%SS # restore kernel SS
 
     jmp l_revert
+
+l_dos_9: # DOS 1+ - WRITE STRING TO STANDARD OUTPUT
+	push	%ES
+	push	%ax
+	push	%cx
+	push	%di
+	push	%si
+
+	# search '$' and replace to 0
+	movb	$'$',%al
+	mov	$1000,%cx # 1000 - maxlen
+	mov	%dx,%di
+	push %DS
+	pop  %ES # ES=DS
+	cld
+1:
+	repe scasb
+	jcxz	2f	# end of string
+	xor	%al,%al
+	stosb
+
+	# print:
+	movw	%dx,%si
+	call	sayr_proc
+
+	pop	%si
+	pop	%di
+	pop	%cx
+	pop	%ax
+	pop	%ES
+	jmp	l_iret
+2:
+	print l_longstr
+	jmp	l_end_of_int21
+l_longstr:	.asciz	" MSDOS: VERY LONG STRING OUTPUT "
+
+l_dos_19: # DOS 1+ - GET CURRENT DEFAULT DRIVE
+	movb	DOS_CUR_DRIVE,%al
+	jmp	l_iret
+
+l_dos_25:	# DOS 1+ - SET INTERRUPT VECTOR
+	push	%ax
+	push	%si
+	push	%ES
+
+	xorw	%ax,%ax
+	movw	%ax,%ES # ES=0
+
+	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
+	shlw	$0x2,%ax # ax=ax*4
+	# ax - address of interrupt vector (offset)
+
+	movw	%ax,%si
+	movw	%dx,%es:(%si) # offset := DX
+
+	incw	%si
+	incw	%si
+
+	movw	DOS_DS,%ax
+	movw	%ax,%es:(%si) # segment := DOS DS
+
+	pop	%ES
+	pop	%si
+	pop	%ax
+
+	jmp l_iret
+
+l_dos_30: # DOS 2+ - GET DOS VERSION
+	movw	$0x0303,%ax
+	xorw	%bx,%bx
+	xorw	%cx,%cx
+	jmp l_iret
 
 l_dos_33: # DOS 2+ - EXTENDED BREAK CHECKING
 # AL = subfunction
@@ -1381,11 +1553,58 @@ l_dos_33: # DOS 2+ - EXTENDED BREAK CHECKING
     movb	$0xFF,%al
     jmp		l_iret
 3: # set br
-    movb	%dl,MSDOS_BREAK
-    jmp l_revert
+    movb	%dl,DOS_BREAK
+    jmp l_iret
 1: # al=0 get break
-    movb	MSDOS_BREAK,%dl
+    movb	DOS_BREAK,%dl
     jmp		l_iret
+
+l_dos_35:
+	push	%ax
+	push	%si
+
+	xorw	%bx,%bx
+	movw	%bx,%ES # ES=0
+
+	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
+	shlw	$0x2,%ax # ax=ax*4
+	# ax - address of interrupt vector (offset)
+
+	movw	%ax,%si
+	movw	%es:(%si),%bx # offset -> bx
+
+	incw	%si
+	incw	%si
+
+	movw	%es:(%si),%ax
+	movw	%ax,%es # segment -> ES
+
+	pop	%si
+	pop	%ax
+
+	jmp l_iret
+
+l_dos_47: # DOS 2+ - CWD - GET CURRENT DIRECTORY
+	push	%si
+	push	%ES
+
+	movw	DOS_DS,%ax
+	movw	%ax,%ES
+	movb	$'\',%ES:(%si)
+	incw	%si
+	movb	$0,%ES:(%si)
+
+	movw	$0x100,%ax
+
+	pop	%ES
+	pop	%si
+
+	jmp	l_iret
+
+l_dos_58: # DOS 5+ - GET OR SET UMB LINK STATE
+	xor	%al,%al
+	xor	%bx,%bx
+	jmp	l_iret
 
 l_msdos_exit:
     print s_msdos_exit
@@ -1401,7 +1620,9 @@ l_iret:
     popw	%DS
     iret
 
-MSDOS_BREAK:	.byte	0
+DOS_BREAK:	.byte	0
+DOS_CUR_DRIVE:	.byte	0 # (00h = A:, 01h = B:, etc)
+DOS_DS:	.word
 
 keystroke: .fill STRLEN,1,0
 Filename:  .fill STRLEN,1,0
