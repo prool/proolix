@@ -5,7 +5,12 @@
 print_registers: # proc    ; REGS SAVED
         pushw %ax
 
-        print    s0
+	newline
+
+        print    s_ax
+        call    ohw
+
+        print    s_cs
         pushw   %CS
         popw    %ax
         call    ohw
@@ -36,9 +41,6 @@ next:
         movw     %ES,%ax
         call    ohw
 
-        print    s_ax
-        call    ohw
-
         print    s_bx
         movw     %bx,%ax
         call    ohw
@@ -61,13 +63,12 @@ next:
 
         popw    %ax
         ret
-s0:     .byte      13,10
-	.asciz	"CS="
+s_cs:    .asciz      " CS="
 s_ss:    .asciz      " SS="
 s_sp:    .asciz      " SP="
 s_ds:    .asciz      " DS="
 s_es:    .asciz      " ES="
-s_ax:    .asciz      " AX="
+s_ax:    .asciz      "AX="
 s_bx:    .asciz      " BX="
 s_cx:    .asciz      " CX="
 s_dx:    .asciz      " DX="
@@ -81,6 +82,9 @@ s_ip:    .asciz      " IP="
 print_reg32: # proc    ; REGS SAVED
         push %eax
 
+        print    s_eax
+        call    ohd
+
         print    s_esp
         mov     %ESP,%eax
         call    ohd
@@ -88,9 +92,6 @@ print_reg32: # proc    ; REGS SAVED
 	print	s_ebp
 	mov	%EBP,%eax
 	call	ohd
-
-        print    s_eax
-        call    ohd
 
         print    s_ebx
         mov     %ebx,%eax
@@ -116,7 +117,7 @@ print_reg32: # proc    ; REGS SAVED
         ret
 s_esp:    .asciz      " ESP="
 s_ees:    .asciz      " EES="
-s_eax:    .asciz      " EAX="
+s_eax:    .asciz      "EAX="
 s_ebx:    .asciz      " EBX="
 s_ecx:    .asciz      " ECX="
 s_edx:    .asciz      " EDX="

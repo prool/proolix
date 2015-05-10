@@ -1,3 +1,8 @@
+# Proolix-l stage2
+# by Prool
+# www.prool.kharkov.org
+# russian comments in UTF-8 codetable
+
         .code16
 	.include "macros.S"
 	
@@ -183,7 +188,7 @@ c5_1:	#    no this command
 1:	# this command
     #
 	newline
-        # ˜Ÿﬁ…”Ã≈Œ…—
+        # –í—ã—á–∏—Å–ª–µ–Ω–∏—è
         movb    FatCnt,%al
         cbw
         movw    FatSize,%cx
@@ -199,8 +204,8 @@ c5_1:	#    no this command
 
         movw    SectSiz,%cx
         divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
-        orw     %dx,%dx   # Â”Ã… œ”‘¡‘œÀ Œ≈Œ’Ã≈◊œ , ‘œ –“…¬¡◊Ã—≈Õ ≈›≈ œƒ…Œ
-        jz      2f        # ”≈À‘œ“ (–œ”Ã≈ƒŒ…  Œ≈–œÃŒŸ  ”≈À‘œ“ root¡)
+        orw     %dx,%dx   # –ï—Å–ª–∏ –æ—Å—Ç–∞—Ç–æ–∫ –Ω–µ–Ω—É–ª–µ–≤–æ–π, —Ç–æ –ø—Ä–∏–±–∞–≤–ª—è–µ–º –µ—â–µ –æ–¥–∏–Ω
+        jz      2f        # —Å–µ–∫—Ç–æ—Ä (–ø–æ—Å–ª–µ–¥–Ω–∏–π –Ω–µ–ø–æ–ª–Ω—ã–π —Å–µ–∫—Ç–æ—Ä root–∞)
         incw    %ax
 2:
         # %ax - Root Size in Sectors
@@ -214,8 +219,8 @@ c5_1:	#    no this command
         POPW    %ax      # %ax - Root Bg Sec
 	    # putch	$','
 	    # call	ohw
-3:      # ˙¡«“’⁄À¡ Àœ“Œ≈◊œ«œ À¡‘¡Ãœ«¡ –œ”≈À‘œ“Œœ … –œ”≈À‘œ“ŒŸ  ◊Ÿ◊œƒ ”–…”À¡
-	# ∆¡ Ãœ◊
+3:      # –ó–∞–≥—Ä—É–∑–∫–∞ –∫–æ—Ä–Ω–µ–≤–æ–≥–æ –∫–∞—Ç–∞–ª–æ–≥–∞ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω–æ –∏ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω—ã–π –≤—ã–≤–æ–¥ —Å–ø–∏—Å–∫–∞
+	# —Ñ–∞–π–ª–æ–≤
         pushw   %cx
 
         pushw   %ax
@@ -279,7 +284,7 @@ c5_1:	#    no this command
     movw	$Filename,%bx
     call	getstr
 	newline
-        # ˜Ÿﬁ…”Ã≈Œ…—
+        # –í—ã—á–∏—Å–ª–µ–Ω–∏—è
         movb    FatCnt,%al
         cbw
         movw    FatSize,%cx
@@ -295,8 +300,8 @@ c5_1:	#    no this command
 
         movw    SectSiz,%cx
         divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
-        orw     %dx,%dx   # Â”Ã… œ”‘¡‘œÀ Œ≈Œ’Ã≈◊œ , ‘œ –“…¬¡◊Ã—≈Õ ≈›≈ œƒ…Œ
-        jz      2f        # ”≈À‘œ“ (–œ”Ã≈ƒŒ…  Œ≈–œÃŒŸ  ”≈À‘œ“ root¡)
+        orw     %dx,%dx   # –ï—Å–ª–∏ –æ—Å—Ç–∞—Ç–æ–∫ –Ω–µ–Ω—É–ª–µ–≤–æ–π, —Ç–æ –ø—Ä–∏–±–∞–≤–ª—è–µ–º –µ—â–µ –æ–¥–∏–Ω
+        jz      2f        # —Å–µ–∫—Ç–æ—Ä (–ø–æ—Å–ª–µ–¥–Ω–∏–π –Ω–µ–ø–æ–ª–Ω—ã–π —Å–µ–∫—Ç–æ—Ä root–∞)
         incw    %ax
 2:
         # %ax - Root Size in Sectors
@@ -310,8 +315,8 @@ c5_1:	#    no this command
         POPW    %ax      # %ax - Root Bg Sec
 	    # putch	$','
 	    # call	ohw
-3:      # ˙¡«“’⁄À¡ Àœ“Œ≈◊œ«œ À¡‘¡Ãœ«¡ –œ”≈À‘œ“Œœ … –œ”≈À‘œ“ŒŸ  –œ…”À ◊ Œ≈Õ
-	# …”ÀœÕœ«œ ∆¡ Ã¡
+3:      # –ó–∞–≥—Ä—É–∑–∫–∞ –∫–æ—Ä–Ω–µ–≤–æ–≥–æ –∫–∞—Ç–∞–ª–æ–≥–∞ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω–æ –∏ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω—ã–π –ø–æ–∏—Å–∫ –≤ –Ω–µ–º
+	# –∏—Å–∫–æ–º–æ–≥–æ —Ñ–∞–π–ª–∞
         pushw   %cx
 
         pushw   %ax
@@ -332,7 +337,7 @@ c5_1:	#    no this command
 		jz	7f
 		cmpb	$0xE5,%al
 		je	7f
-		# ”“¡◊Œ…◊¡≈Õ Œ¡ ƒ≈ŒŒœ≈ …Õ— ∆¡ Ã¡ ” ‹‘¡ÃœŒŒŸÕ
+		# —Å—Ä–∞–≤–Ω–∏–≤–∞–µ–º –Ω–∞–π–¥–µ–Ω–Ω–æ–µ –∏–º—è —Ñ–∞–π–ª–∞ —Å —ç—Ç–∞–ª–æ–Ω–Ω—ã–º
 7:		
                 movw    $11,%cx
                 movw    %bx,%di
@@ -357,22 +362,22 @@ c5_1:	#    no this command
 	
 9:
 ###===
-        # H·˚ÏÈ !
+        # H–ê–®–õ–ò !
         popw    %cx
         # Found file
         # %bx - file dir record
         # word ptr (%bx+0x1a) - 1st cluster
         movw    0x1a(%bx),%ax    # %ax - 1st cluster
 
-        # ˙¡«“’⁄À¡ FAT ◊ Ô˙ı
+        # –ó–∞–≥—Ä—É–∑–∫–∞ FAT –≤ –û–ó–£
         PUSHW   %ax      # save %ax with 1st clu no
 
         movw    ResSecs,%ax
         movw    $FATaddr,%bx
         movw    FatSize,%cx
 
-        # ˙¡«“’⁄À¡ —ƒ“¡ –œÀÃ¡”‘≈“Œœ (–œ √≈–œﬁÀ≈ …⁄ FAT¡)
-        # ˙¡«“’⁄À¡ FAT
+        # –ó–∞–≥—Ä—É–∑–∫–∞ —è–¥—Ä–∞ –ø–æ–∫–ª–∞—Å—Ç–µ—Ä–Ω–æ (–ø–æ —Ü–µ–ø–æ—á–∫–µ –∏–∑ FAT–∞)
+        # –ó–∞–≥—Ä—É–∑–∫–∞ FAT
 0:      movb    $Drive,%dl
         pushw   %ax
         call    SecRead
@@ -447,7 +452,7 @@ c5_1:	#    no this command
     movw	$Filename,%bx
     call	getstr
 	newline
-        # ˜Ÿﬁ…”Ã≈Œ…—
+        # –í—ã—á–∏—Å–ª–µ–Ω–∏—è
         movb    FatCnt,%al
         cbw
         movw    FatSize,%cx
@@ -463,8 +468,8 @@ c5_1:	#    no this command
 
         movw    SectSiz,%cx
         divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
-        orw     %dx,%dx   # Â”Ã… œ”‘¡‘œÀ Œ≈Œ’Ã≈◊œ , ‘œ –“…¬¡◊Ã—≈Õ ≈›≈ œƒ…Œ
-        jz      2f        # ”≈À‘œ“ (–œ”Ã≈ƒŒ…  Œ≈–œÃŒŸ  ”≈À‘œ“ root¡)
+        orw     %dx,%dx   # –ï—Å–ª–∏ –æ—Å—Ç–∞—Ç–æ–∫ –Ω–µ–Ω—É–ª–µ–≤–æ–π, —Ç–æ –ø—Ä–∏–±–∞–≤–ª—è–µ–º –µ—â–µ –æ–¥–∏–Ω
+        jz      2f        # —Å–µ–∫—Ç–æ—Ä (–ø–æ—Å–ª–µ–¥–Ω–∏–π –Ω–µ–ø–æ–ª–Ω—ã–π —Å–µ–∫—Ç–æ—Ä root–∞)
         incw    %ax
 2:
         # %ax - Root Size in Sectors
@@ -478,8 +483,8 @@ c5_1:	#    no this command
         POPW    %ax      # %ax - Root Bg Sec
 	    # putch	$','
 	    # call	ohw
-3:      # ˙¡«“’⁄À¡ Àœ“Œ≈◊œ«œ À¡‘¡Ãœ«¡ –œ”≈À‘œ“Œœ … –œ”≈À‘œ“ŒŸ  –œ…”À ◊ Œ≈Õ
-	# …”ÀœÕœ«œ ∆¡ Ã¡
+3:      # –ó–∞–≥—Ä—É–∑–∫–∞ –∫–æ—Ä–Ω–µ–≤–æ–≥–æ –∫–∞—Ç–∞–ª–æ–≥–∞ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω–æ –∏ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω—ã–π –ø–æ–∏—Å–∫ –≤ –Ω–µ–º
+	# –∏—Å–∫–æ–º–æ–≥–æ —Ñ–∞–π–ª–∞
         pushw   %cx
 
         pushw   %ax
@@ -500,7 +505,7 @@ c5_1:	#    no this command
 		jz	7f
 		cmpb	$0xE5,%al
 		je	7f
-		# ”“¡◊Œ…◊¡≈Õ Œ¡ ƒ≈ŒŒœ≈ …Õ— ∆¡ Ã¡ ” ‹‘¡ÃœŒŒŸÕ
+		# —Å—Ä–∞–≤–Ω–∏–≤–∞–µ–º –Ω–∞–π–¥–µ–Ω–Ω–æ–µ –∏–º—è —Ñ–∞–π–ª–∞ —Å —ç—Ç–∞–ª–æ–Ω–Ω—ã–º
 7:		
                 movw    $11,%cx
                 movw    %bx,%di
@@ -525,22 +530,22 @@ c5_1:	#    no this command
 	
 9:
 ###===
-        # H·˚ÏÈ !
+        # H–ê–®–õ–ò !
         popw    %cx
         # Found file
         # %bx - file dir record
         # word ptr (%bx+0x1a) - 1st cluster
         movw    0x1a(%bx),%ax    # %ax - 1st cluster
 
-        # ˙¡«“’⁄À¡ FAT ◊ Ô˙ı
+        # –ó–∞–≥—Ä—É–∑–∫–∞ FAT –≤ –û–ó–£
         PUSHW   %ax      # save %ax with 1st clu no
 
         movw    ResSecs,%ax
         movw    $FATaddr,%bx
         movw    FatSize,%cx
 
-        # ˙¡«“’⁄À¡ —ƒ“¡ –œÀÃ¡”‘≈“Œœ (–œ √≈–œﬁÀ≈ …⁄ FAT¡)
-        # ˙¡«“’⁄À¡ FAT
+        # –ó–∞–≥—Ä—É–∑–∫–∞ —è–¥—Ä–∞ –ø–æ–∫–ª–∞—Å—Ç–µ—Ä–Ω–æ (–ø–æ —Ü–µ–ø–æ—á–∫–µ –∏–∑ FAT–∞)
+        # –ó–∞–≥—Ä—É–∑–∫–∞ FAT
 0:      movb    $Drive,%dl
         pushw   %ax
         call    SecRead
@@ -615,7 +620,7 @@ c5_1:	#    no this command
     movw	$Filename,%bx
     call	getstr
 	newline
-        # ˜Ÿﬁ…”Ã≈Œ…—
+        # –í—ã—á–∏—Å–ª–µ–Ω–∏—è
         movb    FatCnt,%al
         cbw
         movw    FatSize,%cx
@@ -631,8 +636,8 @@ c5_1:	#    no this command
 
         movw    SectSiz,%cx
         divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
-        orw     %dx,%dx   # Â”Ã… œ”‘¡‘œÀ Œ≈Œ’Ã≈◊œ , ‘œ –“…¬¡◊Ã—≈Õ ≈›≈ œƒ…Œ
-        jz      2f        # ”≈À‘œ“ (–œ”Ã≈ƒŒ…  Œ≈–œÃŒŸ  ”≈À‘œ“ root¡)
+        orw     %dx,%dx   # –ï—Å–ª–∏ –æ—Å—Ç–∞—Ç–æ–∫ –Ω–µ–Ω—É–ª–µ–≤–æ–π, —Ç–æ –ø—Ä–∏–±–∞–≤–ª—è–µ–º –µ—â–µ –æ–¥–∏–Ω
+        jz      2f        # —Å–µ–∫—Ç–æ—Ä (–ø–æ—Å–ª–µ–¥–Ω–∏–π –Ω–µ–ø–æ–ª–Ω—ã–π —Å–µ–∫—Ç–æ—Ä root–∞)
         incw    %ax
 2:
         # %ax - Root Size in Sectors
@@ -646,8 +651,8 @@ c5_1:	#    no this command
         POPW    %ax      # %ax - Root Bg Sec
 	    # putch	$','
 	    # call	ohw
-3:      # ˙¡«“’⁄À¡ Àœ“Œ≈◊œ«œ À¡‘¡Ãœ«¡ –œ”≈À‘œ“Œœ … –œ”≈À‘œ“ŒŸ  –œ…”À ◊ Œ≈Õ
-	# …”ÀœÕœ«œ ∆¡ Ã¡
+3:      # –ó–∞–≥—Ä—É–∑–∫–∞ –∫–æ—Ä–Ω–µ–≤–æ–≥–æ –∫–∞—Ç–∞–ª–æ–≥–∞ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω–æ –∏ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω—ã–π –ø–æ–∏—Å–∫ –≤ –Ω–µ–º
+	# –∏—Å–∫–æ–º–æ–≥–æ —Ñ–∞–π–ª–∞
         pushw   %cx
 
         pushw   %ax
@@ -668,7 +673,7 @@ c5_1:	#    no this command
 		jz	7f
 		cmpb	$0xE5,%al
 		je	7f
-		# ”“¡◊Œ…◊¡≈Õ Œ¡ ƒ≈ŒŒœ≈ …Õ— ∆¡ Ã¡ ” ‹‘¡ÃœŒŒŸÕ
+		# —Å—Ä–∞–≤–Ω–∏–≤–∞–µ–º –Ω–∞–π–¥–µ–Ω–Ω–æ–µ –∏–º—è —Ñ–∞–π–ª–∞ —Å —ç—Ç–∞–ª–æ–Ω–Ω—ã–º
 7:		
                 movw    $11,%cx
                 movw    %bx,%di
@@ -693,22 +698,22 @@ c5_1:	#    no this command
 	
 9:
 ###===
-        # H·˚ÏÈ !
+        # H–ê–®–õ–ò !
         popw    %cx
         # Found file
         # %bx - file dir record
         # word ptr (%bx+0x1a) - 1st cluster
         movw    0x1a(%bx),%ax    # %ax - 1st cluster
 
-        # ˙¡«“’⁄À¡ FAT ◊ Ô˙ı
+        # –ó–∞–≥—Ä—É–∑–∫–∞ FAT –≤ –û–ó–£
         PUSHW   %ax      # save %ax with 1st clu no
 
         movw    ResSecs,%ax
         movw    $FATaddr,%bx
         movw    FatSize,%cx
 
-        # ˙¡«“’⁄À¡ —ƒ“¡ –œÀÃ¡”‘≈“Œœ (–œ √≈–œﬁÀ≈ …⁄ FAT¡)
-        # ˙¡«“’⁄À¡ FAT
+        # –ó–∞–≥—Ä—É–∑–∫–∞ —è–¥—Ä–∞ –ø–æ–∫–ª–∞—Å—Ç–µ—Ä–Ω–æ (–ø–æ —Ü–µ–ø–æ—á–∫–µ –∏–∑ FAT–∞)
+        # –ó–∞–≥—Ä—É–∑–∫–∞ FAT
 0:      movb    $Drive,%dl
         pushw   %ax
         call    SecRead
@@ -851,6 +856,174 @@ c5_1:	#    no this command
 	jmp l_revert
 8:	#    no this command
 # c14 end
+
+### command c15
+    xorw %bx,%bx
+0:  
+    movb c15_s(%bx),%al
+    cmpb %al,keystroke(%bx)
+    jne	8f
+    movb keystroke(%bx),%dl
+    orb %al,%dl
+    jz 1f
+    incw %bx
+    jmp 0b
+1:	# this command
+    #
+    print	s_filename
+    movw	$Filename,%bx
+    call	getstr
+	newline
+        # –í—ã—á–∏—Å–ª–µ–Ω–∏—è
+        movb    FatCnt,%al
+        cbw
+        movw    FatSize,%cx
+	mulw    %cx      # %ax*%cx -> %dx:%ax
+        addw    ResSecs,%ax
+        # %ax - Root Beginning Sector
+        movw    %ax,StartClu
+        PUSHW   %ax
+
+        movw    RootSiz,%ax
+        movw    $32,%cx
+        mulw    %cx
+
+        movw    SectSiz,%cx
+        divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
+        orw     %dx,%dx   # –ï—Å–ª–∏ –æ—Å—Ç–∞—Ç–æ–∫ –Ω–µ–Ω—É–ª–µ–≤–æ–π, —Ç–æ –ø—Ä–∏–±–∞–≤–ª—è–µ–º –µ—â–µ –æ–¥–∏–Ω
+        jz      2f        # —Å–µ–∫—Ç–æ—Ä (–ø–æ—Å–ª–µ–¥–Ω–∏–π –Ω–µ–ø–æ–ª–Ω—ã–π —Å–µ–∫—Ç–æ—Ä root–∞)
+        incw    %ax
+2:
+        # %ax - Root Size in Sectors
+        addw    %ax,StartClu
+        movw    %ax,%cx
+        movw    %ax,RootSize
+	    # print	s_lines
+	    # putch	$':'
+	    # movw		%cx,%ax
+	    # call	ohw
+        POPW    %ax      # %ax - Root Bg Sec
+	    # putch	$','
+	    # call	ohw
+3:      # –ó–∞–≥—Ä—É–∑–∫–∞ –∫–æ—Ä–Ω–µ–≤–æ–≥–æ –∫–∞—Ç–∞–ª–æ–≥–∞ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω–æ –∏ –ø–æ—Å–µ–∫—Ç–æ—Ä–Ω—ã–π –ø–æ–∏—Å–∫ –≤ –Ω–µ–º
+	# –∏—Å–∫–æ–º–æ–≥–æ —Ñ–∞–π–ª–∞
+        pushw   %cx
+
+        pushw   %ax
+        movw    $Buff,%bx
+        movb    $Drive,%dl
+        pushw   %ax
+        call    SecRead
+        jnc     4f
+	putch	$'E' # error
+4:	
+        popw    %ax
+        movw    $16,%cx   # root entryes in 1 sector
+5:              pushw   %cx
+		pushw	%bx
+
+		movb	(%bx),%al
+		orb	%al,%al
+		jz	7f
+		cmpb	$0xE5,%al
+		je	7f
+		# —Å—Ä–∞–≤–Ω–∏–≤–∞–µ–º –Ω–∞–π–¥–µ–Ω–Ω–æ–µ –∏–º—è —Ñ–∞–π–ª–∞ —Å —ç—Ç–∞–ª–æ–Ω–Ω—ã–º
+7:		
+                movw    $11,%cx
+                movw    %bx,%di
+		movw    $Filename,%si
+                rep     cmpsb
+                je      9f
+		
+		popw	%bx
+                popw    %cx
+                addw    $32,%bx
+                loop    5b
+
+        popw    %ax
+        incw    %ax
+
+        popw    %cx
+	# putch	$'s'
+        loop    3b
+        # end of load root dir
+	print	s_file_not_found
+	jmp	l_revert
+	
+9:
+###===
+        # H–ê–®–õ–ò !
+        popw    %cx
+        # Found file
+        # %bx - file dir record
+        # word ptr (%bx+0x1a) - 1st cluster
+        movw    0x1a(%bx),%ax    # %ax - 1st cluster
+
+        # –ó–∞–≥—Ä—É–∑–∫–∞ FAT –≤ –û–ó–£
+        PUSHW   %ax      # save %ax with 1st clu no
+
+        movw    ResSecs,%ax
+        movw    $FATaddr,%bx
+        movw    FatSize,%cx
+
+        # –ó–∞–≥—Ä—É–∑–∫–∞ —è–¥—Ä–∞ –ø–æ–∫–ª–∞—Å—Ç–µ—Ä–Ω–æ (–ø–æ —Ü–µ–ø–æ—á–∫–µ –∏–∑ FAT–∞)
+        # –ó–∞–≥—Ä—É–∑–∫–∞ FAT
+0:      movb    $Drive,%dl
+        pushw   %ax
+        call    SecRead
+        jnc     1f
+	# FAT read error
+	print	s_fat_err
+	popw	%ax	# restore stack
+	jmp	l_revert
+1:	
+        popw    %ax
+        addw    $512,%bx
+        incw    %ax      # Next sector!
+
+#       pushw   %ax
+#       CHR1    'F'
+#       popw    %ax
+
+        loop    0b
+
+        movb    ClustSiz,%al
+        cbw
+        movw    SectSiz,%dx
+        mul     %dx
+        movw    %ax,%cx   # Cluster Size in Bytes
+	
+	movw	$KernelSeg,%ax
+	movw	%ax,%ES
+
+        POPW    %ax      # restore %ax (1st clu no)
+        xorw    %bx,%bx
+1:      movb    $Drive,%dl
+        call    CluRead	# read to %ES:%bx
+#          pushw   %ax
+#	   movw $0x0e00+176,%ax
+#          int  $0x10
+#          popw    %ax
+        call    NextClu # set %ax
+        jc      9f
+	addw	$512,%bx	# 512 - cluster size in bytes (ad hoc cluster=1 sector)
+	jmp	1b
+	# end of file
+9:	
+	# start kernel
+        movw    $KernelSeg-0x10,%ax
+        movw    %ax,%DS
+	movw	%ax,%ES
+        cli
+        movw    %ax,%SS
+        movw    $0xfffe,%SP
+        sti
+
+        .byte      0xea    # JMP KernelSeg:0000
+        .word      0x0100,KernelSeg-0x10
+
+8:	#    no this command
+### end of c15 command
 
 # add new command before here
 
@@ -1160,9 +1333,75 @@ print16:	# print of 16 chars in hex and ascii mode
     ret
 
 int21p:
-    print s_int21
+    pushw	%DS
+
+    pushw	%CS
+    popw	%DS # DS:=CS
+
+# int21h (MSDOS system call) commands (in AH register):
+
+# AH=0 DOS 1+ - TERMINATE PROGRAM
+
+    orb		%ah,%ah
+    jz		l_msdos_exit
+
+# AH=33 DOS 2+ - EXTENDED BREAK CHECKING
+    cmpb	$0x33,%ah
+    jz		l_dos_33
+
+    print	s_int21
+    call	print_registers
 #    putch $'I'
+
+l_end_of_int21:
+    pushw	%CS
+    popw	%ES # restore kernel ES
+
+    pushw	%CS
+    popw	%ax
+    movw	%ax,%SS # restore kernel SS
+
+    jmp l_revert
+
+l_dos_33: # DOS 2+ - EXTENDED BREAK CHECKING
+# AL = subfunction
+# 00h get current extended break state
+    orb	%al,%al
+    jz	1f
+# 06h DOS 5+ - GET TRUE VERSION NUMBER
+    cmpb $0x06,%al
+    jz	2f
+# 01h set state of extended Break checking
+    cmpb $0x01,%al
+    jz	3f
+    jmp		l_msdos_unkn_subf
+2: # DOS 5+ - GET TRUE VERSION NUMBER
+    xor		%bx,%bx
+    xor		%dx,%dx
+    movb	$0xFF,%al
+    jmp		l_iret
+3: # set br
+    movb	%dl,MSDOS_BREAK
+    jmp l_revert
+1: # al=0 get break
+    movb	MSDOS_BREAK,%dl
+    jmp		l_iret
+
+l_msdos_exit:
+    print s_msdos_exit
+    jmp l_end_of_int21
+
+l_msdos_unkn_subf:
+    print s_unkn_subf
+    call	print_registers
+    jmp l_end_of_int21
+s_unkn_subf:	.asciz	" MSDOS UNKNOWN SUBFUNCTION "
+
+l_iret:
+    popw	%DS
     iret
+
+MSDOS_BREAK:	.byte	0
 
 keystroke: .fill STRLEN,1,0
 Filename:  .fill STRLEN,1,0
@@ -1211,6 +1450,7 @@ c11_s: .asciz "reg"
 c12_s: .asciz "reg32"
 c13_s: .asciz "vec"
 c14_s: .asciz "int21"
+c15_s: .asciz "run2"
 s_int21: .byte 13,10
 	.ascii	" Interrupt 21h! "
 	.byte 13,10,0
@@ -1235,6 +1475,8 @@ s_help: .byte 13,10,13,10
 .byte 13,10
 .ascii "run - load and run binary file"
 .byte 13,10
+.ascii "run2 - load and run MSDOS .COM file"
+.byte 13,10
 .ascii "test - test of C function call"
 .byte 13,10
 .ascii "reg - print registers"
@@ -1253,6 +1495,9 @@ s_test:	.byte 13,10
 	
 s_debug:	.asciz "DEBUG"	
 s_lines:	.asciz "Root size in sectors, root bg sec"	
+s_msdos_exit:	.byte 13,10
+		.ascii "Program terminated"
+		.byte 13,10,0
 
 SectSiz:         .word      512
 ClustSiz:        .byte      1

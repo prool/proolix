@@ -40,5 +40,6 @@ patchboot
 makediskette
 boots
 cmd1
+cmdc
 # working files
 aaa
