@@ -216,6 +216,8 @@ c5_1:	#    no this command
 1:	# this command
     #
 	newline
+	xor	%ax,%ax
+	mov	%ax,ls_counter
         # Вычисления
         movb    FatCnt,%al
         cbw
@@ -272,9 +274,22 @@ c5_1:	#    no this command
                 movw    $11,%cx
 
 6:          	putch	(%bx)
+
 			incw	%bx		
 			loop	6b
 		
+		push	%ax
+		mov	ls_counter,%ax
+		inc	%ax
+		mov	%ax,ls_counter
+		cmpw	$25,%ax
+		jb	60f
+		print	s_anykey
+		xor	%ax,%ax
+		mov	%ax,ls_counter
+		getch
+60:
+		pop	%ax
 		newline
 7:		
 		popw	%bx
@@ -290,7 +305,8 @@ c5_1:	#    no this command
         loop    3b
         # end of load root dir
 	jmp	l_revert
-     
+ls_counter:	.word	0
+s_anykey:	.asciz	" Press any key "
 8:	#    no this command
     ###
     
@@ -314,6 +330,7 @@ c5_1:	#    no this command
 
     cmpb $0,Filename
     je l_revert # empty filename
+    call	convert_to_8_3
 
 	newline
         # Вычисления
@@ -486,6 +503,7 @@ c5_1:	#    no this command
 	newline
     cmpb $0,Filename
     je l_revert # empty filename
+    call	convert_to_8_3
 
         # Вычисления
         movb    FatCnt,%al
@@ -657,6 +675,7 @@ c5_1:	#    no this command
 	newline
     cmpb $0,Filename
     je l_revert # empty filename
+    call	convert_to_8_3
 
         # Вычисления
         movb    FatCnt,%al
@@ -895,7 +914,7 @@ c5_1:	#    no this command
 8:	#    no this command
 # c14 end
 
-### command c15
+### command c15 run2
     xorw %bx,%bx
 0:  
     movb c15_s(%bx),%al
@@ -914,6 +933,7 @@ c5_1:	#    no this command
 	newline
     cmpb $0,Filename
     je l_revert # empty filename
+    call	convert_to_8_3
 
         # Вычисления
         movb    FatCnt,%al
@@ -1076,6 +1096,308 @@ c5_1:	#    no this command
 
 8:	#    no this command
 ### end of c15 command
+
+### command c16 exe
+    xorw %bx,%bx
+0:  
+    movb c16_s(%bx),%al
+    cmpb %al,keystroke(%bx)
+    jne	8f
+    movb keystroke(%bx),%dl
+    orb %al,%dl
+    jz 1f
+    incw %bx
+    jmp 0b
+1:	# this command
+    #
+    print	s_filename
+    movw	$Filename,%bx
+    call	getstr
+	newline
+    cmpb $0,Filename
+    je l_revert # empty filename
+    call	convert_to_8_3
+
+        # Вычисления
+        movb    FatCnt,%al
+        cbw
+        movw    FatSize,%cx
+	mulw    %cx      # %ax*%cx -> %dx:%ax
+        addw    ResSecs,%ax
+        # %ax - Root Beginning Sector
+        movw    %ax,StartClu
+        PUSHW   %ax
+
+        movw    RootSiz,%ax
+        movw    $32,%cx
+        mulw    %cx
+
+        movw    SectSiz,%cx
+        divw    %cx       # %dx:%ax / %cx -> %ax; mod -> %dx
+        orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
+        jz      2f        # сектор (последний неполный сектор rootа)
+        incw    %ax
+2:
+        # %ax - Root Size in Sectors
+        addw    %ax,StartClu
+        movw    %ax,%cx
+        movw    %ax,RootSize
+	    # print	s_lines
+	    # putch	$':'
+	    # movw		%cx,%ax
+	    # call	ohw
+        POPW    %ax      # %ax - Root Bg Sec
+	    # putch	$','
+	    # call	ohw
+3:      # Загрузка корневого каталога посекторно и посекторный поиск в нем
+	# искомого файла
+        pushw   %cx
+
+        pushw   %ax
+        movw    $Buff,%bx
+        movb    $Drive,%dl
+        pushw   %ax
+        call    SecRead
+        jnc     4f
+	putch	$'E' # error
+4:	
+        popw    %ax
+        movw    $16,%cx   # root entryes in 1 sector
+5:              pushw   %cx
+		pushw	%bx
+
+		movb	(%bx),%al
+		orb	%al,%al
+		jz	7f
+		cmpb	$0xE5,%al
+		je	7f
+		# сравниваем найденное имя файла с эталонным
+7:		
+                movw    $11,%cx
+                movw    %bx,%di
+		movw    $Filename,%si
+                rep     cmpsb
+                je      9f
+		
+		popw	%bx
+                popw    %cx
+                addw    $32,%bx
+                loop    5b
+
+        popw    %ax
+        incw    %ax
+
+        popw    %cx
+	# putch	$'s'
+        loop    3b
+        # end of load root dir
+	print	s_file_not_found
+	jmp	l_revert
+	
+9:
+###===
+        # HАШЛИ !
+        popw    %cx
+        # Found file
+        # %bx - file dir record
+        # word ptr (%bx+0x1a) - 1st cluster
+        movw    0x1a(%bx),%ax    # %ax - 1st cluster
+
+        # Загрузка FAT в ОЗУ
+        PUSHW   %ax      # save %ax with 1st clu no
+
+        movw    ResSecs,%ax
+        movw    $FATaddr,%bx
+        movw    FatSize,%cx
+
+        # Загрузка ядра покластерно (по цепочке из FATа)
+        # Загрузка FAT
+0:      movb    $Drive,%dl
+        pushw   %ax
+        call    SecRead
+        jnc     1f
+	# FAT read error
+	print	s_fat_err
+	popw	%ax	# restore stack
+	jmp	l_revert
+1:	
+        popw    %ax
+        addw    $512,%bx
+        incw    %ax      # Next sector!
+
+#       pushw   %ax
+#       CHR1    'F'
+#       popw    %ax
+
+        loop    0b
+
+        movb    ClustSiz,%al
+        cbw
+        movw    SectSiz,%dx
+        mul     %dx
+        movw    %ax,%cx   # Cluster Size in Bytes
+	
+        POPW    %ax      # restore %ax (1st clu no)
+
+#	read first Cluster to Karman
+	push	%DS
+	pop	%ES
+	movw	$Karman,%bx
+	movb	$Drive,%dl
+	call	CluRead # read 1st cluster to ES:bx
+
+# print EXE header from 1st cluster:
+	push	%ax
+	push	%cx
+	push	%si
+
+	print	s_exe
+	movw	$Karman,%si
+	mov	$13,%cx
+11:	movw	(%si),%ax
+	call	ohw
+	putch	$' '
+	putch	$' '
+	inc	%si
+	inc	%si
+	loop	11b
+	newline
+
+# end print EXE header
+
+# copy code from 1st cluster to KernelSeg:0000
+
+	movw	$8,%di		# offset of EXE Header Size
+	movw	Karman(%di),%ax # Header Size (in paragraphs) -> %ax
+	shlw	$4,%ax # ax = Header Size in bytes
+	movw	$512,%cx # size of cluster
+	subw	%ax,%cx
+	movw	%cx,KernelAddress
+	addw	$Karman,%ax
+	movw	%ax,%si
+	
+	xor	%di,%di	# di=0
+	movw	$KernelSeg,%ax
+	movw	%ax,%ES
+	
+	rep	movsb
+	
+	xor	%si,%si
+	movw	%ES:(%si),%ax
+	call	ohw
+# end of copy code
+	pop	%si
+	pop	%cx
+	pop	%ax
+
+#	read others clusters (2nd, 3rd ...)
+        movw	KernelAddress,%bx
+1:      movb    $Drive,%dl
+        call    CluRead	# read to %ES:%bx
+#          pushw   %ax
+#	   movw $0x0e00+176,%ax
+#          int  $0x10
+#          popw    %ax
+        call    NextClu # set %ax
+        jc      9f
+	addw	$512,%bx	# 512 - cluster size in bytes (ad hoc cluster=1 sector)
+	jmp	1b
+	# end of file
+
+9:
+
+	# relocatables
+	movw	$6,%si
+	movw	Karman(%si),%cx # reloc count
+	movw	$24,%si
+	movw	Karman(%si),%ax
+	movw	%ax,%si	# si - 1st record of reloc table
+12:	# cycle
+	movw	Karman(%si),%di # reloc offset
+	incw	%si
+	incw	%si
+	movw	Karman(%si),%bx # reloc segment
+	
+	addw	$KernelSeg,%bx
+	
+	movw	%bx,%ES
+	
+	movw	%ES:(%di),%ax
+	addw	$KernelSeg,%ax
+	movw	%ax,%ES:(%di)
+	
+	incw	%si
+	incw	%si
+	loop	12b
+	
+#end of reloc
+	
+	putch	$'E'
+	# start
+        cli
+        movw	$14,%si
+        movw	Karman(%si),%ax
+        addw	$KernelSeg,%ax
+        movw	%ax,%SS
+        
+        incw	%si
+        incw	%si
+        movw	Karman(%si),%ax
+        movw	%ax,%SP
+        sti
+
+	xorw	%si,%si
+	movw	$0x20CD,(%si) # First word of PSP (int 20h)
+	incw	%si
+	incw	%si
+	movw	$0x9FFF,(%si) # Second word of PSP: memory top (for lzexe, pklite, etc)
+	incw	%si
+	incw	%si
+	movb	DOS_CUR_DRIVE,%al
+	xorb	%ah,%ah
+	movw	%ax,(%si) # 3rd word: current device
+
+	movw	$20,%si
+	movw	Karman(%si),%ax # new IP
+#	call	ohw
+	incw	%si
+	incw	%si
+	movw	Karman(%si),%bx # new CS
+	addw	$KernelSeg,%bx
+	
+#	pushw	%ax
+#	movw	%bx,%ax
+#	call	ohw
+#	popw	%ax
+
+	pushw	%bx
+	pushw	%ax
+
+        movw    $KernelSeg-0x10,%ax # PSP
+        movw    %ax,%DS
+	movw	%ax,%ES
+
+	retf
+	
+8:	#    no this command
+### end of c16 command
+
+# command c17 begin
+    xorw %bx,%bx
+0:  
+    movb c17_s(%bx),%al
+    cmpb %al,keystroke(%bx)
+    jne	8f
+    movb keystroke(%bx),%dl
+    orb %al,%dl
+    jz 1f
+    incw %bx
+    jmp 0b
+1:	# this command
+	call	keycodes
+	jmp l_revert
+8:	#    no this command
+# c17 end
 
 # add new command before here
 
@@ -1253,6 +1575,110 @@ l_cf:   stc
         jmp     l_ret1
 # NextClu endp
 
+convert_to_8_3: # input: string in (%bx)
+		# output: converted string (conv. to 8.3 DOS filename format)
+		
+    push	%ax
+    push	%cx
+    push	%si
+    push	%di
+    push	%ES
+    
+# fill filename83 by spaces ' '
+    mov	$11,%cx
+    mov $' ',%al
+    mov	$filename83,%di
+    push %DS
+    pop	 %ES # ES:=DS
+    rep	stosb # al -> es:di
+    
+    xor	%al,%al
+    movb %al,zero83
+    
+# copy symbols to filename until '.' or zero
+    xor		%cx,%cx
+    movw	%bx,%si
+    movw	$filename83,%di
+0:
+    movb	(%si),%al
+    orb		%al,%al
+    jz		9f # zero
+    cmpb	$'.',%al
+    je		2f # dot
+    movb	%al,(%di)
+    inc	%si
+    inc	%di
+    inc %cx
+    cmpw	$8,%cx
+    ja		3f # long name
+    jmp		0b
+    
+3:	movb	(%si),%al
+	cmpb	$'.',%al
+	jz	2f
+	jmp	9f
+    
+2:	# dot
+    inc %si
+    movw	$ext83,%di
+    xor		%cx,%cx
+4:  movb	(%si),%al
+    orb		%al,%al
+    jz		9f # end of name
+    movb	%al,(%di)
+    inc		%si
+    inc		%di
+    inc		%cx
+    cmpw	$3,%cx
+    ja		9f # end of ext
+    jmp		4b
+s_filename1:	.asciz	" filename="
+
+9:
+    xorb	%al,%al
+    movb	%al,zero83
+#    print s_filename1
+#    print filename83
+    #
+    # convert letters to upper
+    movw	$filename83,%si
+    movw	%bx,%di
+    movw	$12,%cx
+49: movb	(%si),%al
+    cmpb	$'a',%al
+    jb		51f
+    cmpb	$'z',%al
+    ja		51f
+    andb	$0xDF,%al
+51:
+    movb	%al,(%di)
+    inc		%si
+    inc		%di
+    loop	49b
+55:
+#    print s_filename1
+#    movw	%bx,%si
+#    call	sayr_proc
+
+    pop	%ES
+    pop	%di
+    pop	%si
+    pop	%cx
+    pop %ax
+    ret
+filename83:	.space 8
+ext83:		.space 3
+zero83:		.byte 0
+
+keycodes: # print key codes
+0:
+	xorb	%ah,%ah
+	int	$0x16	# getch to %al
+	putch	%al	# echo
+	putch	$' '
+	call	ohb
+	jmp	0b
+
 getstr:	# read of string from console
 	# input: %bx - string buffer address
 
@@ -1268,8 +1694,11 @@ getstr:	# read of string from console
     xorb %ah,%ah
     int $0x16	# getch to %al
     
-    cmpb $0x0d,%al
+    cmpb $0x0d,%al # enter
     je	1f
+    
+    cmpb $0x08,%al # backspace
+    je	2f
     
     movb %al,(%bx,%si)
     
@@ -1279,6 +1708,15 @@ getstr:	# read of string from console
     
     cmpw $STRLEN,%bx
     je 0f
+    jmp 9b
+    
+2:  #backspace
+    orw	%bx,%bx
+    jz 9b
+    putch %al 
+    putch $' '
+    putch %al
+    decw %bx
     jmp 9b
     
 0:
@@ -1623,6 +2061,7 @@ l_iret:
 DOS_BREAK:	.byte	0
 DOS_CUR_DRIVE:	.byte	0 # (00h = A:, 01h = B:, etc)
 DOS_DS:	.word
+KernelAddress:	.word	0
 
 keystroke: .fill STRLEN,1,0
 Filename:  .fill STRLEN,1,0
@@ -1672,6 +2111,8 @@ c12_s: .asciz "reg32"
 c13_s: .asciz "vec"
 c14_s: .asciz "int21"
 c15_s: .asciz "run2"
+c16_s: .asciz "exe"
+c17_s: .asciz "keycodes"
 s_int21: .byte 13,10
 	.ascii	" Interrupt 21h! "
 	.byte 13,10,0
@@ -1698,6 +2139,8 @@ s_help: .byte 13,10,13,10
 .byte 13,10
 .ascii "run2 - load and run MSDOS .COM file"
 .byte 13,10
+.ascii "exe - load and run MSDOS .EXE file"
+.byte 13,10
 .ascii "test - test of C function call"
 .byte 13,10
 .ascii "reg - print registers"
@@ -1706,13 +2149,21 @@ s_help: .byte 13,10,13,10
 .byte 13,10
 .ascii "vec - print interrupts vector"
 .byte 13,10
+.ascii "keycodes - print key codes"
 .byte 13,10
-.ascii "With best regards, Prool. http://prool.kharkov.org/proolix"
+.byte 13,10
+.ascii "With best regards, Prool. http://prool.kharkov.org/proolix github/prool/proolix"
 .byte 13,10,0
 
 s_test:	.byte 13,10
 	.ascii " *** test of C functions *** "
 	.byte 13,10,0
+
+s_exe:	.ascii	"EXE header (MZ=0x5A4D) "
+	.byte	13,10
+	.ascii	"5A4D--Part  PagCntRelCntHdrSizMinMemMaxMemRelSS ExeSP ChkSumExeIP RelCS TabOff"
+	.byte	13,10
+	.byte	0
 	
 s_debug:	.asciz "DEBUG"	
 s_lines:	.asciz "Root size in sectors, root bg sec"	

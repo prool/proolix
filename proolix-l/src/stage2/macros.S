@@ -14,6 +14,11 @@
 	  int  $0x10
           popw    %ax
     .endm
+    
+	.macro	getch
+    	xorb %ah,%ah
+    	int $0x16	# getch to %al
+	.endm
 
 .macro newline
     putch $13 ; putch $10
