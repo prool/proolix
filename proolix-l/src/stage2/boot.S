@@ -1300,7 +1300,12 @@ s_anykey:	.asciz	" Press any key "
 #          popw    %ax
         call    NextClu # set %ax
         jc      9f
-	addw	$512,%bx	# 512 - cluster size in bytes (ad hoc cluster=1 sector)
+#	addw	$512,%bx	# 512 - cluster size in bytes (ad hoc cluster=1 sector)
+	    push	%ax     # ES+=0x20
+	    movw	%ES,%ax
+	    addw	$0x20,%ax
+	    movw	%ax,%ES
+	    pop		%ax
 	jmp	1b
 	# end of file
 
