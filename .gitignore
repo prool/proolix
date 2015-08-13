@@ -33,6 +33,7 @@
 *.lst
 # binaries
 boot
+boot_
 analyzeboot
 patchboot
 makediskette
@@ -41,3 +42,5 @@ cmd1
 cmdc
 # working files
 aaa
+*.tmp
+

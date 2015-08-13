@@ -1,7 +1,11 @@
 This is stage2 of Proolix-l
 
+Files:
+
 boot.S (in this directory!) is stage2 source
-boot - binary
+boot - binary executable
+cmd1 - example of binary command, compiled under Linux (see Makefile.linux)
+cmd2com - example of binary command, compiled under cygwin (see Makefile.cygwin)
 
 ---
 

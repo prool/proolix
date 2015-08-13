@@ -7,19 +7,24 @@ CPP = cpp
 
 ASFLAG =
 
-boot_true:	boot
-	dd if=boot of=boot_true skip=1
+boot:	boot_ cmd2com
+	dd if=boot_ of=boot skip=1
 
-boot: boot.o
+boot_: boot_.o
 	$(LD) -Ttext 0x0 -M -s -o $@ $< > map.lst
-	chmod a-x boot
+	chmod a-x boot_
+
+ccc:	c1.c
+	gcc c1.c -o ccc.exe
+	strip ccc.exe
+	mv ccc.exe ccc
 
 CKERNELboot: kernc.o c0.o
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o boot c0.o kernc.o > mapc.lst
 	chmod a-x boot
 
 kernc.o:		kernc.c
-	gcc -m32 -c -fno-asynchronous-unwind-tables kernc.c
+	gcc -c -fno-asynchronous-unwind-tables kernc.c
 
 kernc.s:	kernc.c
 	gcc -m32 -S -fno-asynchronous-unwind-tables kernc.c
@@ -37,13 +42,14 @@ libc.s:		libc.c
 lib2.s:		lib2.c
 	gcc -m16 -S lib2.c
 
-boot.o: boot.S
-	$(AS) $(ASFLAG) -a=boot.lst -o $@ $<
+boot_.o: boot_.S
+	sh date.sh
+	$(AS) $(ASFLAG) -a=boot_.lst -o $@ $<
 
 #boot.s: boot.S macros.S defines.h
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot kernc *.lst *.o a.out
+	rm boot boot_ kernc *.lst *.o a.out
 
 saycsip.s: saycsip.S macros.S defines.h
 	$(CPP) -traditional $< -o $@
@@ -77,3 +83,10 @@ cmd1.s: cmd1.S
 	$(CPP) -traditional $< -o $@
 cmd1.o: cmd1.s
 	$(AS) $(ASFLAG) -a=cmd1.lst -o $@ $<
+cmd2:	cmd2.S kernc.o
+	$(AS) $(ASFLAG) -a=cmd2.lst -o cmd2.o cmd2.S
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o cmd2 cmd2.o > cmd2-map.lst
+	chmod a-x cmd2
+# cmd2com - example of binary assembler utility. compile under cygwin. run by 'run' command
+cmd2com:	cmd2
+	dd if=cmd2 of=cmd2com skip=1

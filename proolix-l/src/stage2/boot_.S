@@ -2080,7 +2080,8 @@ str1:	.byte		13,10
 	.byte		13,10
 	.ascii		"www.prool.kharkov.org github.com/prool/proolix"
 	.byte 		13,10
-	.ascii		"Compiled! ;-)"
+	.ascii		"Compiled "
+	.include "date.tmp"
 	.byte 		13,10
 	.ascii		"Use 'help' for help"
 	.byte 		13,10,0
