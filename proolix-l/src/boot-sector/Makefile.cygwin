@@ -20,7 +20,7 @@ boots.s: boots.S
 	$(CPP) -traditional $< -o $@
 
 clean:
-	rm boots.s boots.o boots boots.lst patchboot analyzeboot boot boots
+	rm boots.o boots boots.lst patchboot analyzeboot boot boots
 
 patchboot:	patchboot.c
 

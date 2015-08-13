@@ -31,8 +31,6 @@
 # from prool:
 # compilation listings
 *.lst
-# asm compiler files
-*.s
 # binaries
 boot
 analyzeboot

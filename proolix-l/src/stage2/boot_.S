@@ -2063,6 +2063,10 @@ l_iret:
     popw	%DS
     iret
 
+	.include "ohw.S"
+	.include "sayr.S"
+	.include "saycsip.S"
+
 DOS_BREAK:	.byte	0
 DOS_CUR_DRIVE:	.byte	0 # (00h = A:, 01h = B:, etc)
 DOS_DS:	.word
@@ -2076,7 +2080,7 @@ str1:	.byte		13,10
 	.byte		13,10
 	.ascii		"www.prool.kharkov.org github.com/prool/proolix"
 	.byte 		13,10
-	.ascii		"Compiled ",__DATE__," ",__TIME__
+	.ascii		"Compiled! ;-)"
 	.byte 		13,10
 	.ascii		"Use 'help' for help"
 	.byte 		13,10,0
@@ -2189,4 +2193,9 @@ HidnSec:         .word      0,0
 BigNo:           .word      0,0       # Big total no of sectors
 StartClu:        .word      0       
 RootSize:        .word      0
+
+Karman:	.space		512	# buffer for 1st cluster of .EXE file
+Buff:	.space		512	# buffer for 1 cluster
+FATaddr:	.space	9*512# buffer for FAT. Fat size = 9 sectors
+
 # end of boot.S file

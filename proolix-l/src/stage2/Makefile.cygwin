@@ -7,12 +7,12 @@ CPP = cpp
 
 ASFLAG =
 
-boot:	boot_
-	dd if=boot_ of=boot skip=1
+boot_true:	boot
+	dd if=boot of=boot_true skip=1
 
-boot_: boot_.o
+boot: boot.o
 	$(LD) -Ttext 0x0 -M -s -o $@ $< > map.lst
-	chmod a-x boot_
+	chmod a-x boot
 
 CKERNELboot: kernc.o c0.o
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o boot c0.o kernc.o > mapc.lst
@@ -37,13 +37,13 @@ libc.s:		libc.c
 lib2.s:		lib2.c
 	gcc -m16 -S lib2.c
 
-boot_.o: boot_.S
-	$(AS) $(ASFLAG) -a=boot_.lst -o $@ $<
+boot.o: boot.S
+	$(AS) $(ASFLAG) -a=boot.lst -o $@ $<
 
 #boot.s: boot.S macros.S defines.h
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ kernc *.lst *.o a.out
+	rm boot kernc *.lst *.o a.out
 
 saycsip.s: saycsip.S macros.S defines.h
 	$(CPP) -traditional $< -o $@

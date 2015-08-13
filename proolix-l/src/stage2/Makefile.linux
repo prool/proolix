@@ -1,21 +1,19 @@
 # Proolix-l stage2
-# makefile for cygwin
+# makefile for linux
 
 LD = ld
 AS = as
 CPP = cpp
 
-ASFLAG =
+LDFLAGS = -m elf_i386
+ASFLAG = --32
 
-boot:	boot_
-	dd if=boot_ of=boot skip=1
-
-boot_: boot_.o
-	$(LD) -Ttext 0x0 -M -s -o $@ $< > map.lst
-	chmod a-x boot_
+boot: boot.o saycsip.o ohw.o sayr.o end.o libc.o lib2.o cmd1
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o $@ $< saycsip.o ohw.o sayr.o end.o > map.lst
+	chmod a-x boot
 
 CKERNELboot: kernc.o c0.o
-	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o boot c0.o kernc.o > mapc.lst
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o boot c0.o kernc.o > mapc.lst
 	chmod a-x boot
 
 kernc.o:		kernc.c
@@ -37,13 +35,13 @@ libc.s:		libc.c
 lib2.s:		lib2.c
 	gcc -m16 -S lib2.c
 
-boot_.o: boot_.S
-	$(AS) $(ASFLAG) -a=boot_.lst -o $@ $<
+boot.o: boot.s
+	$(AS) $(ASFLAG) -a=boot.lst -o $@ $<
 
-#boot.s: boot.S macros.S defines.h
-#	$(CPP) -traditional $< -o $@
+boot.s: boot.S macros.S defines.h
+	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ kernc *.lst *.o a.out
+	rm boot kernc *.lst *.s *.o a.out
 
 saycsip.s: saycsip.S macros.S defines.h
 	$(CPP) -traditional $< -o $@
@@ -71,7 +69,7 @@ c0.o: c0.s
 	$(AS) $(ASFLAG) -a=c0.lst -o $@ $<
 
 cmd1: cmd1.o saycsip.o ohw.o sayr.o
-	$(LD) $(LDFLAGS) -m i386pe -M -Ttext 0x0 -s -o $@ $< saycsip.o ohw.o sayr.o> cmd1-map.lst
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o $@ $< saycsip.o ohw.o sayr.o> cmd1-map.lst
 	chmod a-x cmd1
 cmd1.s: cmd1.S
 	$(CPP) -traditional $< -o $@
