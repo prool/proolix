@@ -656,7 +656,7 @@ s_anykey:	.asciz	" Press any key "
     ###
     
     
-    ### command c9
+    ### command c9 - run
     xorw %bx,%bx
 0:  
     movb c9_s(%bx),%al

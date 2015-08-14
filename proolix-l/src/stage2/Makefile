@@ -14,6 +14,10 @@ boot_: boot_.o
 	$(LD) -Ttext 0x0 -M -s -o $@ $< > map.lst
 	chmod a-x boot_
 
+boot_.o: boot_.S macros.S ohw.S sayr.S saycsip.S
+	sh date.sh
+	$(AS) $(ASFLAG) -a=boot_.lst -o $@ $<
+
 ccc:	c1.c
 	gcc c1.c -o ccc.exe
 	strip ccc.exe
@@ -41,10 +45,6 @@ libc.s:		libc.c
 
 lib2.s:		lib2.c
 	gcc -m16 -S lib2.c
-
-boot_.o: boot_.S
-	sh date.sh
-	$(AS) $(ASFLAG) -a=boot_.lst -o $@ $<
 
 #boot.s: boot.S macros.S defines.h
 #	$(CPP) -traditional $< -o $@
@@ -83,10 +83,23 @@ cmd1.s: cmd1.S
 	$(CPP) -traditional $< -o $@
 cmd1.o: cmd1.s
 	$(AS) $(ASFLAG) -a=cmd1.lst -o $@ $<
-cmd2:	cmd2.S kernc.o
+cmd2:	cmd2.S
 	$(AS) $(ASFLAG) -a=cmd2.lst -o cmd2.o cmd2.S
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o cmd2 cmd2.o > cmd2-map.lst
 	chmod a-x cmd2
 # cmd2com - example of binary assembler utility. compile under cygwin. run by 'run' command
 cmd2com:	cmd2
 	dd if=cmd2 of=cmd2com skip=1
+
+c1s:	c1s.s
+	$(AS) $(ASFLAG) -a=c1s.lst -o c1s.o c1s.s
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o c1s c1s.o > map.lst
+	chmod a-x c1s
+
+# cygwin experiments: cross-compile for Proolix: .c file -> asm .s file -> stripped .s file -> binary
+ct:	c2.c
+	gcc -S -m16 c2.c
+	./britva.sh c2.s
+	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o ctmp ctmp.o > map.lst
+	dd if=ctmp of=ct skip=1

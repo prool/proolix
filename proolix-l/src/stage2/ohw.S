@@ -6,6 +6,15 @@
     .global ohb
     .global ohd
 
+/*
+ohq: # Вывод сверхдлинного слова (64 разрядного) %rax в hex виде
+	# reg saved
+	push	%rax
+
+	pop	%rax
+	ret
+*/
+
 ohd: # Вывод длинного слова (%eax, то есть 8 байт) в hex виде
 	# Регистры сохранены
 	pushl	%eax

@@ -81,6 +81,7 @@ s_ip:    .asciz      " IP="
 print_reg32: # proc    ; REGS SAVED
         push %eax
 
+#	mov	$0xDEADBEEF,%eax
         print    s_eax
         call    ohd
 

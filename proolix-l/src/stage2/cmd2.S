@@ -1,7 +1,6 @@
-        .code16
-	.include "macros.S"
-	
-	
+    .code16
+    .include "macros.S"
+
 	.text
 .global _start
 _start:
@@ -12,17 +11,22 @@ _start:
     xorb	%ah,%ah
     int		$0x16
     */
-    
+
     print	str1
     call	print_registers
     newline
-    
+
+	push	%eax
+	pop	%eax
+
+    print	str2
 
     int	$0x20
 
-	.include "ohw.S"
-	.include "sayr.S"
-	.include "saycsip.S"
-
+    .include "ohw.S"
+    .include "sayr.S"
+    .include "saycsip.S"
 
 str1:	.asciz	"cmd2com command run. compile under cygwin "
+
+str2:	.asciz "32 bit commands work! "
