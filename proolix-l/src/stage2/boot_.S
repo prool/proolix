@@ -57,9 +57,23 @@ _start:
     movw	%ax,%ES # ES:=0
     pushw	%CS
     popw	%ax
-    movw	$0x24*2+2,%si
+    movw	$0x24*4+2,%si
     movw	%ax,%ES:(%si)
     lea		int24p,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 80h - Proolix-l system call
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x80*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		int80p,%ax
     decw	%si
     decw	%si
     movw	%ax,%ES:(%si)
@@ -1826,6 +1840,25 @@ print16:	# print of 16 chars in hex and ascii mode
     popw	%ax
     
     ret
+
+int80p:		# Proolix-l interrupt (Proolix-l system call)
+	pushw	%DS
+
+	pushw	%ax
+	putch	$'D'
+	putch	$'S'
+	putch	$'='
+	pushw	%DS	# ax:=DS
+	popw	%ax
+	call	ohw
+	popw	%ax
+
+	pushw	%CS	# DS:=CS
+	popw	%DS
+
+	call	print_registers
+	popw	%DS
+	iret
 
 int24p:
     pushw	%CS

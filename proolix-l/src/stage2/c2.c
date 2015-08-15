@@ -2,14 +2,21 @@ void stop(void);
 void putch(char c);
 void puts0(char *s);
 
+void getch(void)
+{
+__asm__ volatile("xor %ah,%ah");
+__asm__ volatile("int $0x16");
+}
 
 void main(void)
 {
 char c;
-puts0("=======================");
 
-__asm__ volatile("xor %ah,%ah");
-__asm__ volatile("int $0x16");
+puts0("C utility \r\n");
+
+puts0("Press any key");
+
+getch();
 
 stop();
 }
@@ -38,14 +45,13 @@ switch(((int)s)%16)
 	default: putch('X');
 	}
 */
-putch('_');
-s+=0x100;
+//s+=0x200;
 //s=0x200;
 //if (s)
+//__asm__ volatile("movw %0,%%ax"::"r"(s):"%ax");
     while (*s)
 	putch(*s++);
 }
-
 
 void putch(char c)
 {
@@ -53,11 +59,10 @@ __asm__ volatile("movb $0x0E,%ah");
 __asm__ volatile("movb %0,%%al"::"r"(c):"%al");
 __asm__ volatile("xorb %bh,%bh");
 __asm__ volatile("int $0x10");
-}
 
+}
 
 void stop(void)
 {
 __asm__ volatile("int $0x20");
 }
-
