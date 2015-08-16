@@ -43,4 +43,6 @@ cmdc
 # working files
 aaa
 *.tmp
-
+c2.s
+ctmp*
+ct
