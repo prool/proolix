@@ -82,9 +82,18 @@ __asm__ volatile("int $0x16");
 __asm__ volatile("xor %ah,%ah");
 }
 
-// string functions
+int strcmp (const char  *s1, const char  *s2)
+{char c1,c2;
 
-/****************************************************************************/
+/* if (s1==NULL) return 0; */
+/* if (s2==NULL) return 0; */
+do  {c1=*s1++; c2=*s2++; if (c1>c2) return 1; else if (c1<c2) return -1;}
+while (c1&&c2);
+return 0;
+}
+
+#if 0 // запас функций, которые пока не используются
+
 char  *strcpy (char  *dest, const char  *src)
 {char  *cc;
 /* if (dest==NULL) return NULL; */
@@ -129,16 +138,6 @@ cc=dest;
 while(*dest++);
 strcpy(--dest,src);
 return cc;
-}
-/****************************************************************************/
-int strcmp (const char  *s1, const char  *s2)
-{char c1,c2;
-
-/* if (s1==NULL) return 0; */
-/* if (s2==NULL) return 0; */
-do  {c1=*s1++; c2=*s2++; if (c1>c2) return 1; else if (c1<c2) return -1;}
-while (c1&&c2);
-return 0;
 }
 /****************************************************************************/
 int stricmp(const char  *s1, const char  *s2)
@@ -458,3 +457,5 @@ int isspace (int c) {if ((c==' ')||(c=='\t')) return 1; else return 0;}
 int isupper (int c) {return (c>='A')&&(c<='Z');}
 int isxdigit(int c)
   {return ((c>='0')&&(c<='9'))||((c>='a')&&(c<='f'))||((c>='A')&&(c<='F'));}
+
+#endif

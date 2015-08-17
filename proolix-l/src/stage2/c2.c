@@ -11,7 +11,7 @@ void main(void)
 char c;
 char buf [BUFLEN];
 
-puts0("Proolix-l shell\r\n");
+puts0("Proolix-l shell");
 
 while (1)
 	{
@@ -21,6 +21,8 @@ while (1)
 
 	if (buf[0]==0) puts0("");
 	else if (!strcmp(buf,"help")) help();
+	else if (!strcmp(buf,"exit")) break;
+	else if (!strcmp(buf,"quit")) break;
 	else
 		{
 		puts0("Unknown command '");
