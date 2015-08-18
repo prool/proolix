@@ -2195,7 +2195,12 @@ s_help: .byte 13,10,13,10
 .ascii "keycodes - print key codes"
 .byte 13,10
 .byte 13,10
-.ascii "With best regards, Prool. http://prool.kharkov.org/proolix github/prool/proolix"
+.ascii "run <enter> ct <enter> - run proolix simple shell"
+.byte 13,10
+.byte 13,10
+.ascii "With best regards, Prool. http://prool.kharkov.org/proolix"
+.byte 13,10
+.ascii "http://github/prool/proolix"
 .byte 13,10,0
 
 s_test:	.byte 13,10
