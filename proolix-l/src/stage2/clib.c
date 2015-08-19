@@ -39,18 +39,16 @@ void puts0(char *s)
 
 void putch(char c)
 {
+/*
+VIDEO - TELETYPE OUTPUT
+
+AH = 0Eh
+AL = character to write
+BH = page number
+BL = foreground color (graphics modes only)
+*/
 __asm__ volatile("movb $0x0E,%ah");
 __asm__ volatile("movb %0,%%al"::"r"(c):"%al");
-__asm__ volatile("xorb %bh,%bh");
-__asm__ volatile("int $0x10");
-
-}
-
-void putcha(char c, unsigned short int attr) // put chat with attributes
-{
-__asm__ volatile("movb $0x0E,%ah");
-__asm__ volatile("movb %0,%%al"::"r"(c):"%al");
-__asm__ volatile("movw %0,%%cx"::"r"(attr):"%cx");
 __asm__ volatile("xorb %bh,%bh");
 __asm__ volatile("int $0x10");
 
@@ -63,6 +61,13 @@ __asm__ volatile("int $0x20");
 
 int getch(void)
 {
+/*
+AH = 00h
+
+Return:
+AH = BIOS scan code
+AL = ASCII character
+*/
 __asm__ volatile("xor %ah,%ah");
 __asm__ volatile("int $0x16");
 __asm__ volatile("xor %ah,%ah");

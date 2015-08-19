@@ -1,5 +1,7 @@
 // view exe (PE EXE) header. built under cygwin/64. prool
 
+// info about PE EXE format: http://mzc.narod.ru/Creating/Step008.htm
+
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>

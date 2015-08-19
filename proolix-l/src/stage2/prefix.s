@@ -1,10 +1,22 @@
 # assembler prefix file for c-translated text
 
+# some comments from Interrupt list http://www.ctyme.com/intr/int.htm
+
 	.text
 	.code16gcc
 	jmp	_main
 
 _putch2:
+# VIDEO - WRITE CHARACTER AND ATTRIBUTE AT CURSOR POSITION
+
+# AH = 09h
+# AL = character to display
+# BH = page number (00h to number of pages - 1)
+# background color in 256-color graphics modes (ET4000)
+# BL = attribute (text mode) or color (graphics mode)
+# if bit 7 set in <256-color graphics mode, character is XOR'ed
+# onto screen
+# CX = number of times to write character
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$4, %esp
@@ -32,6 +44,8 @@ _putch_color:
 #	movb	%al,%al # par 1
 	movsbl	-8(%ebp), %ecx
 	movb	%cl,%bl # par 2
+	                                                                                
+#	movb	$3,%bl # prool fool!
 
 	movw	$1,%cx
 	movb	$9,%ah
@@ -40,7 +54,16 @@ _putch_color:
 	leave
 	ret
 
-_setpos_:
+_setpos:
+# VIDEO - SET CURSOR POSITION
+
+# AH = 02h
+# BH = page number
+# 0-3 in modes 2&3
+# 0-7 in modes 0&1
+# 0 in graphics modes
+# DH = row (00h is top)
+# DL = column (00h is left)
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$12, %esp
@@ -57,8 +80,22 @@ _setpos_:
 	int	$0x10
 	leave
 	ret
-/*
 _getpos:
+# VIDEO - GET CURSOR POSITION AND SIZE
+
+# AH = 03h
+# BH = page number
+# 0-3 in modes 2&3
+# 0-7 in modes 0&1
+# 0 in graphics modes
+
+# Return:
+# AX = 0000h (Phoenix BIOS)
+# CH = start scan line
+# CL = end scan line
+# DH = row (00h is top)
+# DL = column (00h is left)
+
 	pushl	%ebp
 	movl	%esp, %ebp
 
@@ -79,4 +116,30 @@ _getpos:
 	movl	%ebx, (%eax)	# param2
 	popl	%ebp
 	ret
-*/
+
+_cls:
+# VIDEO - SCROLL UP WINDOW
+
+# AH = 06h
+# AL = number of lines by which to scroll up (00h = clear entire window)
+# BH = attribute used to write blank lines at bottom of window
+# CH,CL = row,column of window's upper left corner
+# DH,DL = row,column of window's lower right corner
+
+	movb	$6,%ah
+	xorb	%al,%al
+	movb	$0x01,%bh
+	movw	$0x0000,%cx
+	movw	$0x184F,%dx
+	int	$0x10
+	ret
+
+_scroll:
+	movb	$6,%ah
+	movb	$1,%al
+	movb	$0x01,%bh
+	movw	$0x0000,%cx
+	movw	$0x184F,%dx
+	int	$0x10
+	ret
+	

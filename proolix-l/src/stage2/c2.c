@@ -6,13 +6,12 @@
 
 // global variables
 
-char global_color;
-char g_row;
-char g_col;
-
 void help(void);
 void putch2(char c);
 void putch_color(char c, char attrib);
+
+void getpos(char *row, char *col);
+void setpos (char row, char col);
 
 #if 0
 void two_parameters(int *i, int *j) // see translated text in .s file
@@ -22,37 +21,31 @@ void two_parameters(int *i, int *j) // see translated text in .s file
 }
 #endif
 
-void getpos(char *row, char *col)
-{
-*row=g_row;
-*col=g_col;
-}
-
-void setpos(char row, char col)
-{
-g_row=row;
-g_col=col;
-setpos_(row,col);
-}
-
 void putch3(char c)
-{char i,j;
-getpos(&i,&j);
+{char g_col,g_row;
+char color;
+color=4;
+getpos(&g_row,&g_col);
 switch(c)
 	{
-	case '\r': j=0; setpos(i,j); break;
-	case '\n': i++; setpos(i,j); break;
+	case '\r': g_col=0; setpos(g_row,g_col); break;
+	case '\n': if (g_row==24)
+			scroll();
+		   else
+			{g_row++; setpos(g_row,g_col);}
+		   break;
 	default:
-		putch_color(c,global_color);
-		j++;
-		setpos(i,j);
+		putch_color(c,color);
+		g_col++;
+		setpos(g_row,g_col);
 	}
 }
 
 void puts0(char *s)
 {
     while (*s)
-	putch3(*s++);
+//	putch3(*s++);
+	putch(*s++);
 }
 
 
@@ -91,13 +84,13 @@ for (i=0;i<256;i++) putch(i);
 
 void main(void)
 {
-char c;
 char buf [BUFLEN];
+int i,j;
+char c,cc;
 
-global_color=6;
-setpos(0,0);
+//getpos(&c,&cc);
 
-puts0("Proolix-l shell. Compile ");
+puts0(" Proolix-l shell. Compile ");
 puts0(__DATE__);
 puts0(" ");
 puts0(__TIME__);
@@ -114,7 +107,8 @@ while (1)
 	else if (!strcmp(buf,"exit")) break;
 	else if (!strcmp(buf,"quit")) break;
 	else if (!strcmp(buf,"test")) test();
-	else if (!strcmp(buf,"ascii")) ascii();
+	else if (!strcmp(buf,"cls")) cls();
+	else if (!strcmp(buf,"scroll")) scroll();
 	else
 		{
 		puts0("Unknown command '");

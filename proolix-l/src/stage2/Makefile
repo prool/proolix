@@ -102,7 +102,8 @@ ct:	c2.c headers.h clib.c prefix.s
 	./britva.sh c2.s
 	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o ctmp ctmp.o > map.lst
-	dd if=ctmp of=ct skip=2
+#	skip parameter set manually (use brains)
+	dd if=ctmp of=ct skip=1
 	cp ct /cygdrive/e
 
 vexe:	vexe.c
