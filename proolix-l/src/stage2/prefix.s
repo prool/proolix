@@ -6,6 +6,22 @@
 	.code16gcc
 	jmp	_main
 
+_set_color:
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	8(%ebp), %eax
+	movb	%al,global_color
+	leave
+	ret
+
+_get_color:
+	xor	%eax,%eax
+	movb	global_color,%al
+	ret
+
+global_color:	.word	0
+
 _putch2:
 # VIDEO - WRITE CHARACTER AND ATTRIBUTE AT CURSOR POSITION
 
@@ -80,7 +96,7 @@ _setpos:
 	int	$0x10
 	leave
 	ret
-_getpos:
+
 # VIDEO - GET CURSOR POSITION AND SIZE
 
 # AH = 03h
@@ -96,6 +112,24 @@ _getpos:
 # DH = row (00h is top)
 # DL = column (00h is left)
 
+_get_row:
+	movb	$3,%ah
+	xorb	%bh,%bh
+	int	$0x10
+	xor	%eax,%eax
+	movb	%dh,%al
+	ret
+
+_get_col:
+	movb	$3,%ah
+	xorb	%bh,%bh
+	int	$0x10
+	xor	%eax,%eax
+	movb	%dl,%al
+	ret
+
+/* eto ne rabotaet
+_getpos:
 	pushl	%ebp
 	movl	%esp, %ebp
 
@@ -116,8 +150,9 @@ _getpos:
 	movl	%ebx, (%eax)	# param2
 	popl	%ebp
 	ret
+*/
 
-_cls:
+_cls_:
 # VIDEO - SCROLL UP WINDOW
 
 # AH = 06h
@@ -128,7 +163,7 @@ _cls:
 
 	movb	$6,%ah
 	xorb	%al,%al
-	movb	$0x01,%bh
+	movb	global_color,%bh
 	movw	$0x0000,%cx
 	movw	$0x184F,%dx
 	int	$0x10
@@ -137,7 +172,7 @@ _cls:
 _scroll:
 	movb	$6,%ah
 	movb	$1,%al
-	movb	$0x01,%bh
+	movb	global_color,%bh
 	movw	$0x0000,%cx
 	movw	$0x184F,%dx
 	int	$0x10

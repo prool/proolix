@@ -1,9 +1,77 @@
+// proolix-l c library
+
+#if 0
+void two_parameters(int *i, int *j) // see translated text in .s file
+{
+*i=getch();
+*j=getch();
+}
+#endif
+
+void cls(void)
+{
+cls_();
+setpos(0,0);
+}
+
+void putch3(char c)
+{char g_col,g_row;
+g_row=get_row();
+g_col=get_col();
+switch(c)
+	{
+	case '\r': g_col=0; setpos(g_row,g_col); break;
+	case '\n': if (g_row==24)
+			scroll();
+		   else
+			{g_row++; setpos(g_row,g_col);}
+		   break;
+	default:
+		putch_color(c,get_color());
+		g_col++;
+		setpos(g_row,g_col);
+	}
+}
+
+void puts0(char *s)
+{
+    while (*s)
+	putch3(*s++);
+//	putch(*s++);
+}
+
+
+void test (void)
+{int i,j;
+
+setpos(0,0);
+
+puts0("stroka 1\r\n");
+puts0("stroka 2\r\n");                                                                                                       
+puts0("stroka 3\r\n");
+
+//for (i=0;i<256;i++) {global_color=i; putch3('W');}
+
+//putch3('a');
+
+#if 0
+setpos(0,0);putch_color('1',2);
+setpos(0,1);putch_color('2',3);
+setpos(0,2);putch_color('3',4);
+#endif
+}
+
+void ascii(void)
+{int i;
+for (i=0;i<256;i++) putch(i);
+}
+
 char *getsn(char *str, int len)
 {char c; int i;
 i=0;
 while(1)
 	{
-	c=getch(); putch(c);
+	c=getch(); putch3(c);
 	if (c==0x0DU) {*str=0; return str;}
 	*str=c;
 	if (++i>=(len-1)) {*str=0; return str;}
