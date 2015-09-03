@@ -1,5 +1,5 @@
 # Proolix-l stage2
-# makefile for cygwin
+# makefile for linux
 
 LD = ld
 AS = as
@@ -8,7 +8,7 @@ CPP = cpp
 ASFLAG =
 
 boot:	boot_ cmd2com
-	dd if=boot_ of=boot skip=1
+	dd if=boot_ of=boot skip=4096
 
 boot_: boot_.o
 	$(LD) -Ttext 0x0 -M -s -o $@ $< > map.lst
@@ -49,7 +49,7 @@ lib2.s:		lib2.c
 #boot.s: boot.S macros.S defines.h
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ kernc *.lst *.o a.out
+	rm boot boot_ kernc *.lst *.o a.out ct
 
 saycsip.s: saycsip.S macros.S defines.h
 	$(CPP) -traditional $< -o $@
@@ -103,8 +103,8 @@ ct:	c2.c headers.h clib.c prefix.s
 	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o ctmp ctmp.o > map.lst
 #	skip parameter set manually (use brains)
-	dd if=ctmp of=ct skip=1
-	cp ct /cygdrive/e
+	dd if=ctmp of=ct skip=4096
+	cp ct /mnt/fdd
 
 vexe:	vexe.c
 	gcc vexe.c -o vexe.exe

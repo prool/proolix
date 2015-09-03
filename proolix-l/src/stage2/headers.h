@@ -10,6 +10,7 @@ void putch3(char c);
 void puts0(char *s);
 void putch_color(char c, char attrib);
 int getch(void);
+char *getsn(char *str, int len);
 size_t strlen (const char *s);
 char *strchr (const char *str, int c);
 char  * strncpy (char  * dest, const char  * src, size_t maxlen);
@@ -22,3 +23,4 @@ char get_color(void);
 void set_color(char color);
 
 void help(void);
+void test(void);

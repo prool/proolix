@@ -1,5 +1,13 @@
 // proolix-l c library
 
+#include <limits.h>
+
+ // for printf
+#define MAX_LEN_STR 256 
+#define EOF (-1)
+
+/////////////////////////////////////////////////////////////////////////////
+
 #if 0
 void two_parameters(int *i, int *j) // see translated text in .s file
 {
@@ -7,6 +15,40 @@ void two_parameters(int *i, int *j) // see translated text in .s file
 *j=getch();
 }
 #endif
+
+int toupper (int ch)
+{
+if ((ch>='a')&&(ch<='z'))return ch + 'A' - 'a'; else return ch;
+}
+
+char *strchr (const char *str, int c)
+{
+/* if (str==NULL) return NULL; */
+while (*str)
+  if (*str==c)
+    return (char *) str;
+  else str++;
+return NULL;
+}
+
+size_t strlen (const char *s)
+{
+size_t i;
+/* if (s==NULL) return NULL; */
+i=0;
+while (*s++)i++;
+return i;
+}
+
+char  *strcpy (char  *dest, const char  *src)
+{char  *cc;
+/* if (dest==NULL) return NULL; */
+/* if (src==NULL) return NULL; */
+cc=dest;
+  do *dest++ = *src;
+  while (*src++);
+return cc;
+}
 
 void cls(void)
 {
@@ -153,15 +195,6 @@ return 0;
 
 #if 0 // запас функций, которые пока не используются
 
-char  *strcpy (char  *dest, const char  *src)
-{char  *cc;
-/* if (dest==NULL) return NULL; */
-/* if (src==NULL) return NULL; */
-cc=dest;
-  do *dest++ = *src;
-  while (*src++);
-return cc;
-}
 /****************************************************************************/
 char  *stpcpy (char  *dest, const char  *src)
 {
@@ -430,25 +463,8 @@ return ret;
 }
 
 /****************************************************************************/
-size_t strlen (const char *s)
-{
-size_t i;
-/* if (s==NULL) return NULL; */
-i=0;
-while (*s++)i++;
-return i;
-}
 /****************************************************************************/
 
-char *strchr (const char *str, int c)
-{
-/* if (str==NULL) return NULL; */
-while (*str)
-  if (*str==c)
-    return (char *) str;
-  else str++;
-return NULL;
-}
 /****************************************************************************/
 
 int tolower (int ch)
@@ -456,10 +472,6 @@ int tolower (int ch)
 if ((ch>='A')&&(ch<='Z'))return ch + 'a' - 'A'; else return ch;
 }
 /****************************************************************************/
-int toupper (int ch)
-{
-if ((ch>='a')&&(ch<='z'))return ch + 'A' - 'a'; else return ch;
-}
 
 /****************************************************************************/
 int isgraph(int c)
@@ -518,3 +530,620 @@ int isxdigit(int c)
   {return ((c>='0')&&(c<='9'))||((c>='a')&&(c<='f'))||((c>='A')&&(c<='F'));}
 
 #endif
+
+/****************************************************************************/
+void  *memcpy(void  *dest, const void  *src, size_t n)
+{size_t i; void  *ret;
+/* if (dest==NULL) return NULL; */
+/* if (src==NULL) return NULL; */
+ret=dest;
+for (i=0;i<n;i++)
+	{
+	*((char  *)dest)=*((char  *)src);
+	(char *)dest++;
+	(char *)src++;
+	}
+return ret;
+}
+/****************************************************************************/
+void  *memccpy(void  *dest, const void  *src, int c, size_t n)
+{size_t i;
+/* if (dest==NULL) return NULL; */
+/* if (src==NULL) return NULL; */
+for (i=0;i<n;i++)
+  {
+  *((char  *)dest)=*((char  *)src);
+  (char *)dest++;
+  if (*((char  *)src)==c) {return (char  *)src;}
+  (char *)src++;
+  }
+return NULL;
+}
+/****************************************************************************/
+int memcmp (const void  *s1, const void  *s2, size_t n)
+{char c1,c2; size_t i;
+
+/* if (s1==NULL) return 0; */
+/* if (s2==NULL) return 0; */
+for(i=0;i<n;i++)
+  {
+  c1=*((char  *)s1+(unsigned int)i);
+  c2=*((char  *)s2+(unsigned int)i);
+  if (c1>c2) return 1;
+  else if (c1<c2) return -1;
+  }
+return 0;
+}
+/****************************************************************************/
+int memicmp (const void  *s1, const void  *s2, size_t n)
+{char c1,c2; size_t i;
+
+/* if (s1==NULL) return 0; */
+/* if (s2==NULL) return 0; */
+for(i=0;i<n;i++)
+  {
+  c1=toupper(*((char  *)s1+(unsigned int)i));
+  c2=toupper(*((char  *)s2+(unsigned int)i));
+  if (c1>c2) return 1;
+  else if (c1<c2) return -1;
+  }
+return 0;
+}
+/****************************************************************************/
+void  *memchr (const void  *str, int c, size_t n)
+{size_t i;
+/* if (str==NULL) return NULL; */
+for(i=0;i<n;i++)
+  if (*((char  *)str+(unsigned int)i)==c)
+    return (char  *)str+(unsigned int)i;
+return NULL;
+}
+/****************************************************************************/
+void  *memset  (void  *str, int c, size_t n)
+{size_t i;
+/* if (str==NULL) return NULL; */
+for(i=0;i<n;i++) *((char  *)str+(unsigned int)i)=c;
+return str;
+}
+
+#if 0 // printf package
+
+int printf (const char  *format, ...)
+{
+va_list v; int counter;
+char new_printf_buf[MAX_LEN_STR];
+
+/* Called functions: vsprintf(), puts0() */
+
+/* Использование в качестве буфера массива printf_buf, выделяемого по
+malloc (см. в kernel.c) вызывает глюки (зависания).
+А использование в качестве буфера
+локального массива new_printf_buf глюков не вызывает. Все работает. */
+
+va_start(v,0);
+counter=vsprintf(new_printf_buf,format,v);
+puts0(new_printf_buf);
+return counter;
+}
+/****************************************************************************/
+int vsprintf (char  *str, const char  *format, va_list v)
+{
+int i, counter=0, width, prec, Modifier, Type,
+  FlagMinus, FlagPlus, FlagBlank, FlagDiez, FlagZero;
+char c, *cc,  *fcc;
+unsigned int segment;
+int len; char  *ss; long L;
+/* char Clipboard [MAX_LEN_STR]; */
+char new_printf_buf[MAX_LEN_STR]; /* см. примечание в начале ф-ции printf */
+
+while(*format)
+  {
+  if (*format!='%')
+    {
+    *str++=*format;
+    counter++;
+    }
+  else
+    {char s [] = "printf: Flag '%c' is not realized now :( ";
+    /* встречен символ '%' */
+    /* % [FLAG] [WIDTH] [.PREC] [MODIFIER] TYPE */
+    /*
+                                TYPE:
+       d signed dec int
+       i "
+       o unsigned oct int
+       u unsigned dec int
+       x unsigned hex int lowercase
+       X "                uppercase
+       f float
+       e float with Exponent
+       g f or e
+       E e
+       G g
+       c 1 char
+       s string
+       % %
+       p pointer
+       n char counter (?)
+
+                                FLAG:
+       none right, 0 or blank
+       - left
+       + sign + or -
+       blank sign - only
+       # oct - 0 hex - 0x 0X
+                                WIDTH:
+       n
+       0n 0 fill
+       * next arg - width
+                                PREC:
+       none
+       .0
+       .n
+       * - next arg
+                                MODIFIER:
+       F far
+       N near
+       h short int
+       l long int
+       L long double
+     */
+    /* обрабатываем флаги */
+    /* % [FLAG] [WIDTH] [.PREC] [MODIFIER] TYPE */
+    FlagMinus=0; FlagPlus=0; FlagBlank=0; FlagDiez=0; FlagZero=0;
+    while(strchr("-+ #0",c=*++format)!=NULL)
+      switch (c)
+      {
+      /* данная идиотская запись вида "var=1; if (var)" используется для того,
+      чтобы не было сообщения компилятора "variable not used". После того,
+      как обработка флагов будет реализована, идиотские операторы будут,
+      естественно, удалены */
+        case '-': FlagMinus=1; break;
+        case '+': FlagPlus =1; if (FlagPlus ) printf(s,c); break;
+        case ' ': FlagBlank=1; if (FlagBlank) printf(s,c); break;
+        case '#': FlagDiez =1; if (FlagDiez ) printf(s,c); break;
+        case '0': FlagZero =1;
+      }
+    if (c==0) break;
+    /* Обрабатываем ширину */
+    /* % [FLAG] [WIDTH] [.PREC] [MODIFIER] TYPE */
+    if (isdigit(*format))
+      {width=atoi(format);while(isdigit(c=*++format));
+      }
+    else width=0;
+    if (c==0) break;
+    if (c=='.')
+      {
+      prec=atoi(format+1);
+      while(isdigit(c=*++format));
+      if (c==0) break;
+      }
+    else prec=0;
+    if (prec) printf("printf: prec is not realized now :( ");
+    /* обрабатываем modifier */
+    /* % [FLAG] [WIDTH] [.PREC] [MODIFIER] TYPE */
+    if (strchr("FNhlL",c=*format)!=NULL)
+      {Modifier=c; format++;
+      switch(Modifier)
+        {
+        case 'F':
+        case 'N':
+        case 'h':
+        case 'l': break;
+        case 'L':
+          printf("printf: Modifier '%c' is invalid\n",Modifier);
+        }
+      }
+    else Modifier=0;
+    if (c==0) break;
+    if (strchr("diouxXfeEgGcspn%",c=*format)==NULL)
+      {Type=0; printf("printf: invalid type '%c'",c);}
+    else
+      {
+      Type=c;
+      /* вывод аргумента */
+      switch(Type)
+        {
+        case '%': *str++='%'; counter++; break;
+        case 'u': /* unsigned int */
+        case 'i': /* signed int */
+        case 'd': /* signed int */
+                  if (Type=='u')
+                    if (Modifier=='l') L=va_arg(v,unsigned long);
+                    else L=va_arg(v,unsigned int);
+                  else
+                    if (Modifier=='l') L=va_arg(v,long);
+                    else L=va_arg(v,int);
+
+                  #ifdef DEBUG
+                  printf("printf: L=%08lX\n",L);
+                  #endif
+
+                  if (Type!='u') if (L<0) {*str++='-'; width--; L=-L;}
+
+                  if (Type=='u')
+                    if (Modifier=='l') ultoa(L,new_printf_buf,10);
+                    else ultoa(L,new_printf_buf,10);
+                  else
+                    if (Modifier=='l') ltoa(L,new_printf_buf,10);
+                    else itoa((int)L,new_printf_buf,10);
+
+                  #ifdef DEBUG
+                  printf("printf: new_printf_buf=%s\n",new_printf_buf);
+                  #endif
+                  len=(int)strlen(new_printf_buf);
+                  /* подавляем незначащие нули */
+                  if (L)
+                    {
+                    ss=new_printf_buf;
+                    if (*ss=='-')ss++;
+                    while(*ss=='0')*ss++=' ';
+                    fcc=ss;
+                    }
+                  else
+                    fcc="0";
+                  goto l_s;
+        case 'x':
+        case 'X': if (Modifier=='l')
+                    {
+                    if (width==0) width=8;
+                    ltoa(va_arg(v,long),new_printf_buf,16);
+                    }
+                  else
+                    {
+                    if (width==0) width=4;
+                    itoa(va_arg(v,int),new_printf_buf,16);
+                    }
+                  if ((len=(int)strlen(new_printf_buf))>width)
+                    {
+                    fcc=new_printf_buf;
+                    fcc+=len-width;
+                    }
+                  else
+                    fcc=new_printf_buf;
+                  goto l_s;
+        case 'p': if (width<5)
+                    {itoa(va_arg(v,int),new_printf_buf,10);
+                    strcpy(str,new_printf_buf);
+                    counter+=(i=(int)strlen(new_printf_buf));
+                    str+=i;}
+                  else
+                    {
+                    itoa(va_arg(v,int),new_printf_buf,10);
+                    strcpy(str,new_printf_buf);
+                    counter+=(i=(int)strlen(new_printf_buf));
+                    str+=i;
+                    *str++=':'; counter++;
+                    itoa(va_arg(v,int),new_printf_buf,10);
+                    strcpy(str,new_printf_buf);
+                    counter+=(i=(int)strlen(new_printf_buf));
+                    str+=i;
+                    }
+                  break;
+        case 'c': *str++=(char)va_arg(v,int); counter++; break;
+        case 'o': if (Modifier=='l') {ltoa(va_arg(v,long),new_printf_buf,8);}
+                  else {itoa(va_arg(v,int),new_printf_buf,8);}
+                  fcc=new_printf_buf;
+                  goto l_s;
+        case 's':
+                  #if 0 // 1 - proolix-d, 0 -proolix-l
+                  if (Modifier=='F')
+                    {fcc=va_arg(v, char  *);
+                    if (fcc==(char  *)NULL) fcc="(null)";
+                    }
+                  else
+                    {cc=va_arg(v,char *);
+                    if (cc==(char *)NULL) fcc="(null)";
+                    else
+                      {
+                      #ifdef BOOT /* compile printf for Boot Manager */
+                        asm mov ax,DS; /* SS ? */
+                        asm mov segment,ax;
+                        fcc = MK_FP (segment, cc);
+                      #else /* Compile printf for Proolix Kernel */
+                      if (User)
+                        {
+                        asm mov ax,ProcessPar;
+                        asm mov segment,ax;
+                        fcc = MK_FP (segment, cc);
+                        }
+                      else
+                        {
+                        asm mov ax,DS; /* SS ? */
+                        asm mov segment,ax;
+                        fcc = MK_FP (segment, cc);
+                        }
+                      #endif
+                      }
+                    }
+                  #else
+                    fcc=va_arg(v, char  *);
+                    if (fcc==(char  *)NULL) fcc="(null)";
+                  #endif
+                  #ifdef DEBUG
+                  puts0("printf: fcc="); puts0(fcc);
+                  #endif
+                  l_s:
+                  i=(int)strlen(fcc);
+                  if (width>i)
+                    {
+                    if (FlagMinus)
+                      {
+                      strcpy(str,fcc);
+                      memset(str+i,' ',width-i);
+                      }
+                    else
+                      {int j;char c;
+                      if (Type=='s') c=' ';
+                      else if (FlagZero) c='0';
+                      else c=' ';
+                      memset(str,c,j=width-i);
+                      strcpy(str+j,fcc);
+                      }
+                    str+=width; counter+=width;
+                    }
+                  else
+                    {
+                    strcpy(str,fcc);
+                    counter+=i; str+=i;
+                    }
+                  break;
+        case 'f':
+        case 'e':
+        case 'E':
+        case 'g':
+        case 'G':
+        case 'n':
+        default: printf("printf: type '%c' not supported in this realisation",
+                        Type);
+        }
+      }
+    }
+  format++;
+  }
+*str=0;
+return counter;
+}
+/****************************************************************************/
+int sprintf(char  *str, const char  *format, ...)
+{va_list v;
+va_start(v,0);
+return vsprintf(str, format, v);
+}
+#if 0
+int vprintf(const char  *format, va_list v)
+{
+int counter;
+/* char str[MAX_LEN_STR]; */
+char new_printf_buf[MAX_LEN_STR]; /* см. примечание в начале ф-ции printf */
+
+va_start(v,0);
+counter=vsprintf(new_printf_buf,format,v);
+if(puts0(new_printf_buf)==EOF)return EOF;
+return counter;
+}
+#endif
+
+char HexDigit [] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+int Divisor8  [] = {0100000, 010000, 01000, 0100, 010, 1};
+long Divisor10L [] = {1000000000L,
+                      100000000L,
+                       10000000L,
+                        1000000L,
+                         100000L,
+                          10000L,
+                           1000L,
+                            100L,
+                             10L,
+                              1L};
+
+long Divisor8L [] = {010000000000L,
+                     01000000000L,
+                      0100000000L,
+                       010000000L,
+                        01000000L,
+                         0100000L,
+                          010000L,
+                           01000L,
+                            0100L,
+                             010L,
+                              01L};
+
+int htoi(const char  *s)
+{
+int i; char c;
+i=0;
+while (*s)
+  {
+  i<<=4;
+  c=toupper(*s++);
+  if ((c>='0')&&(c<='9')) i+=c-'0';
+  else if ((c>='A')&&(c<='F')) i+=c+10-'A';
+  else return 0;
+  }
+return i;
+}
+/****************************************************************************/
+long htol(const char  *s)
+{
+long i; char c;
+i=0;
+while (*s)
+  {
+  i<<=4;
+  c=toupper(*s++);
+  if ((c>='0')&&(c<='9')) i+=c-'0';
+  else if ((c>='A')&&(c<='F')) i+=c+10-'A';
+  else return 0;
+  }
+return i;
+}
+/****************************************************************************/
+int atoi(const char  *s)
+{
+int i; char c;
+i=0;
+if (*s=='+') s++;
+else if(*s=='-')return-atoi(++s);
+while (*s)
+  {
+  c=*s++;
+  if (isdigit(c)) {i=i*10; i+=c-'0';}
+  else break;
+  }
+return i;
+}
+/****************************************************************************/
+long atol(const char  *s)
+{
+long i; char c;
+i=0;
+if (*s=='+') s++;
+else if(*s=='-')return-atol(++s);
+while (*s)
+  {
+  c=*s++;
+  if (isdigit(c)) {i=i*10; i+=c-'0';}
+  else break;
+  }
+return i;
+}
+/****************************************************************************/
+#if 0
+void fuck1(void)
+{
+int Divisor [] = {10000, 1000, 100, 10, 1};
+
+printf("fuck1 = %04X\n",Divisor[0]);
+
+}
+#endif
+/****************************************************************************/
+char  *itoa (int w, char  *str, int radix)
+{
+char  *ret;
+int i, r, power, n;
+int Divisor10 [] = {10000, 1000, 100, 10, 1};
+
+/* printf("itoa = %04X\n",Divisor10[0]); */
+
+if (radix>34) radix=34;
+
+ret=str;
+if (w<0) if (radix==10) {*str++='-'; itoa(-w,str,-10); return ret;}
+
+switch(radix)
+  {
+  case   2: for (i=0;i<16;i++) {*str++='0'+ w & 0x8000; w<<=1;} break;
+  case   8: for (i=0;i<6;i++)
+              {r=w/Divisor8[i]; w%=Divisor8[i]; *str++='0'+r;}
+            break;
+  case  16: for (i=0;i<4;i++) {*str++=HexDigit[(w&0xF000)>>12];w<<=4;} break;
+  case  10: *str++='0';
+            for (i=0;i<5;i++)
+              {r=w/Divisor10[i]; w%=Divisor10[i]; *str++='0'+r;
+              #ifdef DEBUG
+              printf("itoa: Divisor10[i]=%04X r=%04X w=%04X\n",
+                Divisor10[i],r,w);
+              #endif
+              }
+            break;
+  case -10: for (i=0;i<5;i++)
+              {r=w/Divisor10[i]; w%=Divisor10[i]; *str++='0'+r;
+              }
+            break;
+  default:  power=UINT_MAX;
+            for (i=1;i<16;i++) {power/=radix; if (power>0) break;}
+            n=i; power=1;
+            for (i=1;i<n;i++,power*=radix);
+            for (i=0;i<n;i++)
+              {power/=radix; r=w/power; w%=power; *str++=HexDigit[r];}
+            break;
+  }
+*str=0;
+return ret;
+}
+/****************************************************************************/
+char  *ltoa (long w, char  *str, int radix)
+{
+char  *ret;
+int i, n;
+long r, power;
+
+if (radix>34) radix=34;
+
+ret=str;
+if (w<0) if (radix==10) {*str++='-'; ltoa(-w,str,-10); return ret;}
+
+switch(radix)
+  {
+  case  2: for (i=0;i<32;i++) {*str++='0'+ w & 0x8000; w<<=1;} break;
+  case  8: for (i=0;i<11;i++)
+             {r=w/Divisor8L[i]; w%=Divisor8L[i]; *str++='0'+r;}
+           break;
+  case 16: for (i=0;i<8;i++)
+             {*str++=HexDigit[(int)((w&0xF0000000L)>>28)];w<<=4;}
+           break;
+  case 10: *str++='0';
+           for (i=0;i<10;i++)
+             {r=w/Divisor10L[i]; w%=Divisor10L[i]; *str++='0'+r;
+             }
+           break;
+  case -10: for (i=0;i<10;i++)
+              {r=w/Divisor10L[i]; w%=Divisor10L[i]; *str++='0'+r;
+              }
+            break;
+  default: power=ULONG_MAX;
+           for (i=1;i<32;i++) {power/=radix; if (power>0) break;}
+           n=i; power=1;
+           for (i=1;i<n;i++,power*=radix);
+           for (i=0;i<n;i++)
+             {power/=(long)radix; r=w/power; w%=power; *str++=HexDigit[(int)r];}
+           break;
+  }
+*str=0;
+return ret;
+}
+/****************************************************************************/
+char  *ultoa (unsigned long w, char  *str, int radix)
+{
+char  *ret;
+int i, n;
+long r, power;
+
+if (radix>34) radix=34;
+
+ret=str;
+
+switch(radix)
+  {
+  case  2: for (i=0;i<32;i++) {*str++='0'+ w & 0x8000; w<<=1;} break;
+  case  8: for (i=0;i<11;i++)
+             {r=w/Divisor8L[i]; w%=Divisor8L[i]; *str++='0'+r;}
+           break;
+  case 16: for (i=0;i<8;i++)
+             {*str++=HexDigit[(int)((w&0xF0000000L)>>28)];w<<=4;}
+           break;
+  case 10: *str++='0';
+           for (i=0;i<10;i++)
+             {r=w/Divisor10L[i]; w%=Divisor10L[i]; *str++='0'+r;
+             }
+           break;
+  case -10: for (i=0;i<10;i++)
+              {r=w/Divisor10L[i]; w%=Divisor10L[i]; *str++='0'+r;
+              }
+            break;
+  default: power=ULONG_MAX;
+           for (i=1;i<32;i++) {power/=radix; if (power>0) break;}
+           n=i; power=1;
+           for (i=1;i<n;i++,power*=radix);
+           for (i=0;i<n;i++)
+             {power/=(long)radix; r=w/power; w%=power; *str++=HexDigit[(int)r];}
+           break;
+  }
+*str=0;
+return ret;
+}
+
+#endif // printf package
+

@@ -2,7 +2,6 @@
 
 #include "headers.h"
 
-#include "clib.c"
 
 // global variables NOT USED! NOT WORK! BIKOZ .RSS SEGMENT NOT ADRESSED IN BIN FILE!
 
@@ -25,6 +24,13 @@ puts0(__DATE__);
 puts0(" ");
 puts0(__TIME__);
 puts0("\r\n");
+
+#if 0
+puts0("itoa 5 = ");
+itoa(5,buf,10);
+puts0(buf);
+//printf("test of printf %i\r\n",i);
+#endif
 
 set_color(7);
 
@@ -75,3 +81,5 @@ palette - print color palette\r\n\
 exit, quit - exit\r\n\
 ");
 }
+
+#include "clib.c"

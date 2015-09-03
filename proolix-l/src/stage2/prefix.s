@@ -4,9 +4,9 @@
 
 	.text
 	.code16gcc
-	jmp	_main
+	jmp	main
 
-_set_color:
+set_color:
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$4, %esp
@@ -15,14 +15,14 @@ _set_color:
 	leave
 	ret
 
-_get_color:
+get_color:
 	xor	%eax,%eax
 	movb	global_color,%al
 	ret
 
 global_color:	.word	0
 
-_putch2:
+putch2:
 # VIDEO - WRITE CHARACTER AND ATTRIBUTE AT CURSOR POSITION
 
 # AH = 09h
@@ -48,7 +48,7 @@ _putch2:
 	leave
 	ret
 
-_putch_color:
+putch_color:
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$12, %esp
@@ -70,7 +70,7 @@ _putch_color:
 	leave
 	ret
 
-_setpos:
+setpos:
 # VIDEO - SET CURSOR POSITION
 
 # AH = 02h
@@ -112,7 +112,7 @@ _setpos:
 # DH = row (00h is top)
 # DL = column (00h is left)
 
-_get_row:
+get_row:
 	movb	$3,%ah
 	xorb	%bh,%bh
 	int	$0x10
@@ -120,7 +120,7 @@ _get_row:
 	movb	%dh,%al
 	ret
 
-_get_col:
+get_col:
 	movb	$3,%ah
 	xorb	%bh,%bh
 	int	$0x10
@@ -129,7 +129,7 @@ _get_col:
 	ret
 
 /* eto ne rabotaet
-_getpos:
+getpos:
 	pushl	%ebp
 	movl	%esp, %ebp
 
@@ -152,7 +152,7 @@ _getpos:
 	ret
 */
 
-_cls_:
+cls_:
 # VIDEO - SCROLL UP WINDOW
 
 # AH = 06h
@@ -169,7 +169,7 @@ _cls_:
 	int	$0x10
 	ret
 
-_scroll:
+scroll:
 	movb	$6,%ah
 	movb	$1,%al
 	movb	global_color,%bh
