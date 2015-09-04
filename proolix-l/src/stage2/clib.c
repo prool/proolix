@@ -6,8 +6,6 @@
 #define MAX_LEN_STR 256 
 #define EOF (-1)
 
-/////////////////////////////////////////////////////////////////////////////
-
 #if 0
 void two_parameters(int *i, int *j) // see translated text in .s file
 {
@@ -15,6 +13,18 @@ void two_parameters(int *i, int *j) // see translated text in .s file
 *j=getch();
 }
 #endif
+
+void help(void)
+{
+puts0("Proolix-l shell command\r\n\r\n\
+test - test\r\n\
+help - help\r\n\
+ascii - write ascii table\r\n\
+cls - clearscreen\r\n\
+palette - print color palette\r\n\
+exit, quit - exit\r\n\
+");
+}
 
 int toupper (int ch)
 {
@@ -137,6 +147,34 @@ void puthex(int c)
 {
 puthex_b((c>>8) & 0xFFU);
 puthex_b(c&0xFFU);
+}
+
+void putdec (int w)
+{int r,i,trail_zeroes;
+trail_zeroes=1;
+int Divisor10 [] = {10000, 1000, 100, 10, 1};
+
+if (w<0) {putch('-'); w=-w;}
+if (w==0) {putch('0'); return;}
+
+            for (i=0;i<5;i++)
+              {
+              r=w/Divisor10[i];
+              w%=Divisor10[i];
+              if (r!=0)
+            	    {
+            	    putch('0'+r);
+            	    trail_zeroes=0;
+            	    }
+              else // r==0
+            	    if (trail_zeroes)
+            		{// nothing
+            		}
+            	    else
+            		{
+            		putch('0');
+            		}
+              }
 }
 
 #if 0
@@ -910,6 +948,9 @@ int sprintf(char  *str, const char  *format, ...)
 va_start(v,0);
 return vsprintf(str, format, v);
 }
+
+#endif // printf package
+
 #if 0
 int vprintf(const char  *format, va_list v)
 {
@@ -1018,7 +1059,8 @@ printf("fuck1 = %04X\n",Divisor[0]);
 
 }
 #endif
-/****************************************************************************/
+
+#if 0 // itoa package
 char  *itoa (int w, char  *str, int radix)
 {
 char  *ret;
@@ -1144,6 +1186,61 @@ switch(radix)
 *str=0;
 return ret;
 }
+#endif // itoa package
 
-#endif // printf package
+void out_boot(void *buf)
 
+{int i;
+unsigned long DiskSize;
+unsigned long TrueSectors;
+struct BootStru *b;
+//b=buf; ///////////////////////////////////////////
+puts0("Jump command \r\n");
+#if 0
+puthex_b((*b).Jmp[0]);
+puthex_b((*b).Jmp[1]);
+puthex_b((*b).Jmp[2]);
+
+puts0("OEM name     ");
+puts0((*b).OEM);
+
+for(i=0;i<8;) printf("%02X ",(*b).OEM[i++]);
+
+printf("\nSector size                      %4i bytes Cluster size                %1i sect\n",(*b).SectSiz,(*b).ClustSiz);
+printf("Reserved sectors (before 1st FAT)  %2i       FAT counter                 %1i\n",(*b).ResSecs,(*b).FatCnt);
+printf("Root directory entries           %4i       Total sectors         %7u\n",(*b).RootSiz,(*b).TotSecs);
+printf("Media descr                        %02X       FAT size                %5i sect\n",(*b).Media,(*b).FatSize);
+printf("Track size                         %2i sec   Heads                     %3i\n",(*b).TrkSecs,(*b).HeadCnt);
+printf("Hidden sectors                %7li       Big Number Of Sectors %7li\n",(*b).HidnSec,(*b).BigSect);
+printf("Physical Drive No                  %02X       ",(*b).DriveNo);
+printf("Reserved byte              %02X \n",(*b).Thing);
+printf("Extended Boot Signature            %02X       ",(*b).BootSign);
+printf("Volume Serial No %04X-%04X",
+(*b).SerialNo[1],
+(*b).SerialNo[0]);
+
+printf("\nVolume Label (in boot)  ");
+for(i=0;i<11;)putchp((*b).VolLbl[i++]);
+printf("\n                        ");
+for(i=0;i<11;)printf("%02X ",(*b).VolLbl[i++]);
+printf("\nFile system Id          ");
+for(i=0;i<8;)putchp((*b).FileSysId[i++]);
+printf("\n                        ");
+for(i=0;i<8;)printf("%02X ",(*b).FileSysId[i++]);
+
+if ((*b).TotSecs==0) TrueSectors=(*b).BigSect;
+else TrueSectors=(*b).TotSecs;
+
+DiskSize=((long) (*b).SectSiz * TrueSectors)/1024l;
+
+if (DiskSize>5000)
+  {
+  DiskSize/=1024;
+  printf("\nDisk size %li Mb\n",DiskSize);
+  }
+else
+  {
+  printf("\nDisk size %li Kb\n",DiskSize);
+  }
+#endif
+}

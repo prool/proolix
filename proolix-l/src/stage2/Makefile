@@ -104,7 +104,7 @@ ct:	c2.c headers.h clib.c prefix.s
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o ctmp ctmp.o > map.lst
 #	skip parameter set manually (use brains)
 	dd if=ctmp of=ct skip=4096
-	cp ct /mnt/fdd
+	#cp ct /mnt/fdd
 
 vexe:	vexe.c
 	gcc vexe.c -o vexe.exe

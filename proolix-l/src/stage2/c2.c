@@ -2,8 +2,12 @@
 
 #include "headers.h"
 
-
 // global variables NOT USED! NOT WORK! BIKOZ .RSS SEGMENT NOT ADRESSED IN BIN FILE!
+
+void testchar(char *c)
+{
+*c='c';
+}
 
 void palette(void)
 {int i;
@@ -16,23 +20,45 @@ void main(void)
 char buf [BUFLEN];
 int i,j;
 char c,cc;
+char bootsector[512];
 
 set_color(15);
 
-puts0("Proolix-l shell. Compile ");
+puts0("Proolix-l shell. Compiled ");
 puts0(__DATE__);
 puts0(" ");
 puts0(__TIME__);
 puts0("\r\n");
 
-#if 0
-puts0("itoa 5 = ");
-itoa(5,buf,10);
-puts0(buf);
-//printf("test of printf %i\r\n",i);
+#if 0 // test of putdec()
+puts0("digit 0. putdec: "); putdec(0); puts0("\r\n");
+puts0("digit 1. putdec: "); putdec(1); puts0("\r\n");
+puts0("digit 50. putdec: "); putdec(50); puts0("\r\n");
+puts0("digit 55. putdec: "); putdec(55); puts0("\r\n");
+puts0("digit 100. putdec: "); putdec(100); puts0("\r\n");
+puts0("digit 101. putdec: "); putdec(101); puts0("\r\n");
+puts0("digit -1. putdec: "); putdec(-1); puts0("\r\n");
 #endif
 
 set_color(7);
+
+#if 0 // test of char* param
+puts0("test of char* param. `c' = ");
+c='*';
+testchar(&c);
+putch(c);
+#endif
+
+readboot(bootsector);
+
+puts0("boot sector read\r\n");
+
+#if 1
+//for (i=0;i<512;i++) puthex(bootsector[i]);
+for (i=0;i<512;i++) putch(bootsector[i]);
+#endif
+
+//out_boot(bootsector);
 
 //puts0("cursor coord "); puthex(get_row()); puts0(" "); puthex(get_col()); puts0("\r\n"); 
 
@@ -68,18 +94,6 @@ while (1)
 	}
 
 stop();
-}
-
-void help(void)
-{
-puts0("Proolix-l shell command\r\n\r\n\
-test - test\r\n\
-help - help\r\n\
-ascii - write ascii table\r\n\
-cls - clearscreen\r\n\
-palette - print color palette\r\n\
-exit, quit - exit\r\n\
-");
 }
 
 #include "clib.c"

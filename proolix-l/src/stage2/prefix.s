@@ -178,3 +178,21 @@ scroll:
 	int	$0x10
 	ret
 	
+readboot:
+	pushl	%ebp
+
+	movl	%esp, %ebp
+	movl	8(%ebp), %ebx # parameter: addr of buffer
+	
+	# ES:BX -> data buffer
+	
+	movw	$0x0201,%ax # ah = 02 (command 'read'), al=1 - number of sectors to read
+	movw	$0x0001,%cx
+	# CH = low eight bits of cylinder number
+	# CL = sector number 1-63 (bits 0-5) high two bits of cylinder (bits 6-7, hard disk only)
+	movw	$0x0000,%dx # DH = head number DL = drive number (bit 7 set for hard disk)
+	
+	int	$0x13
+
+	popl	%ebp
+	ret
