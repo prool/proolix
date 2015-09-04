@@ -101,10 +101,10 @@ ct:	c2.c headers.h clib.c prefix.s
 	gcc -S -m16 c2.c
 	./britva.sh c2.s
 	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s
-	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o ctmp ctmp.o > map.lst
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o ctmp ctmp.o > map.lst
 #	skip parameter set manually (use brains)
-	dd if=ctmp of=ct skip=4096
-	#cp ct /mnt/fdd
+#	dd if=ctmp of=ct skip=4096
+	cp ctmp ct
 
 vexe:	vexe.c
 	gcc vexe.c -o vexe.exe

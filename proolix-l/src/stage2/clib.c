@@ -14,18 +14,6 @@ void two_parameters(int *i, int *j) // see translated text in .s file
 }
 #endif
 
-void help(void)
-{
-puts0("Proolix-l shell command\r\n\r\n\
-test - test\r\n\
-help - help\r\n\
-ascii - write ascii table\r\n\
-cls - clearscreen\r\n\
-palette - print color palette\r\n\
-exit, quit - exit\r\n\
-");
-}
-
 int toupper (int ch)
 {
 if ((ch>='a')&&(ch<='z'))return ch + 'A' - 'a'; else return ch;
@@ -501,9 +489,6 @@ return ret;
 }
 
 /****************************************************************************/
-/****************************************************************************/
-
-/****************************************************************************/
 
 int tolower (int ch)
 {
@@ -965,6 +950,7 @@ return counter;
 }
 #endif
 
+#if 0 // global variables NOT PERMIT!!!!!!!!!
 char HexDigit [] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 int Divisor8  [] = {0100000, 010000, 01000, 0100, 010, 1};
 long Divisor10L [] = {1000000000L,
@@ -989,6 +975,8 @@ long Divisor8L [] = {010000000000L,
                             0100L,
                              010L,
                               01L};
+
+#endif
 
 int htoi(const char  *s)
 {
@@ -1189,44 +1177,42 @@ return ret;
 #endif // itoa package
 
 void out_boot(void *buf)
-
 {int i;
 unsigned long DiskSize;
 unsigned long TrueSectors;
 struct BootStru *b;
-//b=buf; ///////////////////////////////////////////
+b=buf;
 puts0("Jump command \r\n");
-#if 0
 puthex_b((*b).Jmp[0]);
 puthex_b((*b).Jmp[1]);
 puthex_b((*b).Jmp[2]);
 
-puts0("OEM name     ");
+puts0("\r\nOEM name     ");
 puts0((*b).OEM);
 
-for(i=0;i<8;) printf("%02X ",(*b).OEM[i++]);
+for(i=0;i<8;) {puthex_b((*b).OEM[i++]); putch(' ');}
+puts0("\r\nSector size                      ");putdec((*b).SectSiz);puts0(" bytes Cluster size                ");putdec((*b).ClustSiz);
+puts0(" sect\r\n");
+puts0("Reserved sectors (before 1st FAT)  ");putdec((*b).ResSecs);puts0("       FAT counter                 ");putdec((*b).FatCnt);
 
-printf("\nSector size                      %4i bytes Cluster size                %1i sect\n",(*b).SectSiz,(*b).ClustSiz);
-printf("Reserved sectors (before 1st FAT)  %2i       FAT counter                 %1i\n",(*b).ResSecs,(*b).FatCnt);
-printf("Root directory entries           %4i       Total sectors         %7u\n",(*b).RootSiz,(*b).TotSecs);
-printf("Media descr                        %02X       FAT size                %5i sect\n",(*b).Media,(*b).FatSize);
-printf("Track size                         %2i sec   Heads                     %3i\n",(*b).TrkSecs,(*b).HeadCnt);
-printf("Hidden sectors                %7li       Big Number Of Sectors %7li\n",(*b).HidnSec,(*b).BigSect);
-printf("Physical Drive No                  %02X       ",(*b).DriveNo);
-printf("Reserved byte              %02X \n",(*b).Thing);
-printf("Extended Boot Signature            %02X       ",(*b).BootSign);
-printf("Volume Serial No %04X-%04X",
-(*b).SerialNo[1],
-(*b).SerialNo[0]);
+#if 0
+puts0("\r\nRoot directory entries           %4i       Total sectors         %7u\r\n",(*b).RootSiz,(*b).TotSecs);
+puts0("Media descr                        %02X       FAT size                %5i sect\r\n",(*b).Media,(*b).FatSize);
+puts0("Track size                         %2i sec   Heads                     %3i\r\n",(*b).TrkSecs,(*b).HeadCnt);
+puts0("Hidden sectors                %7li       Big Number Of Sectors %7li\r\n",(*b).HidnSec,(*b).BigSect);
+puts0("Physical Drive No                  %02X       ",(*b).DriveNo);
+puts0("Reserved byte              %02X \r\n",(*b).Thing);
+puts0("Extended Boot Signature            %02X       ",(*b).BootSign);
+puts0("Volume Serial No %04X-%04X",(*b).SerialNo[1],(*b).SerialNo[0]);
 
-printf("\nVolume Label (in boot)  ");
-for(i=0;i<11;)putchp((*b).VolLbl[i++]);
-printf("\n                        ");
-for(i=0;i<11;)printf("%02X ",(*b).VolLbl[i++]);
-printf("\nFile system Id          ");
-for(i=0;i<8;)putchp((*b).FileSysId[i++]);
-printf("\n                        ");
-for(i=0;i<8;)printf("%02X ",(*b).FileSysId[i++]);
+puts0("\r\nVolume Label (in boot)  ");
+for(i=0;i<11;)putch((*b).VolLbl[i++]);
+puts0("\r\n                        ");
+for(i=0;i<11;)puts0("%02X ",(*b).VolLbl[i++]);
+puts0("\r\nFile system Id          ");
+for(i=0;i<8;)putch((*b).FileSysId[i++]);
+puts0("\r\n                        ");
+for(i=0;i<8;)puts0("%02X ",(*b).FileSysId[i++]);
 
 if ((*b).TotSecs==0) TrueSectors=(*b).BigSect;
 else TrueSectors=(*b).TotSecs;
@@ -1236,11 +1222,23 @@ DiskSize=((long) (*b).SectSiz * TrueSectors)/1024l;
 if (DiskSize>5000)
   {
   DiskSize/=1024;
-  printf("\nDisk size %li Mb\n",DiskSize);
+  puts0("\r\nDisk size %li Mb\r\n",DiskSize);
   }
 else
   {
-  printf("\nDisk size %li Kb\n",DiskSize);
+  puts0("\r\nDisk size %li Kb\r\n",DiskSize);
   }
 #endif
+}
+
+void help(void)
+{
+puts0("Proolix-l shell command\r\n\r\n\
+test - test\r\n\
+help - help\r\n\
+ascii - write ascii table\r\n\
+cls - clearscreen\r\n\
+palette - print color palette\r\n\
+exit, quit - exit\r\n\
+");
 }

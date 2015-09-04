@@ -55,10 +55,10 @@ puts0("boot sector read\r\n");
 
 #if 1
 //for (i=0;i<512;i++) puthex(bootsector[i]);
-for (i=0;i<512;i++) putch(bootsector[i]);
+//for (i=0;i<512;i++) putch(bootsector[i]);
 #endif
 
-//out_boot(bootsector);
+out_boot(bootsector);
 
 //puts0("cursor coord "); puthex(get_row()); puts0(" "); puthex(get_col()); puts0("\r\n"); 
 
