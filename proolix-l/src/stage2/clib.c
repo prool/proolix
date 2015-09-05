@@ -1182,7 +1182,7 @@ unsigned long DiskSize;
 unsigned long TrueSectors;
 struct BootStru *b;
 b=buf;
-puts0("Jump command \r\n");
+puts0("Jump command ");
 puthex_b((*b).Jmp[0]);
 puthex_b((*b).Jmp[1]);
 puthex_b((*b).Jmp[2]);
@@ -1194,41 +1194,43 @@ for(i=0;i<8;) {puthex_b((*b).OEM[i++]); putch(' ');}
 puts0("\r\nSector size                      ");putdec((*b).SectSiz);puts0(" bytes Cluster size                ");putdec((*b).ClustSiz);
 puts0(" sect\r\n");
 puts0("Reserved sectors (before 1st FAT)  ");putdec((*b).ResSecs);puts0("       FAT counter                 ");putdec((*b).FatCnt);
-
-#if 0
-puts0("\r\nRoot directory entries           %4i       Total sectors         %7u\r\n",(*b).RootSiz,(*b).TotSecs);
-puts0("Media descr                        %02X       FAT size                %5i sect\r\n",(*b).Media,(*b).FatSize);
-puts0("Track size                         %2i sec   Heads                     %3i\r\n",(*b).TrkSecs,(*b).HeadCnt);
-puts0("Hidden sectors                %7li       Big Number Of Sectors %7li\r\n",(*b).HidnSec,(*b).BigSect);
-puts0("Physical Drive No                  %02X       ",(*b).DriveNo);
-puts0("Reserved byte              %02X \r\n",(*b).Thing);
-puts0("Extended Boot Signature            %02X       ",(*b).BootSign);
-puts0("Volume Serial No %04X-%04X",(*b).SerialNo[1],(*b).SerialNo[0]);
-
+puts0("\r\nRoot directory entries           ");putdec((*b).RootSiz);puts0("       Total sectors         ");putdec((*b).TotSecs);
+puts0("\r\nMedia descr                        ");puthex((*b).Media);puts0("       FAT size                ");putdec((*b).FatSize);
+puts0("\r\nTrack size                         ");putdec((*b).TrkSecs);puts0(" sec   Heads                     ");putdec((*b).HeadCnt);
+puts0("\r\nHidden sectors                ");putdec((*b).HidnSec);puts0("       Big Number Of Sectors ");putdec((*b).BigSect);
+puts0("\r\nPhysical Drive No                  ");puthex(b->DriveNo);
+puts0(" Reserved byte              ");puthex((*b).Thing);
+puts0("\r\nExtended Boot Signature            ");puthex((*b).BootSign);
+puts0(" Volume Serial No ");puthex((*b).SerialNo[1]);puthex((*b).SerialNo[0]);
 puts0("\r\nVolume Label (in boot)  ");
 for(i=0;i<11;)putch((*b).VolLbl[i++]);
 puts0("\r\n                        ");
-for(i=0;i<11;)puts0("%02X ",(*b).VolLbl[i++]);
+for(i=0;i<11;) puthex_b((*b).VolLbl[i++]);
 puts0("\r\nFile system Id          ");
 for(i=0;i<8;)putch((*b).FileSysId[i++]);
 puts0("\r\n                        ");
-for(i=0;i<8;)puts0("%02X ",(*b).FileSysId[i++]);
-
+for(i=0;i<8;)puthex_b((*b).FileSysId[i++]);
 if ((*b).TotSecs==0) TrueSectors=(*b).BigSect;
 else TrueSectors=(*b).TotSecs;
-
 DiskSize=((long) (*b).SectSiz * TrueSectors)/1024l;
 
 if (DiskSize>5000)
   {
   DiskSize/=1024;
-  puts0("\r\nDisk size %li Mb\r\n",DiskSize);
+  puts0("\r\nDisk size ");putdec(DiskSize);puts0(" Mb\r\n");
   }
 else
   {
-  puts0("\r\nDisk size %li Kb\r\n",DiskSize);
+  puts0("\r\nDisk size ");putdec(DiskSize);puts0(" Kb\r\n");
   }
-#endif
+}
+
+void system(void)
+{
+puts0("\r\nsize of int ");putdec(sizeof(int));
+puts0("\r\nsize of long int ");putdec(sizeof(long int));
+puts0("\r\nsize of short int ");putdec(sizeof(short int));
+puts0("\r\nsize of char ");putdec(sizeof(char));
 }
 
 void help(void)
@@ -1239,6 +1241,7 @@ help - help\r\n\
 ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
 palette - print color palette\r\n\
+system - print system parameters\r\n\
 exit, quit - exit\r\n\
 ");
 }

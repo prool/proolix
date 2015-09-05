@@ -1,9 +1,3 @@
-See readme.txt files in subdirectories!
+diskette.img - Proolix-l bootable diskette
 
----
-
-Russian comments in sources
-
-- in oldest files in CP866 ("MSDOS alternative") codetable
-- in old files in KOI8-R codetable
-- in new files in UTF-8 codetable
+Make bootable flash USB stick with 'unetbootin' utility

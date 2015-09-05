@@ -51,7 +51,7 @@ putch(c);
 
 readboot(bootsector);
 
-puts0("boot sector read\r\n");
+puts0("Boot sector read. ");
 
 #if 1
 //for (i=0;i<512;i++) puthex(bootsector[i]);
@@ -85,6 +85,7 @@ while (1)
 	else if (!strcmp(buf,"cls")) cls();
 	else if (!strcmp(buf,"scroll")) scroll();
 	else if (!strcmp(buf,"palette")) palette();
+	else if (!strcmp(buf,"system")) system();
 	else
 		{
 		puts0("Unknown command '");

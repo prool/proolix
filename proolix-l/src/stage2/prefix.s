@@ -4,6 +4,8 @@
 
 	.text
 	.code16gcc
+_start:	
+	.globl	_start
 	jmp	main
 
 set_color:
