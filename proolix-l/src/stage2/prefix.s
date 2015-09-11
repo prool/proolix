@@ -7,6 +7,28 @@
 _start:	
 	.globl	_start
 	jmp	main
+	
+# variables
+
+example_var:	.word	0,0
+
+basic:
+	int	$0x18
+	ret
+peek:
+	pushl	%ebp
+
+#	pushl	%ES	
+	movl	%esp,%ebp
+	subl	$4,%esp
+	movl	8(%ebp),%ebx
+	xor	%eax,%eax
+	movl	%eax,%ES
+	movl	%ES:(%ebx),%eax
+#	popl	%ES
+	
+	leave
+	ret
 
 set_color:
 	pushl	%ebp

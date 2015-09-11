@@ -137,6 +137,12 @@ puthex_b((c>>8) & 0xFFU);
 puthex_b(c&0xFFU);
 }
 
+void puthex_l(int c)
+{
+puthex ((c>>16)&0xFFFFU);
+puthex (c & 0xFFFFU);
+}
+
 void putdec (int w)
 {int r,i,trail_zeroes;
 trail_zeroes=1;
@@ -1194,14 +1200,14 @@ for(i=0;i<8;) {puthex_b((*b).OEM[i++]); putch(' ');}
 puts0("\r\nSector size                      ");putdec((*b).SectSiz);puts0(" bytes Cluster size                ");putdec((*b).ClustSiz);
 puts0(" sect\r\n");
 puts0("Reserved sectors (before 1st FAT)  ");putdec((*b).ResSecs);puts0("       FAT counter                 ");putdec((*b).FatCnt);
-puts0("\r\nRoot directory entries           ");putdec((*b).RootSiz);puts0("       Total sectors         ");putdec((*b).TotSecs);
-puts0("\r\nMedia descr                        ");puthex((*b).Media);puts0("       FAT size                ");putdec((*b).FatSize);
-puts0("\r\nTrack size                         ");putdec((*b).TrkSecs);puts0(" sec   Heads                     ");putdec((*b).HeadCnt);
-puts0("\r\nHidden sectors                ");putdec((*b).HidnSec);puts0("       Big Number Of Sectors ");putdec((*b).BigSect);
-puts0("\r\nPhysical Drive No                  ");puthex(b->DriveNo);
-puts0(" Reserved byte              ");puthex((*b).Thing);
-puts0("\r\nExtended Boot Signature            ");puthex((*b).BootSign);
-puts0(" Volume Serial No ");puthex((*b).SerialNo[1]);puthex((*b).SerialNo[0]);
+puts0("\r\nRoot directory entries           ");putdec((*b).RootSiz);puts0("       Total sectors               ");putdec((*b).TotSecs);
+puts0("\r\nMedia descr                       ");puthex_b((*b).Media);puts0("       FAT size                    ");putdec((*b).FatSize);
+puts0("\r\nTrack size                        ");putdec((*b).TrkSecs);puts0(" sec   Heads                       ");putdec((*b).HeadCnt);
+puts0("\r\nHidden sectors                     ");putdec((*b).HidnSec);puts0("       Big Number Of Sectors       ");putdec((*b).BigSect);
+puts0("\r\nPhysical Drive No                 ");puthex_b(b->DriveNo);
+//puts0(" Reserved byte              ");puthex_b((*b).Thing);
+//puts0("\r\nExtended Boot Signature            ");puthex_b((*b).BootSign);
+puts0("       Volume Serial No            ");puthex((*b).SerialNo[1]);putch('-');puthex((*b).SerialNo[0]);
 puts0("\r\nVolume Label (in boot)  ");
 for(i=0;i<11;)putch((*b).VolLbl[i++]);
 puts0("\r\n                        ");
@@ -1233,6 +1239,33 @@ puts0("\r\nsize of short int ");putdec(sizeof(short int));
 puts0("\r\nsize of char ");putdec(sizeof(char));
 }
 
+void memmap(void)
+{
+puts0("\
+Memory map for Proolix-l (real mode)\r\n\
+0 - 1FF  Vectors\r\n\
+200 - 3FF free area (stack of boot sector)\r\n\
+400 - 4FF ROM BIOS data\r\n\
+600 =0060:0000 - load kernel address (see src/stage2/boot.S, KernelSeg constant)\r\n\
+07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
+07E00                      Boot sector end\r\n\
+30500 (=3050:0000) stage2 (see src/boot-sector/boots.S, stage2_seg constant)\r\n\
+MemTop (f.e. 9FFFF)\r\n\
+A0000 EGA (in graph modes)\r\n\
+B0000 MDA, Hercules 1st videopage\r\n\
+B8000 CGA, EGA, VGA 1st videopage (mode=3, symbol mode)\r\n\
+C8000 Additional ROM modules (2K blocks)\r\n\
+E0000 End of addtn ROM\r\n\
+E0000 Bg  AT ROM BIOS\r\n\
+EFFFF End AT ROM BIOS\r\n\
+F6000 ROM Basic\r\n\
+FE000 ROM BIOS, POST\r\n\
+FFFF0 JMP - COLD REBOOT\r\n\
+FFFF5 BIOS version/date (ASCII)\r\n\
+FFFFE PC/XT/AT identefication byte\r\n\
+");
+}
+
 void help(void)
 {
 puts0("Proolix-l shell command\r\n\r\n\
@@ -1242,6 +1275,43 @@ ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
 palette - print color palette\r\n\
 system - print system parameters\r\n\
+memd - memory dump\r\n\
+memmap - print memory map\r\n\
+basic - call ROM BASIC (if exist)\r\n\
 exit, quit - exit\r\n\
 ");
+}
+
+void memd(void)
+{char str[MAX_LEN_STR];
+int a,i,line,c;
+
+puts0("adr? ");
+getsn(str,MAX_LEN_STR);
+a=(htoi(str));
+//puts0("\r\nAddress = ");
+//puthex_l(a);
+
+puts0("\r\n");
+
+#define MEMD_STEP 16
+
+for (line=0;line<23;line++)
+    {
+    puthex_l(a); putch(' ');
+    for (i=0;i<=MEMD_STEP;i++)
+	{
+	c=peek(a+i);
+	puthex_b(c);
+	putch(' ');
+	}
+    for (i=0;i<=MEMD_STEP;i++)
+	{
+	c=(peek(a+i))&0xFFU;
+	if (c<' ') putch('.');
+	else putch(c);
+	}
+    a+=MEMD_STEP;
+    puts0("\r\n");
+    }	
 }

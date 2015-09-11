@@ -15,12 +15,16 @@ for (i=0;i<256;i++) {if (i%16==0) puts0("\r\n");set_color(i); puts0("W");}
 set_color(7); puts0("end of palette");
 }
 
+extern int example_var;
+
 void main(void)
 {
 char buf [BUFLEN];
 int i,j;
 char c,cc;
 char bootsector[512];
+
+example_var=0;
 
 set_color(15);
 
@@ -86,6 +90,9 @@ while (1)
 	else if (!strcmp(buf,"scroll")) scroll();
 	else if (!strcmp(buf,"palette")) palette();
 	else if (!strcmp(buf,"system")) system();
+	else if (!strcmp(buf,"memd")) memd();
+	else if (!strcmp(buf,"memmap")) memmap();
+	else if (!strcmp(buf,"basic")) basic();
 	else
 		{
 		puts0("Unknown command '");

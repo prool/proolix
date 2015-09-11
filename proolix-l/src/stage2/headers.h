@@ -10,11 +10,14 @@ void putch3(char c);
 void puts0(char *s);
 void putch_color(char c, char attrib);
 void puthex(int c);
+void puthex_l(int c);
 int getch(void);
 char *getsn(char *str, int len);
 size_t strlen (const char *s);
 char *strchr (const char *str, int c);
 char  * strncpy (char  * dest, const char  * src, size_t maxlen);
+
+int peek (int addr);
 
 char get_row(void);
 char get_col(void);
@@ -24,10 +27,13 @@ char get_color(void);
 void set_color(char color);
 
 void help(void);
+void memmap(void);
 void system(void);
 void test(void);
 void ascii(void);
 void cls(void);
+void memd(void);
+void basic(void);
 
 char  *itoa (int w, char  *str, int radix);
 
@@ -85,3 +91,9 @@ OldVec          dw      2 dup (0)
   unsigned char VolLbl [11];
   unsigned char FileSysId [8];
 };
+
+#define FP_OFF(fp)      ((unsigned)(fp))
+#define FP_SEG(fp)      ((unsigned)((unsigned long)(fp) >> 16))
+
+#define MK_FP(seg,ofs)  ((void *) \
+                           (((unsigned long)(seg) << 16) | (unsigned)(ofs)))

@@ -7,7 +7,7 @@ CPP = cpp
 
 ASFLAG =
 
-boot:	boot_ cmd2com
+boot:	boot_
 	dd if=boot_ of=boot skip=4096
 
 boot_: boot_.o
@@ -97,7 +97,7 @@ c1s:	c1s.s
 	chmod a-x c1s
 
 # cygwin experiments: cross-compile for Proolix: .c file -> asm .s file -> stripped .s file -> binary
-ct:	c2.c headers.h clib.c prefix.s
+ct:	c2.c clib.c prefix.s headers.h
 	gcc -S -m16 c2.c
 	./britva.sh c2.s
 	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s
