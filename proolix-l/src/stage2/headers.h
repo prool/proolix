@@ -1,5 +1,20 @@
 // C-headers for c utilities
 
+// variables
+
+extern int SectorsOnCyl;
+extern int TrkSecs;
+extern int HeadCnt;
+extern int RootBeg;
+extern int DataStart;
+extern int MaxSectors;
+extern int ResSecs;
+extern int CluSize;
+extern int CluSizeBytes;
+extern int FatSize;
+extern int RootEnd;
+extern int MaxClusters;
+
 #define NULL 0
 typedef unsigned int size_t;
 
@@ -11,6 +26,8 @@ void puts0(char *s);
 void putch_color(char c, char attrib);
 void puthex(int c);
 void puthex_l(int c);
+void putdec(int);
+void putdec2(int, int, int);
 int getch(void);
 char *getsn(char *str, int len);
 size_t strlen (const char *s);
@@ -34,11 +51,16 @@ void ascii(void);
 void cls(void);
 void memd(void);
 void basic(void);
+void diskd0(void);
+void diskd(void);
+void ls(void);
 
 char  *itoa (int w, char  *str, int radix);
 
 void readboot (char *buffer);
 void out_boot(void *buf);
+void process_boot(void *buf);
+int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer);
 
 struct __attribute__((__packed__)) BootStru /* structure of boot sector of FAT12 and FAT16*/
 {
@@ -97,3 +119,14 @@ OldVec          dw      2 dup (0)
 
 #define MK_FP(seg,ofs)  ((void *) \
                            (((unsigned long)(seg) << 16) | (unsigned)(ofs)))
+
+struct __attribute__((__packed__)) dirent16 /* directory structure of FAT-12 and FAT-16 */
+{
+char d_name [11];
+unsigned char AttrByte;
+char Reserv [10];
+unsigned short int FileTime;
+unsigned short int FileDate;
+unsigned short int d_fileno; /* initial cluster number */
+unsigned int Size;
+};

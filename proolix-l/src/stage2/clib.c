@@ -146,12 +146,12 @@ puthex (c & 0xFFFFU);
 void putdec (int w)
 {int r,i,trail_zeroes;
 trail_zeroes=1;
-int Divisor10 [] = {10000, 1000, 100, 10, 1};
+int Divisor10 [10] = {1000000000,100000000,10000000,1000000,100000,10000, 1000, 100, 10, 1};
 
 if (w<0) {putch('-'); w=-w;}
 if (w==0) {putch('0'); return;}
 
-            for (i=0;i<5;i++)
+            for (i=0;i<10;i++)
               {
               r=w/Divisor10[i];
               w%=Divisor10[i];
@@ -163,6 +163,37 @@ if (w==0) {putch('0'); return;}
               else // r==0
             	    if (trail_zeroes)
             		{// nothing
+            		}
+            	    else
+            		{
+            		putch('0');
+            		}
+              }
+}
+
+void putdec2 (int w, int digits, int zeroes)
+{int r,i,trail_zeroes;
+trail_zeroes=1;
+int Divisor10 [10] = {1000000000,100000000,10000000,1000000,100000,10000, 1000, 100, 10, 1};
+
+if ((digits<1)||(digits>10)) return;
+
+if (w<0) {putch('-'); w=-w;}
+if (w==0) {putch('0'); return;}
+
+            for (i=10-digits;i<10;i++)
+              {
+              r=w/Divisor10[i];
+              w%=Divisor10[i];
+              if (r!=0)
+            	    {
+            	    putch('0'+r);
+            	    trail_zeroes=0;
+            	    }
+              else // r==0
+            	    if (trail_zeroes)
+            		{if (zeroes==0) putch('0');
+			else putch(' ');
             		}
             	    else
             		{
@@ -1182,6 +1213,83 @@ return ret;
 }
 #endif // itoa package
 
+void process_boot (void *buf)
+{int i;
+  struct BootStru *b;
+  b=buf;
+  HeadCnt=b->HeadCnt;
+  TrkSecs=b->TrkSecs;
+  SectorsOnCyl=HeadCnt*TrkSecs;
+
+  if ((i=b->ResSecs)!=0) ResSecs=i; ResSecs=b->HidnSec+1;
+  if ((i=b->TotSecs)!=0) MaxSectors=i;
+  else MaxSectors=b->BigSect+b->HidnSec;
+
+  CluSize=b->ClustSiz;
+  CluSizeBytes=CluSize * 512;
+  FatSize=b->FatSize;
+  RootBeg = ResSecs + 2 * b->FatSize; // 2 - FatCnt
+  RootEnd = RootBeg + ( ( b->RootSiz * 32 ) / b->SectSiz ) - 1;
+  DataStart = RootEnd+1;
+  MaxClusters=((MaxSectors-DataStart)/CluSize+1);
+  puts0("process_boot end\r\n");
+}
+
+void ls (void)
+{
+char buf[512];
+unsigned char *pp;
+int i,j,k;
+struct dirent16 *d;
+
+puts0("RootBeg=");putdec(RootBeg);puts0("\r\n");
+
+for(i=RootBeg;i<RootEnd;i++)
+    {
+    for (k=0;k<512;k++) buf[k]=0;
+    secread(0,i,buf);
+    pp=buf;
+    for (j=0;j<16;j++)
+	{
+	d=(void *)pp;
+	if ((*pp==0x0E5)||(*pp==0)||(d->AttrByte&8)) {pp+=32; continue;}
+	for (k=0;k<11;k++) putch(d->d_name[k]);
+	putch(' ');
+#if 1
+	if (d->AttrByte&128)	putch('*'); else putch('.');
+	if (d->AttrByte& 64)	putch('*'); else putch('.');
+	if (d->AttrByte& 32)	putch('A'); else putch('.');
+	if (d->AttrByte& 16)	putch('D'); else putch('.');
+	if (d->AttrByte&  8)	putch('L'); else putch('.');
+	if (d->AttrByte&  4)	putch('S'); else putch('.');
+	if (d->AttrByte&  2)	putch('H'); else putch('.');
+	if (d->AttrByte&  1)	putch('R'); else putch('.');
+#endif
+
+// time 0000 0000 0000 0000
+//      hhhh hmmm mmms ssss
+// date 0000 0000 0000 0000
+//      yyyy yyym mmmd dddd
+
+	putch(' ');
+	putdec2((d->FileDate&0x0001FU),2,0); // day
+	putch('-');
+	putdec2((d->FileDate&0x001E0U)>>5,2,0); // month
+	putch('-');
+	putdec2(((d->FileDate&0x0FE00U)>>9)+1980,4,0); // year
+
+	putch(' ');
+	putdec2((d->FileTime&0x0F800U) >> 11,2,0); // heur
+	putch(':');
+	putdec2((d->FileTime&0x007E0U) >> 5,2,0); // min
+	putch(':');
+	putdec2((d->FileTime&0x0001FU) * 2,2,0); // sec
+	puts0("\r\n");
+	pp+=32;
+	}
+    }
+}
+
 void out_boot(void *buf)
 {int i;
 unsigned long DiskSize;
@@ -1229,6 +1337,18 @@ else
   {
   puts0("\r\nDisk size ");putdec(DiskSize);puts0(" Kb\r\n");
   }
+
+puts0("\r\n0 - boot sector; 1 - "); // %i - FAT\n%i-%i - root dir\n%i-%i - data area\n");
+putdec(RootBeg-1);
+puts0(" - FAT; ");
+putdec(RootBeg);
+puts0(" - ");
+putdec(DataStart-1);
+puts0(" - root dir; ");
+putdec(DataStart);
+puts0(" - ");
+putdec(MaxSectors-1);
+puts0(" - data area\r\n");
 }
 
 void system(void)
@@ -1278,6 +1398,9 @@ system - print system parameters\r\n\
 memd - memory dump\r\n\
 memmap - print memory map\r\n\
 basic - call ROM BASIC (if exist)\r\n\
+diskd0 - disk dump #1\r\n\
+diskd - disk dump #2\r\n\
+ls - ls\r\n\
 exit, quit - exit\r\n\
 ");
 }
@@ -1299,13 +1422,13 @@ puts0("\r\n");
 for (line=0;line<23;line++)
     {
     puthex_l(a); putch(' ');
-    for (i=0;i<=MEMD_STEP;i++)
+    for (i=0;i<MEMD_STEP;i++)
 	{
 	c=peek(a+i);
 	puthex_b(c);
 	putch(' ');
 	}
-    for (i=0;i<=MEMD_STEP;i++)
+    for (i=0;i<MEMD_STEP;i++)
 	{
 	c=(peek(a+i))&0xFFU;
 	if (c<' ') putch('.');
@@ -1314,4 +1437,143 @@ for (line=0;line<23;line++)
     a+=MEMD_STEP;
     puts0("\r\n");
     }	
+}
+
+void diskd0(void)
+{char Buffer [512];
+char str[MAX_LEN_STR];
+int drive, sec, head, trk, i, ii, c, line;
+
+puts0("drive? ");
+getsn(str,MAX_LEN_STR);
+drive=htoi(str);
+
+puts0("\r\nsec? (1-...) ");
+getsn(str,MAX_LEN_STR);
+sec=htoi(str);
+
+puts0("\r\nhead? ");
+getsn(str,MAX_LEN_STR);
+head=htoi(str);
+
+puts0("\r\ntrk (cyl)? ");
+getsn(str,MAX_LEN_STR);
+trk=htoi(str);
+
+puts0("\r\ndrive = ");
+puthex(drive);
+puts0(" sec = ");
+puthex(sec);
+puts0(" head = ");
+puthex(head);
+puts0(" trk = ");
+puthex(trk);
+
+for(i=0;i<512;i++) Buffer[i]=0;
+
+i=readsec0(drive, sec, head, trk /* or cyl */, Buffer);
+
+puts0(" err code = ");
+puthex(i);
+puts0("\r\n");
+
+ii=0;
+for (line=0;line<32;line++)
+    {
+    if (line==15) {puts0(" press any key "); getch();putch('\r');}
+    for (i=0;i<MEMD_STEP;i++)
+	{
+	c=Buffer[ii++];
+	puthex_b(c);
+	putch(' ');
+	}
+    ii=ii-MEMD_STEP;
+    for (i=0;i<MEMD_STEP;i++)
+	{
+	c=(Buffer[ii++])&0xFFU;
+	if (c<' ') putch('.');
+	else putch(c);
+	}
+    puts0("\r\n");
+    }	
+}
+
+void diskd(void)
+{char Buffer [512];
+char str[MAX_LEN_STR];
+int drive, sec, i, ii, c, line;
+
+puts0("drive? ");
+getsn(str,MAX_LEN_STR);
+drive=htoi(str);
+
+puts0("\r\nabs sec? ");
+getsn(str,MAX_LEN_STR);
+sec=atoi(str);
+
+puts0("\r\ndrive = ");
+puthex(drive);
+puts0(" sec = ");
+putdec(sec);
+
+for(i=0;i<512;i++) Buffer[i]=0;
+
+i=secread(drive, sec, Buffer);
+
+puts0(" err code = ");
+puthex(i);
+puts0("\r\n");
+
+ii=0;
+for (line=0;line<32;line++)
+    {
+    if (line==15) {puts0(" press any key "); getch();putch('\r');}
+    for (i=0;i<MEMD_STEP;i++)
+	{
+	c=Buffer[ii++];
+	puthex_b(c);
+	putch(' ');
+	}
+    ii=ii-MEMD_STEP;
+    for (i=0;i<MEMD_STEP;i++)
+	{
+	c=(Buffer[ii++])&0xFFU;
+	if (c<' ') putch('.');
+	else putch(c);
+	}
+    puts0("\r\n");
+    }	
+}
+
+int secread (int drive, unsigned AbsSec, char *Buffer)
+{/* Read absolute sectors
+Input:
+drive (for int 13h Fn=2)
+abs sec number
+buffer
+
+Output: return!=0 if error
+*/
+int Track, SecNoOnCyl, i;
+char Head, SecOnTrk;
+
+Track=(AbsSec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
+SecNoOnCyl=(AbsSec%SectorsOnCyl);
+Head=SecNoOnCyl/TrkSecs;
+SecOnTrk=SecNoOnCyl%TrkSecs+1;
+       /*
+       2 bytes are combined to a word similar to INT 13:
+
+        7 6 5 4 3 2 1 0  1st byte  (sector)
+        | | -------------Sector offset within cylinder
+        +-+--------------High order bits of cylinder #
+
+        7 6 5 4 3 2 1 0  2nd byte  (cylinder)
+        -----------------Low order bits of cylinder #
+        */
+if ((i=Track &0x0300)!=0)
+  {
+  SecOnTrk = (SecOnTrk & 0x3F) | (short int)(i>>2);
+  }
+return readsec0(drive, SecOnTrk, Head, Track, Buffer);
 }

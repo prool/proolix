@@ -15,16 +15,12 @@ for (i=0;i<256;i++) {if (i%16==0) puts0("\r\n");set_color(i); puts0("W");}
 set_color(7); puts0("end of palette");
 }
 
-extern int example_var;
-
 void main(void)
 {
 char buf [BUFLEN];
 int i,j;
 char c,cc;
 char bootsector[512];
-
-example_var=0;
 
 set_color(15);
 
@@ -46,21 +42,9 @@ puts0("digit -1. putdec: "); putdec(-1); puts0("\r\n");
 
 set_color(7);
 
-#if 0 // test of char* param
-puts0("test of char* param. `c' = ");
-c='*';
-testchar(&c);
-putch(c);
-#endif
-
 readboot(bootsector);
 
-puts0("Boot sector read. ");
-
-#if 1
-//for (i=0;i<512;i++) puthex(bootsector[i]);
-//for (i=0;i<512;i++) putch(bootsector[i]);
-#endif
+process_boot(bootsector);
 
 out_boot(bootsector);
 
@@ -93,6 +77,9 @@ while (1)
 	else if (!strcmp(buf,"memd")) memd();
 	else if (!strcmp(buf,"memmap")) memmap();
 	else if (!strcmp(buf,"basic")) basic();
+	else if (!strcmp(buf,"diskd0")) diskd0();
+	else if (!strcmp(buf,"diskd")) diskd();
+	else if (!strcmp(buf,"ls")) ls();
 	else
 		{
 		puts0("Unknown command '");

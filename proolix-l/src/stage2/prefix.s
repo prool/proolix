@@ -9,8 +9,19 @@ _start:
 	jmp	main
 	
 # variables
-
-example_var:	.word	0,0
+	.ascii	" Kernel ;-) "
+SectorsOnCyl:	.word	0,0
+TrkSecs:	.word	0,0
+HeadCnt:	.word	0,0
+RootBeg:	.word	0,0
+DataStart:	.word	0,0
+MaxSectors:	.word	0,0
+ResSecs:	.word	0,0
+CluSize:	.word	0,0
+CluSizeBytes:	.word	0,0
+FatSize:	.word	0,0
+RootEnd:	.word	0,0
+MaxClusters:	.word	0,0
 
 basic:
 	int	$0x18
@@ -18,14 +29,15 @@ basic:
 peek:
 	pushl	%ebp
 
-#	pushl	%ES	
 	movl	%esp,%ebp
 	subl	$4,%esp
 	movl	8(%ebp),%ebx
 	xor	%eax,%eax
+	
+	push	%ES
 	movl	%eax,%ES
 	movl	%ES:(%ebx),%eax
-#	popl	%ES
+	pop	%ES
 	
 	leave
 	ret
@@ -54,7 +66,7 @@ putch2:
 # BH = page number (00h to number of pages - 1)
 # background color in 256-color graphics modes (ET4000)
 # BL = attribute (text mode) or color (graphics mode)
-# if bit 7 set in <256-color graphics mode, character is XOR'ed
+# if bit 7 set in <256-color graphics mode, character is XORed
 # onto screen
 # CX = number of times to write character
 	pushl	%ebp
@@ -216,6 +228,25 @@ readboot:
 	# CL = sector number 1-63 (bits 0-5) high two bits of cylinder (bits 6-7, hard disk only)
 	movw	$0x0000,%dx # DH = head number DL = drive number (bit 7 set for hard disk)
 	
+	int	$0x13
+
+	popl	%ebp
+	ret
+
+readsec0: # void readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer)
+	pushl	%ebp
+
+	movl	%esp,%ebp
+	movb	8(%ebp),%dl # drive
+	movb	12(%ebp),%cl # sector
+	movb	16(%ebp),%dh # head
+	movb	20(%ebp),%ch # trk (cyl)
+	movw	24(%ebp),%bx # Buffer address
+
+	push	%DS
+	pop	%ES	# ES :=DS
+
+	movw	$0x0201,%ax # ah = 02 (command 'read'), al=1 - number of sectors to read
 	int	$0x13
 
 	popl	%ebp
