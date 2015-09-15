@@ -6,6 +6,11 @@
 	.code16gcc
 _start:	
 	.globl	_start
+
+	  movb $0x0e,%ah
+	  movb $'A',%al
+	  int  $0x10	# putch ('A')
+
 	jmp	main
 	
 # variables

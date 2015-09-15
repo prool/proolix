@@ -46,17 +46,17 @@ libc.s:		libc.c
 lib2.s:		lib2.c
 	gcc -m16 -S lib2.c
 
-#boot.s: boot.S macros.S defines.h
+#boot.s: boot.S macros.S
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ kernc *.lst *.o a.out ct
+	rm boot boot_ kernc *.lst *.o a.out ct cmd1
 
-saycsip.s: saycsip.S macros.S defines.h
+saycsip.s: saycsip.S macros.S
 	$(CPP) -traditional $< -o $@
 saycsip.o: saycsip.s
 	$(AS) $(ASFLAG) -a=saycsip.lst -o $@ $<
 
-ohw.s: ohw.S defines.h
+ohw.s: ohw.S
 	$(CPP) -traditional $< -o $@
 ohw.o: ohw.s
 	$(AS) $(ASFLAG) -a=ohw.lst -o $@ $<
@@ -77,7 +77,8 @@ c0.o: c0.s
 	$(AS) $(ASFLAG) -a=c0.lst -o $@ $<
 
 cmd1: cmd1.o saycsip.o ohw.o sayr.o
-	$(LD) $(LDFLAGS) -m i386pe -M -Ttext 0x0 -s -o $@ $< saycsip.o ohw.o sayr.o> cmd1-map.lst
+#	$(LD) $(LDFLAGS) -m i386pe -M -Ttext 0x0 -s -o $@ $< saycsip.o ohw.o sayr.o> cmd1-map.lst
+	$(LD) $(LDFLAGS) --oformat binary -M -Ttext 0x0 -s -o $@ $< saycsip.o ohw.o sayr.o> cmd1-map.lst
 	chmod a-x cmd1
 cmd1.s: cmd1.S
 	$(CPP) -traditional $< -o $@

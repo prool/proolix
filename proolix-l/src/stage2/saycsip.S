@@ -1,4 +1,5 @@
 	.code16
+	.include	"macros.S"
 	.text
 	.global print_registers
 print_registers: # proc    ; REGS SAVED

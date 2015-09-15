@@ -16,7 +16,9 @@ _start:
     print	str1
     call	print_registers
     newline
+    
+	pushl	-4(%ecx)
 
     int	$0x20
 
-str1:	.asciz	"CMD1 run! "
+str1:	.asciz	"CMD1 run. And pushl -4(%ecx) command"

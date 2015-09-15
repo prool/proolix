@@ -1,7 +1,7 @@
 proolix
 =======
 
-Simple POSIX-compatible OS for i8086
+Simple hobby POSIX-compatible OS for i8086
 
 ---
 
@@ -12,7 +12,8 @@ Proolix-d - хронологически первый, средой разраб
 
 Проект Д загружался и даже как-то работал!
 
-Proolix-l - это рефакторинг проекта Д, уже в среде Linux с использованием компиляторов gcc/as. Там разработан только бутсектор и простейшее ядро. Цель рефакторинга: переход на исключительно свободное ПО
+Proolix-l - это делающийся сейчас рефакторинг проекта Д, уже в среде Linux с использованием компиляторов gcc/as.
+Цель рефакторинга: переход на исключительно свободное ПО и свободные инструменты разработки
 
 ---
 
@@ -26,9 +27,8 @@ Prool
 
 ---
 
--- 
-Proolix files here http://prool.kharkov.org/proolix/
+Proolix page here http://prool.kharkov.org/proolix
 
-Proolix maillist http://subscribe.ru/catalog/comp.soft.othos.proolix/
+Proolix maillist http://subscribe.ru/catalog/comp.soft.othos.proolix
 
-Prool page http://prool.kharkov.org
+Proolix blog http://prool.kharkov.org/proolix/blog
