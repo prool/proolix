@@ -7,16 +7,13 @@ CPP = cpp
 
 ASFLAG =
 
-boot:	boot_
-	dd if=boot_ of=boot skip=4096
+boot: boot.o
+	$(LD) --oformat binary -Ttext 0x0 -M -s -o $@ $< > map.lst
+	chmod a-x boot
 
-boot_: boot_.o
-	$(LD) -Ttext 0x0 -M -s -o $@ $< > map.lst
-	chmod a-x boot_
-
-boot_.o: boot_.S macros.S ohw.S sayr.S saycsip.S
+boot.o: boot.S macros.S ohw.S sayr.S saycsip.S
 	sh date.sh
-	$(AS) $(ASFLAG) -a=boot_.lst -o $@ $<
+	$(AS) $(ASFLAG) -a=boot.lst -o $@ $<
 
 ccc:	c1.c
 	gcc c1.c -o ccc.exe

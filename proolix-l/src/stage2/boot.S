@@ -79,6 +79,174 @@ _start:
     movw	%ax,%ES:(%si)
     popw	%ES
 
+    # intercept of int 0h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x0*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_0,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 1h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x1*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_1,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 2h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x2*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_2,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 3h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x3*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_3,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 4h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x4*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_4,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 5h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x5*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_5,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 6h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x6*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_6,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 7h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x7*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_7,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int ah
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0xa*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_a,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int bh
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0xb*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_b,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int ch
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0xc*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_c,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int dh
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0xd*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_d,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+    
     # command cycle
 l_revert:
     print prompt
@@ -1840,6 +2008,165 @@ print16:	# print of 16 chars in hex and ascii mode
     popw	%ax
     
     ret
+
+interrupt_0:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_0
+
+	popw	%DS
+	iret
+
+s_interrupt_0:	.asciz	" Int 0 "
+
+interrupt_1:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_1
+
+	popw	%DS
+	iret
+
+s_interrupt_1:	.asciz	" Int 1 "
+
+interrupt_2:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_2
+
+	popw	%DS
+	iret
+
+s_interrupt_2:	.asciz	" Int 2 "
+
+interrupt_3:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_3
+
+	popw	%DS
+	iret
+
+s_interrupt_3:	.asciz	" Int 3 "
+
+interrupt_4:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_4
+
+	popw	%DS
+	iret
+
+s_interrupt_4:	.asciz	" Int 4 "
+
+interrupt_5:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_5
+
+	popw	%DS
+	iret
+
+s_interrupt_5:	.asciz	" Int 5 "
+
+interrupt_6:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_6
+
+	popw	%DS
+	iret
+
+s_interrupt_6:	.asciz	" Int 6 "
+
+interrupt_7:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_7
+
+	popw	%DS
+	iret
+
+s_interrupt_7:	.asciz	" Int 7 "
+
+interrupt_a:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_a
+
+	popw	%DS
+	iret
+
+s_interrupt_a:	.asciz	" Int a "
+
+interrupt_b:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_b
+
+	popw	%DS
+	iret
+
+s_interrupt_b:	.asciz	" Int b "
+
+interrupt_c:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_c
+
+	popw	%DS
+	iret
+
+s_interrupt_c:	.asciz	" Int C "
+
+interrupt_d:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_d
+	
+	movb	$0x20,%al
+	outb	%al,$0x20
+
+	popw	%DS
+	iret
+
+s_interrupt_d:	.asciz	" int d GENERAL PROTECTION VIOLATION "
 
 int80p:		# Proolix-l interrupt (Proolix-l system call)
 	pushw	%DS
