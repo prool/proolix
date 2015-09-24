@@ -32,7 +32,7 @@ struct BootStru
   unsigned char DriveNo;
   unsigned char Thing;
   unsigned char BootSign;
-  short  SerialNo [2];
+  unsigned short  SerialNo [2];
   unsigned char VolLbl [11];
   unsigned char FileSysId [8];
   /*

@@ -172,7 +172,7 @@ if (w==0) {putch('0'); return;}
 }
 
 void putdec2 (int w, int digits, int zeroes)
-{int r,i,trail_zeroes;
+{int r,i,trail_zeroes,j;
 trail_zeroes=1;
 int Divisor10 [10] = {1000000000,100000000,10000000,1000000,100000,10000, 1000, 100, 10, 1};
 
@@ -185,6 +185,11 @@ if (w==0) {putch('0'); return;}
               {
               r=w/Divisor10[i];
               w%=Divisor10[i];
+              if (r>9)
+        	    {// overflow
+        	    for (j=0;j<digits;j++) putch('*');
+        	    return;
+        	    }
               if (r!=0)
             	    {
             	    putch('0'+r);
@@ -1284,6 +1289,10 @@ for(i=RootBeg;i<RootEnd;i++)
 	putdec2((d->FileTime&0x007E0U) >> 5,2,0); // min
 	putch(':');
 	putdec2((d->FileTime&0x0001FU) * 2,2,0); // sec
+	putch(' ');
+	putdec2(d->Size,5,1); // filesize
+	putch(' ');
+	putdec2((d->d_fileno)&0xFFFFU,4,1); // 1st cluster
 	puts0("\r\n");
 	pp+=32;
 	}
