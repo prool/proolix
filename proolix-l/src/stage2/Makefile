@@ -94,7 +94,7 @@ c1s:	c1s.s
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s -o c1s c1s.o > map.lst
 	chmod a-x c1s
 
-# cygwin experiments: cross-compile for Proolix: .c file -> asm .s file -> stripped .s file -> binary
+# cross-compile for Proolix: .c file -> asm .s file -> modified .s file -> binary
 ct:	c2.c clib.c prefix.s headers.h
 	gcc -S -m16 c2.c
 	./britva.sh c2.s
