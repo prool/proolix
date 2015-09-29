@@ -1237,7 +1237,7 @@ void process_boot (void *buf)
   RootEnd = RootBeg + ( ( b->RootSiz * 32 ) / b->SectSiz ) - 1;
   DataStart = RootEnd+1;
   MaxClusters=((MaxSectors-DataStart)/CluSize+1);
-  puts0("process_boot end\r\n");
+//  puts0("process_boot end\r\n");
 }
 
 void ls (void)
@@ -1504,6 +1504,7 @@ while (1)
       case 'S': segm=htoi(cmd+2); break;
       case 'O': off=htoi(cmd+2); break;
       case 'K': memmap(); break;
+      case 'Z': poke(htoi(cmd+2),segm,off); break;
       case '?':puts0(
 "Commands:\r\n\
 /Q - Quit\r\n\
@@ -1513,7 +1514,8 @@ while (1)
 /S<hex_value> - set Segment\r\n\
 /O<hex_value> - set Offset\r\n\
 /K - print memory map\r\n\
-Enter - next string\r\n"); break;
+Enter - next string\r\n\
+/Z<hex_value> - poke hex_value to memory\r\n"); break;
       default: puts0("Invalid command\r\n");
       }
     puts0("\r\n");

@@ -42,6 +42,8 @@ puts0("digit -1. putdec: "); putdec(-1); puts0("\r\n");
 
 set_color(7);
 
+puts0("End of code "); puthex(end_of()); puts0("\r\n");
+
 readboot(bootsector);
 
 process_boot(bootsector);

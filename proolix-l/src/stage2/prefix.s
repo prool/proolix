@@ -272,3 +272,24 @@ peek2: # peek2 (segment, offset)
 	pop	%ES
 	popl	%ebp
 	ret
+	
+poke: # poke (value, segment, offset)
+	pushl	%ebp
+	
+	movl %esp,%ebp
+	push	%ES
+	
+	movb	8(%ebp),%al # value
+	movw	12(%ebp),%bx # segment
+	movw	%bx,%ES
+	movw	16(%ebp),%bx # offset
+	movb	%al,%ES:(%bx)
+	
+	pop	%ES
+	popl	%ebp
+	ret
+
+end_of: # short int end_of (void)
+	lea	EndOfCT,%ax
+	ret
+	
