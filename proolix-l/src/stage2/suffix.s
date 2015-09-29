@@ -1,2 +1,2 @@
 # suffix file
-# prool fool!
+EndOfCT:	.ascii	" end of CT "

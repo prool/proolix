@@ -74,6 +74,7 @@ while (1)
 	else if (!strcmp(buf,"scroll")) scroll();
 	else if (!strcmp(buf,"palette")) palette();
 	else if (!strcmp(buf,"system")) system();
+	else if (!strcmp(buf,"memd0")) memd0();
 	else if (!strcmp(buf,"memd")) memd();
 	else if (!strcmp(buf,"memmap")) memmap();
 	else if (!strcmp(buf,"basic")) basic();

@@ -18,6 +18,9 @@ _start:
     putch	$'-'
     print	str1
     call	print_registers
+    print	s_end
+    lea		EndOf,%ax
+    call	ohw
     newline
 
     # intercept of int 21h (MSDOS interrupt)
@@ -2545,6 +2548,7 @@ s_lines:	.asciz "Root size in sectors, root bg sec"
 s_msdos_exit:	.byte 13,10
 		.ascii "Program terminated"
 		.byte 13,10,0
+s_end:		.asciz " finish addr = "
 
 SectSiz:         .word      512
 ClustSiz:        .byte      1
@@ -2563,5 +2567,5 @@ RootSize:        .word      0
 Karman:	.space		512	# buffer for 1st cluster of .EXE file
 Buff:	.space		512	# buffer for 1 cluster
 FATaddr:	.space	9*512# buffer for FAT. Fat size = 9 sectors
-
+EndOf:		.ascii	" end of stage2 "
 # end of boot.S file

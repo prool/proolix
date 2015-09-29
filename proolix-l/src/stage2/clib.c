@@ -1384,7 +1384,6 @@ A0000 EGA (in graph modes)\r\n\
 B0000 MDA, Hercules 1st videopage\r\n\
 B8000 CGA, EGA, VGA 1st videopage (mode=3, symbol mode)\r\n\
 C8000 Additional ROM modules (2K blocks)\r\n\
-E0000 End of addtn ROM\r\n\
 E0000 Bg  AT ROM BIOS\r\n\
 EFFFF End AT ROM BIOS\r\n\
 F6000 ROM Basic\r\n\
@@ -1404,7 +1403,8 @@ ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
 palette - print color palette\r\n\
 system - print system parameters\r\n\
-memd - memory dump\r\n\
+memd0 - memory dump for extended processor mode\r\n\
+memd - memoty dump for real mode\r\n\
 memmap - print memory map\r\n\
 basic - call ROM BASIC (if exist)\r\n\
 diskd0 - disk dump #1\r\n\
@@ -1414,7 +1414,7 @@ exit, quit - exit\r\n\
 ");
 }
 
-void memd(void)
+void memd0(void)
 {char str[MAX_LEN_STR];
 int a,i,line,c;
 
@@ -1446,6 +1446,81 @@ for (line=0;line<23;line++)
     a+=MEMD_STEP;
     puts0("\r\n");
     }	
+}
+
+void memd(void)
+{
+char c;
+int i;
+char Option = 'M';
+short int segm, off;
+char cmd [MAX_LEN_STR];
+
+/* Adr0 = (char *) 0; */
+segm = 0;
+off = 0;
+
+puts0("Use /? command for help\r\n");
+
+while (1)
+  {
+  puthex(segm);
+  putch(':');
+  puthex(off);
+  putch(' ');
+  switch (Option)
+    {
+    case 'A': for(i=0;i<16;i++)
+                            {
+                                if ((c=peek2(segm,off+i))>=' ') putch(c);
+                                else putch('.');
+                            }
+	break;
+    case 'M':
+    	for(i=0;i<16;i++){puthex_b(peek2(segm,off+i));putch(' ');}
+    	for(i=0;i<16;i++)
+                            {
+                                if ((c=peek2(segm,off+i))>=' ') putch(c);
+                                else putch('.');
+                            }
+	break;
+    case 'H': for(i=0;i<16;i++){puthex_b(peek2(segm,off+i));putch(' ');}
+                          break;
+    }
+  puts0("\r\n");
+  putch(':');
+  getsn(cmd, MAX_LEN_STR);
+
+  i=0; while (cmd[i]) if (cmd[i]=='\r') {cmd[i]=0; break;} else i++;
+
+  if (cmd[0]=='/')
+    {
+    switch (c=toupper(cmd[1]))
+      {
+      case 'Q': puts0("\r\n"); return;
+      case 'A':
+      case 'H':
+      case 'M': Option=c; break;
+      case 'S': segm=htoi(cmd+2); break;
+      case 'O': off=htoi(cmd+2); break;
+      case 'K': memmap(); break;
+      case '?':puts0(
+"Commands:\r\n\
+/Q - Quit\r\n\
+/A - Ascii mode\r\n\
+/H - Hex mode\r\n\
+/M - Mix (hex & ascii) mode\r\n\
+/S<hex_value> - set Segment\r\n\
+/O<hex_value> - set Offset\r\n\
+/K - print memory map\r\n\
+Enter - next string\r\n"); break;
+      default: puts0("Invalid command\r\n");
+      }
+    puts0("\r\n");
+    }
+  else if (!cmd[0]) {off+=16;}
+  else ;
+  }
 }
 
 void diskd0(void)

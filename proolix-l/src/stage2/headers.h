@@ -35,6 +35,7 @@ char *strchr (const char *str, int c);
 char  * strncpy (char  * dest, const char  * src, size_t maxlen);
 
 int peek (int addr);
+char peek2(short int seg, short int offset);
 
 char get_row(void);
 char get_col(void);
@@ -49,6 +50,7 @@ void system(void);
 void test(void);
 void ascii(void);
 void cls(void);
+void memd0(void);
 void memd(void);
 void basic(void);
 void diskd0(void);

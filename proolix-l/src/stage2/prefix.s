@@ -257,3 +257,18 @@ readsec0: # void readsec0(char drive, char sec, char head, char trk /* or cyl */
 
 	popl	%ebp
 	ret
+
+peek2: # peek2 (segment, offset)
+	pushl	%ebp
+	
+	movl	%esp,%ebp
+	push	%ES
+	
+	movw	8(%ebp),%ax
+	movw	%ax,%ES
+	movw	12(%ebp),%bx
+	movb	%ES:(%bx),%al
+	
+	pop	%ES
+	popl	%ebp
+	ret
