@@ -54,7 +54,7 @@ cls_();
 setpos(0,0);
 }
 
-void putch3(char c)
+void putch(char c)
 {char g_col,g_row;
 g_row=get_row();
 g_col=get_col();
@@ -76,7 +76,7 @@ switch(c)
 void puts0(char *s)
 {
     while (*s)
-	putch3(*s++);
+	putch(*s++);
 //	putch(*s++);
 }
 
@@ -90,9 +90,9 @@ puts0("stroka 1\r\n");
 puts0("stroka 2\r\n");                                                                                                       
 puts0("stroka 3\r\n");
 
-//for (i=0;i<256;i++) {global_color=i; putch3('W');}
+//for (i=0;i<256;i++) {global_color=i; putch('W');}
 
-//putch3('a');
+//putch('a');
 
 #if 0
 setpos(0,0);putch_color('1',2);
@@ -111,7 +111,7 @@ char *getsn(char *str, int len)
 i=0;
 while(1)
 	{
-	c=getch(); putch3(c);
+	c=getch(); putch(c);
 	if (c==0x0DU) {*str=0; return str;}
 	*str=c;
 	if (++i>=(len-1)) {*str=0; return str;}
@@ -215,7 +215,7 @@ void puts0(char *s)
 }
 #endif
 
-void putch(char c)
+void putch0(char c)
 {
 /*
 VIDEO - TELETYPE OUTPUT

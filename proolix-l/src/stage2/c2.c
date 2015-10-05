@@ -40,9 +40,11 @@ puts0("digit 101. putdec: "); putdec(101); puts0("\r\n");
 puts0("digit -1. putdec: "); putdec(-1); puts0("\r\n");
 #endif
 
-set_color(7);
+set_color(6);
 
 puts0("End of code "); puthex(end_of()); puts0("\r\n");
+
+set_color(7);
 
 readboot(bootsector);
 
