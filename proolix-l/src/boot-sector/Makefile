@@ -1,37 +1,43 @@
-# Proolix-l boot sector makefile for cygwin
+# Proolix-l boot sector makefile for linux
 # for install boot sector to diskette /dev/fd0 usage 'make install'
 
 LD = ld
 AS = as
 CPP = cpp
 
-bbb:	boots
-	dd if=boots of=bbb count=1 skip=1
-
+# boot sector for diskette with FAT12 filesystem
 boots: boots.o patchboot analyzeboot makediskette
-#	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
-	$(LD) -Ttext 0x0 -s -o $@ $<
+	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
 	chmod a-x boots
 
 boots.o: boots.s
 	$(AS) -a=boots.lst -o $@ $<
 
 boots.s: boots.S
-	$(CPP) -traditional $< -o $@
+	$(CPP) -traditional -DFAT12 $< -o $@
+
+# boot sector for diskette with FAT16 filesystem
+boots16: boots16.o patchboot analyzeboot makediskette
+	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
+	chmod a-x boots16
+
+boots16.o: boots16.s
+	$(AS) -a=boots16.lst -o $@ $<
+
+boots16.s: boots.S
+	$(CPP) -traditional -DFAT16 $< -o $@
+#############################################################
 
 clean:
-	rm boots.o boots boots.lst patchboot analyzeboot boot boots
+	rm boots.s boots.o boots boots.lst patchboot analyzeboot makediskette boot boots
 
 patchboot:	patchboot.c
 
 analyzeboot:	analyzeboot.c
 
-install:	bbb makediskette
-	./makediskette diskette.img bbb
-
-installOLD: boots patchboot
+install: boots patchboot
 	dd if=/dev/fd0 of=boot-orig count=1
-	./patchboot boot-orig bbb boot-result
+	./patchboot boot-orig boots boot-result
 	dd if=boot-result of=/dev/fd0 count=1
 	rm -f boot-orig
 	rm -f boot-result

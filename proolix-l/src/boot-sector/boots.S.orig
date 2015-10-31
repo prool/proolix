@@ -68,12 +68,7 @@ BigNo:           .word      0,0       # Big total no of sectors
                  .word      0       # ! internal vars
 StartClu:        .word      0       # !
 Lbl:             .ascii      "BOOT       "   # Volume label
-#ifdef		FAT12
                  .ascii      "FAT12 " # File system ID
-#endif
-#ifdef		FAT16
-		.ascii		"FAT16 "
-#endif
 RootSize:        .ascii	     "  " # use 2 last bytes of File system id
 OldVec:          .word      0,0
 
@@ -189,6 +184,7 @@ loop2:          pushw   %cx
 
 l_err:
         putch   $'e'
+        putch	$'r'
         call    ohw
         xorb    %ah,%ah
         int     $0x16
@@ -418,19 +414,6 @@ SecRead:        # Read absolute sectors
         movw     $0x201,%ax # Fn=02, Read 1 sector
         int      $0x13
 #        jnc     l_break
-
-#if 0
-// debug output
-	movw	$50,%cx
-	xorw	%bx,%bx
-l_debug:
-	movb	%ES:(%bx),%al
-	#call	ohb
-	putch	%al
-	incw	%bx
-	loop	l_debug
-////////////////////////////////////
-#endif
 
 #        popw     %cx
 #        loop    l_loop
