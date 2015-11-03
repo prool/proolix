@@ -1,30 +1,36 @@
-Simple hobby POSIX-compatible OS for i8086
-<p>
-<a href="http://prool.kharkov.org/proolix/blog/wp-content/uploads/proolix-machine.png"><img src="http://prool.kharkov.org/proolix/blog/wp-content/uploads/proolix-machine-300x167.png"></a>
-<br>
-After booting
-<p>
+proolix
+=======
 
-<a href="http://prool.kharkov.org/proolix/blog/screenshots">Screenshots...</a>
-<p>
+Simple hobby POSIX-compatible OS for i8086
+
+![screenshot1](http://prool.kharkov.org/proolix/blog/wp-content/uploads/proolix-machine-300x167.png "After booting")
+
+[Screenshots...] (http://prool.kharkov.org/proolix/blog/screenshots)
+
+---
+
 Proolix состоит из двух проектов:
-<p>
+
 Proolix-d - хронологически первый, средой разработки является проприетарная среда MSDOS/MS Windows и проприетарный компилятор Turbo C 2.0/tasm.
 (Хотя он уже вроде как стал бесплатным, но не свободным)
-<p>
+
 Проект Д загружался и даже как-то работал!
-<p>
+
 Proolix-l - это делающийся сейчас рефакторинг проекта Д, уже в среде Linux с использованием компиляторов gcc/as.
 Цель рефакторинга: переход на исключительно свободное ПО и свободные инструменты разработки
-<pre>
+
+---
+
 Russian comments in sources
 
 - in oldest files in CP866 ("MSDOS alternative") codetable
 - in old files in KOI8-R codetable
 - in new files in UTF-8 codetable
-</pre>
+
 Prool
-<p>
-<a href="http://prool.kharkov.org/proolix/blog">Proolix page</a>
-<p>
-<a href="http://subscribe.ru/catalog/comp.soft.othos.proolix">Proolix maillist</a>
+
+---
+
+Proolix maillist http://subscribe.ru/catalog/comp.soft.othos.proolix
+
+Proolix blog http://prool.kharkov.org/proolix/blog
