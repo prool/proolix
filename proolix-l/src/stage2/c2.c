@@ -70,6 +70,7 @@ while (1)
 
 	if (buf[0]==0) puts0("");
 	else if (!strcmp(buf,"help")) help();
+	else if (!strcmp(buf,"?")) help();
 	else if (!strcmp(buf,"exit")) break;
 	else if (!strcmp(buf,"quit")) break;
 	else if (!strcmp(buf,"test")) test();

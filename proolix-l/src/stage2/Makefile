@@ -7,6 +7,8 @@ CPP = cpp
 
 ASFLAG =
 
+all:	boot ct
+
 boot: boot.o
 	$(LD) --oformat binary -Ttext 0x0 -M -s -o $@ $< > map.lst
 	chmod a-x boot

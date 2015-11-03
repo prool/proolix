@@ -3,6 +3,8 @@ proolix
 
 Simple hobby POSIX-compatible OS for i8086
 
+[Screenshots] (http://prool.kharkov.org/proolix/blog/screenshots)
+
 ---
 
 Proolix состоит из двух проектов:
@@ -26,8 +28,6 @@ Russian comments in sources
 Prool
 
 ---
-
-Proolix page here http://prool.kharkov.org/proolix
 
 Proolix maillist http://subscribe.ru/catalog/comp.soft.othos.proolix
 

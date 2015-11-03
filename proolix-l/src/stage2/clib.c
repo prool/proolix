@@ -1244,10 +1244,11 @@ void ls (void)
 {
 char buf[512];
 unsigned char *pp;
-int i,j,k;
+int i,j,k, sec;
 struct dirent16 *d;
 
-puts0("RootBeg=");putdec(RootBeg);puts0("\r\n");
+puts0("RootBeg=");putdec(RootBeg);
+puts0("\r\nFilename    Flags    Date                Size 1stClu 1stSector\r\n");
 
 for(i=RootBeg;i<RootEnd;i++)
     {
@@ -1292,7 +1293,9 @@ for(i=RootBeg;i<RootEnd;i++)
 	putch(' ');
 	putdec2(d->Size,5,1); // filesize
 	putch(' ');
-	putdec2((d->d_fileno)&0xFFFFU,4,1); // 1st cluster
+	putdec2(sec=((d->d_fileno)&0xFFFFU),4,1); // 1st cluster
+	putch(' ');
+	putdec(SecForClu(sec)); // 1st sector
 	puts0("\r\n");
 	pp+=32;
 	}
@@ -1376,7 +1379,9 @@ Memory map for Proolix-l (real mode)\r\n\
 200 - 3FF free area (stack of boot sector)\r\n\
 400 - 4FF ROM BIOS data\r\n\
 600 =0060:0000 - load kernel address (see src/stage2/boot.S, KernelSeg constant)\r\n\
-07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
+end of Kernel (CT) 0060:");
+puthex(end_of());
+puts0("\r\n07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
 07E00                      Boot sector end\r\n\
 30500 (=3050:0000) stage2 (see src/boot-sector/boots.S, stage2_seg constant)\r\n\
 MemTop (f.e. 9FFFF)\r\n\
@@ -1398,17 +1403,17 @@ void help(void)
 {
 puts0("Proolix-l shell command\r\n\r\n\
 test - test\r\n\
-help - help\r\n\
+help, ? - this help\r\n\
 ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
 palette - print color palette\r\n\
 system - print system parameters\r\n\
 memd0 - memory dump for extended processor mode\r\n\
-memd - memoty dump for real mode\r\n\
+memd - memory dump for real mode\r\n\
 memmap - print memory map\r\n\
 basic - call ROM BASIC (if exist)\r\n\
-diskd0 - disk dump #1\r\n\
-diskd - disk dump #2\r\n\
+diskd0 - disk dump #1 (sector/head/track)\r\n\
+diskd - disk dump #2 (absolute sector)\r\n\
 ls - ls\r\n\
 exit, quit - exit\r\n\
 ");
@@ -1559,9 +1564,11 @@ for(i=0;i<512;i++) Buffer[i]=0;
 
 i=readsec0(drive, sec, head, trk /* or cyl */, Buffer);
 
+if (i==1) puts0(" OK");
+else {
 puts0(" err code = ");
 puthex(i);
-if (i==1) puts0(" OK");
+}
 puts0("\r\n");
 
 ii=0;
@@ -1607,9 +1614,11 @@ for(i=0;i<512;i++) Buffer[i]=0;
 
 i=secread(drive, sec, Buffer);
 
+if (i==1) puts0(" OK");
+else {
 puts0(" err code = ");
 puthex(i);
-if (i==1) puts0(" OK");
+}
 puts0("\r\n");
 
 ii=0;
@@ -1664,4 +1673,26 @@ if ((i=Track &0x0300)!=0)
   SecOnTrk = (SecOnTrk & 0x3F) | (short int)(i>>2);
   }
 return readsec0(drive, SecOnTrk, Head, Track, Buffer);
+}
+
+int SecForClu (int CluNo)
+{unsigned long l;
+/*
+Sector=ResSecs + FatCnt*FatSize + (RootSiz*32)/SectSiz + ((CluNo-2)*ClustSiz)
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       DataStart
+*/
+if ((CluNo>MaxClusters)||(CluNo<2))
+  {
+  #if 0
+  printf("SecForClu: Invalid cluster number. CluNo=%u, MaxClusters=%u",
+  CluNo,MaxClusters);
+  #endif
+  return -1;
+  }
+l=DataStart + ( (CluNo-2) * CluSize );
+#ifdef DEBUG
+printf("sec4clu: return %li ",l);
+#endif
+return l;
 }

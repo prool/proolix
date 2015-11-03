@@ -58,6 +58,7 @@ void basic(void);
 void diskd0(void);
 void diskd(void);
 void ls(void);
+int SecForClu (int CluNo);
 
 char  *itoa (int w, char  *str, int radix);
 

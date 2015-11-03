@@ -15,7 +15,7 @@ _start:
 	jmp	main
 	
 # variables
-	.ascii	" Kernel ;-) "
+	.ascii	" CT=Kernel;-) "
 SectorsOnCyl:	.word	0,0
 TrkSecs:	.word	0,0
 HeadCnt:	.word	0,0
@@ -28,6 +28,8 @@ CluSizeBytes:	.word	0,0
 FatSize:	.word	0,0
 RootEnd:	.word	0,0
 MaxClusters:	.word	0,0
+
+global_color:	.word	0
 
 basic:
 	int	$0x18
@@ -62,7 +64,6 @@ get_color:
 	movb	global_color,%al
 	ret
 
-global_color:	.word	0
 
 putch2:
 # VIDEO - WRITE CHARACTER AND ATTRIBUTE AT CURSOR POSITION
@@ -292,4 +293,3 @@ poke: # poke (value, segment, offset)
 end_of: # short int end_of (void)
 	lea	EndOfCT,%ax
 	ret
-	
