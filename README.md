@@ -3,6 +3,8 @@ proolix
 
 Simple hobby POSIX-compatible OS for i8086
 
+![screenshot1](http://prool.kharkov.org/proolix/blog/wp-content/uploads/proolix-machine-300x167.png "After booting")
+
 [Screenshots] (http://prool.kharkov.org/proolix/blog/screenshots)
 
 ---
