@@ -1595,16 +1595,22 @@ for (line=0;line<32;line++)
 void diskd(void)
 {char Buffer [512];
 char str[MAX_LEN_STR];
-int drive, sec, i, ii, c, line;
+int drive, sec, ii, c, line;
+short int i;
 
-puts0("drive? ");
+puts0("drive (0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
 drive=htoi(str);
 
-puts0("\r\nabs sec? ");
+puts0("\r\nabs sec (0-...) ? ");
 getsn(str,MAX_LEN_STR);
 sec=atoi(str);
 
+int quit=0;
+
+while(!quit)
+
+{// while
 puts0("\r\ndrive = ");
 puthex(drive);
 puts0(" sec = ");
@@ -1639,7 +1645,17 @@ for (line=0;line<32;line++)
 	else putch(c);
 	}
     puts0("\r\n");
+    }
+puts0("Next sector (q - quit, r - retry, b - back, other key - next) ? \r\n");
+char c=getch();
+switch(c)
+    {
+    case 'q': quit=1; break;
+    case 'r': break;
+    case 'b': sec--; break;
+    default: sec++;
     }	
+} // while
 }
 
 int secread (int drive, unsigned AbsSec, char *Buffer)
