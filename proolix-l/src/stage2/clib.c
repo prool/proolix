@@ -1377,7 +1377,7 @@ puts0("\
 Memory map for Proolix-l (real mode)\r\n\
 0 - 1FF  Vectors\r\n\
 200 - 3FF free area (stack of boot sector)\r\n\
-400 - 4FF ROM BIOS data\r\n\
+400 - 4FF ROM BIOS data: 475: count of HDD\r\n\
 600 =0060:0000 - load kernel address (see src/stage2/boot.S, KernelSeg constant)\r\n\
 end of Kernel (CT) 0060:");
 puthex(end_of());
@@ -1406,6 +1406,7 @@ test - test\r\n\
 help, ? - this help\r\n\
 ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
+off - screensaver (clear screen and wait of press any key\r\n\
 palette - print color palette\r\n\
 system - print system parameters\r\n\
 memd0 - memory dump for extended processor mode\r\n\
@@ -1414,6 +1415,7 @@ memmap - print memory map\r\n\
 basic - call ROM BASIC (if exist)\r\n\
 diskd0 - disk dump #1 (sector/head/track)\r\n\
 diskd - disk dump #2 (absolute sector)\r\n\
+testdisk - test of disk\r\n\
 ls - ls\r\n\
 exit, quit - exit\r\n\
 ");
@@ -1592,11 +1594,91 @@ for (line=0;line<32;line++)
     }	
 }
 
+void print_drive_type(char i)
+{
+puts0("\r\nDrive code ");
+puthex_b(i);
+puts0(", type ");
+switch(i)
+	{
+	case 1: puts0("360K"); break;
+	case 2: puts0("1.2M"); break;
+	case 3: puts0("720K"); break;
+	case 4: puts0("1.44M"); break;
+	case 5: puts0("2.88M?"); break;
+	case 6: puts0("2.88M"); break;
+	case 7: puts0("HDD?"); break;
+	case 0x10: puts0("ATAPI removable media"); break;
+	default: puts0("unknown");
+	}
+puts0("\r\n");
+}
+
+void testdisk(void)
+{
+char str[MAX_LEN_STR];
+char drive;
+
+puts0("drive (0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
+getsn(str,MAX_LEN_STR);
+drive=htoi(str);
+
+puts0("\r\ndrive = ");
+puthex_b(drive);
+int i=GetDriveParam(drive);
+if (i)
+	{
+	puts0("\r\n error code = ");
+	puthex(i);
+	puts0("\r\n");
+	return;
+	}
+
+puts0("ax = ");
+puthex(reg_ax);
+puts0(" bx = ");
+puthex(reg_bx);
+puts0(" cx = ");
+puthex(reg_cx);
+puts0(" dx = ");
+puthex(reg_dx);
+puts0(" es = ");
+puthex(reg_es);
+puts0(" di = ");
+puthex(reg_di);
+
+print_drive_type(reg_bx & 0xFFU);
+
+int cyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
+
+puts0(" cyl = ");
+putdec(cyl);
+
+int sec = reg_cx &0x3FU;
+
+puts0(" sec = ");
+putdec(sec);
+
+int heads = ((reg_dx & 0xFF00U) >> 8)&0xFFU;
+
+puts0(" heads = ");
+putdec(heads);
+
+puts0(" number of drives = ");
+putdec(reg_dx & 0xFFU);
+
+puts0(" size = ");
+putdec(sec*(heads+1)*(cyl+1)/2);
+puts0("K\r\n");
+}
+
 void diskd(void)
-{char Buffer [512];
+{
+unsigned char Buffer [512];
 char str[MAX_LEN_STR];
 int drive, sec, ii, c, line;
 short int i;
+struct MBRstru *MBR;
 
 puts0("drive (0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
@@ -1646,13 +1728,72 @@ for (line=0;line<32;line++)
 	}
     puts0("\r\n");
     }
-puts0("Next sector (q - quit, r - retry, b - back, other key - next) ? \r\n");
+puts0("Next sector (q - quit, r - retry, b - back, V - view MBR, B - view boot, other key - next) ? \r\n");
 char c=getch();
 switch(c)
     {
     case 'q': quit=1; break;
     case 'r': break;
     case 'b': sec--; break;
+    case 'V': 	// view_mbr begin
+
+		puts0("System    ----Begin----       ----End-----  Prec. sec Total sec\r\n");
+		puts0("          head sec  cyl       head sec cyl\r\n");
+		int ii=446;
+		for (i=0;i<4;i++)
+		{
+		switch(Buffer[ii++])
+		    {
+		    case 0: putch('N'); break; // no active partition
+		    case 0x80U: putch('A'); break; // active partititon
+		    default: putch('E'); // error
+		    }
+
+		puts0("         ");
+		putdec(Buffer[ii++]); // head
+		puts0("    ");
+		putdec(Buffer[ii]&0x3FU); // sector
+		puts0("    ");
+		short int cyl=((short int)(Buffer[ii+1])) | ((Buffer[ii]&0xC0U)<<2);
+		putdec(cyl); // cyl
+		ii+=2;
+		puts0(" ");
+
+		out_os(Buffer[ii++]); // OS type
+		puts0("     ");
+
+		putdec(Buffer[ii++]); // head
+		puts0(" ");
+		putdec(Buffer[ii]&0x3FU); // sector
+		puts0(" ");
+		cyl=((short int)(Buffer[ii+1])) | ((Buffer[ii]&0xC0U)<<2);
+		putdec(cyl); // cyl
+		ii+=2;
+		puts0("  ");
+		
+		// Horner algorythm
+		long l=Buffer[ii+3]&0xFFUL;
+		l=(l<<8) | Buffer[ii+2];
+		l=(l<<8) | Buffer[ii+1];
+		l=(l<<8) | Buffer[ii];
+		putdec(l);
+		puts0("  ");
+		ii+=4;
+
+		// Horner algorythm #2
+		l=Buffer[ii+3]&0xFFUL;
+		l=(l<<8) | Buffer[ii+2];
+		l=(l<<8) | Buffer[ii+1];
+		l=(l<<8) | Buffer[ii];
+		putdec(l);
+		ii+=4;
+		puts0("\r\n");
+		} // end for
+		// view_mbr end
+		break;
+    case 'B':
+		puts0("View boot not implemented yet...\r\n");
+		break;
     default: sec++;
     }	
 } // while
@@ -1711,4 +1852,162 @@ l=DataStart + ( (CluNo-2) * CluSize );
 printf("sec4clu: return %li ",l);
 #endif
 return l;
+}
+
+void off (void)
+{int i;
+for (i=0;i<25;i++) puts0("\r\n");
+getch();
+}
+
+void out_os (unsigned char c)
+{
+switch(c)
+  { /*          Values for operating system indicator:                 */
+
+  case 0x00: puts0("none   "); break; /* 00h    empty */
+  case 0x01: puts0("FAT-12 "); break; /* 01h    DOS 12-bit FAT */
+  #if 0
+  case 0x02: puts0("XENIX /"); break; /* 02h    XENIX root file system */
+  case 0x03: puts0("XENIX u"); break; /* 03h    XENIX /usr file system (obsolete) */
+  #endif
+  case 0x04: puts0("FAT-16 "); break; /* 04h    DOS 16-bit FAT < 32M */
+  case 0x05: puts0("EXTEND "); break; /* 05h    DOS 3.3+ extended partition */
+  case 0x06: puts0("LARGE  "); break; /* 06h    DOS 3.31+ Large File System (16-bit FAT >= 32M), "Big DOS" */
+  case 0x07: puts0("HPFS/NT"); break; /* 07h    QNX */
+                                       /* 07h    OS/2 HPFS */
+                                       /* 07h    Windows NT NTFS */
+                                       /* 07h    Advanced Unix */
+  #if 0
+  case 0x08: puts0("OS2 AIX"); break; /* 08h    OS/2 (v1.0-1.3 only) */
+                                       /* 08h    AIX bootable partition, SplitDrive */
+                                       /* 08h    Commodore DOS */
+                                       /* 08h    DELL partition spanning multiple drives */
+  case 0x09: puts0("AIX    "); break; /* 09h    AIX data partition */
+                                       /* 09h    Coherent filesystem */
+  case 0x0A: puts0("OS2 Coh"); break; /* 0Ah    OS/2 Boot Manager */
+                                       /* 0Ah    OPUS */
+                                       /* 0Ah    Coherent swap partition */
+  #endif
+  case 0x0B: puts0("FAT-32 "); break; /* 0Bh    Windows95 with 32-bit FAT */
+  case 0x0C: puts0("FAT32LB"); break; /* 0Ch    Windows95 with 32-bit FAT (using LBA-mode INT 13 extensions) */
+  case 0x0E: puts0("VFATLBA"); break; /* 0Eh    logical-block-addressable VFAT (same as 06h but using LBA-mode INT 13) "FAT-16 LBA" */
+  case 0x0F: puts0("EXTENDL"); break; /* 0Fh    logical-block-addressable VFAT (same as 05h but using LBA-mode INT 13) "FAT-32 extended LBA" */
+  #if 0
+  case 0x10: puts0("OPUS   "); break; /* 10h    OPUS */
+  case 0x11: puts0("OS/2   "); break; /* 11h    OS/2 Boot Manager, hidden DOS 12-bit FAT */
+  case 0x12: puts0("Compaq "); break; /* 12h    Compaq Diagnostics (config) partition */
+  case 0x14: puts0("OS/2   "); break; /* 14h    (resulted from using Novell DOS 7.0 FDISK to delete Linux Native part) */
+                                       /* 14h    OS/2 Boot Manager hidden sub-32M 16-bit FAT partition */
+  case 0x16: puts0("OS/2   "); break; /* 16h    OS/2 Boot Manager hidden over-32M 16-bit FAT partition */
+  case 0x17: puts0("OS/2   "); break; /* 17h    OS/2 Boot Manager hidden HPFS partition */
+  case 0x18: puts0("WinSwap"); break; /* 18h    AST special Windows swap file ("Zero-Volt Suspend" partition) */
+  case 0x19: puts0("Photon "); break; /* 19h    Willowtech Photon coS */
+  case 0x1E: puts0("Hiden95"); break; /* 1Eh    Hidden FAT95 */
+  case 0x20: puts0("Willow "); break; /* 20h    Willowsoft Overture File System (OFS1) */
+  case 0x21: puts0("reserv "); break; /* 21h    officially listed as reserved */
+  case 0x23: puts0("reserv "); break; /* 23h    officially listed as reserved */
+  case 0x24: puts0("NEC    "); break; /* 24h    NEC MS-DOS 3.x */
+  case 0x26: puts0("reserv "); break; /* 26h    officially listed as reserved */
+  case 0x31: puts0("reserv "); break; /* 31h    officially listed as reserved */
+  case 0x33: puts0("reserv "); break; /* 33h    officially listed as reserved */
+  case 0x34: puts0("reserv "); break; /* 34h    officially listed as reserved */
+  case 0x36: puts0("reserv "); break; /* 36h    officially listed as reserved */
+  case 0x38: puts0("Theos  "); break; /* 38h    Theos */
+  case 0x3C: puts0("PQMagic"); break; /* 3Ch    PowerQuest PartitionMagic recovery partition */
+  case 0x40: puts0("VENIX  "); break; /* 40h    VENIX 80286 */
+  case 0x41: puts0("Linux  "); break; /* 41h    Linux, Personal RISC Boot */
+  case 0x42: puts0("LinuxSw"); break; /* 42h    SFS (Secure File System) by Peter Gutmann */
+                                       /*        Linux swap (sharing disk with DRDOS) */
+  case 0x43: puts0("Linux  "); break; /* 43h    Linux native (sharing disk with DRDOS) */
+  case 0x50: puts0("OnTrack"); break; /* 50h    OnTrack Disk Manager, read-only partition */
+  case 0x51: puts0("NOVEL  "); break; /* 51h    OnTrack Disk Manager, read/write partition */
+                                       /* 51h    NOVEL */
+  case 0x52: puts0("CP/M   "); break; /* 52h    CP/M */
+                                       /* 52h    Microport System V/386 */
+  case 0x53: puts0("OnTrack"); break; /* 53h    OnTrack Disk Manager */
+  case 0x54: puts0("OnTrack"); break; /* 54h    OnTrack Disk Manager (Dynamic Drive Overlay) */
+  case 0x55: puts0("EZ     "); break; /* 55h    EZ-Drive */
+  case 0x56: puts0("GoldenB"); break; /* 56h    GoldenBow VFeature */
+  case 0x5C: puts0("Priam  "); break; /* 5Ch    Priam EDisk */
+  case 0x61: puts0("SpeedSt"); break; /* 61h    SpeedStor */
+  case 0x63: puts0("SysV386"); break; /* 63h    Unix SysV/386, 386/ix (SCO, ISC UNIX, UnixWare, ...) */
+                                       /* 63h    Mach, MtXinu BSD 4.3 on Mach */
+                                       /* 63h    GNU HURD */
+  case 0x64: puts0("Novell "); break; /* 64h    Novell NetWare 286 */
+  case 0x65: puts0("Novell "); break; /* 65h    Novell NetWare (3.11) */
+  case 0x67: puts0("Novell "); break; /* 67h    Novell */
+  case 0x68: puts0("Novell "); break; /* 68h    Novell */
+  case 0x69: puts0("Novell "); break; /* 69h    Novell */
+  case 0x70: puts0("DiskSec"); break; /* 70h    DiskSecure Multi-Boot */
+  case 0x71: puts0("reserv "); break; /* 71h    officially listed as reserved */
+  case 0x73: puts0("reserv "); break; /* 73h    officially listed as reserved */
+  case 0x74: puts0("reserv "); break; /* 74h    officially listed as reserved */
+  case 0x75: puts0("PC/IX  "); break; /* 75h    PC/IX */
+  case 0x76: puts0("reserv "); break; /* 76h    officially listed as reserved */
+  case 0x77: puts0("QNX    "); break; /* 77h    QNX4.x */
+  case 0x78: puts0("QNX    "); break; /* 78h    QNX4.x 2nd part */
+  case 0x79: puts0("QNX    "); break; /* 79h    QNX4.x 3rd part */
+  #endif
+  case 0x80: puts0("Minix  "); break; /* 80h    Minix v1.1 - 1.4a */
+  case 0x81: puts0("Linux  "); break; /* 81h    Minix v1.4b+ */
+                                       /* 81h    Linux */
+                                       /* 81h    Mitac Advanced Disk Manager */
+  case 0x82: puts0("Linux  "); break; /* 82h    Linux Swap partition */
+                                       /* 82h    Prime */
+  case 0x83: puts0("Linux  "); break; /* 83h    Linux native file system (ext2fs/xiafs) */
+  #if 0
+  case 0x84: puts0("OS/2   "); break; /* 84h    OS/2-renumbered type 04h partition (related to hiding DOS C: drive) */
+  #endif
+  case 0x85: puts0("LinuxEx"); break; /* 85h    Linux extended partition */
+  case 0x86: puts0("WinNT  "); break; /* 86h    NTFS, FAT16 volume/stripe set (Windows NT) */
+  case 0x87: puts0("HPFS/NT"); break; /* 87h    HPFS Fault-Tolerant mirrored partition */
+                                       /* 87h    NTFS volume/stripe set */
+  #if 0
+  case 0x93: puts0("Amoeba "); break; /* 93h    Amoeba file system */
+  case 0x94: puts0("Amoeba "); break; /* 94h    Amoeba bad block table */
+  case 0xA0: puts0("Phoenix"); break; /* A0h    Phoenix NoteBIOS Power Management "Save-to-Disk" partition */
+                                       /*        IBM Thinkpad hibernation partition */
+  case 0xA1: puts0("reserv "); break; /* A1h    officially listed as reserved */
+  case 0xA3: puts0("reserv "); break; /* A3h    officially listed as reserved */
+  case 0xA4: puts0("reserv "); break; /* A4h    officially listed as reserved */
+  case 0xA5: puts0("386BSD "); break; /* A5h    Net,Free,Open,386BSD and BSD/OS */
+  case 0xA6: puts0("reserv "); break; /* A6h    officially listed as reserved */
+  case 0xA7: puts0("NEXT   "); break; /* A7h    NEXTSTEP */
+  case 0xB1: puts0("reserv "); break; /* B1h    officially listed as reserved */
+  case 0xB3: puts0("reserv "); break; /* B3h    officially listed as reserved */
+  case 0xB4: puts0("reserv "); break; /* B4h    officially listed as reserved */
+  case 0xB6: puts0("reserv "); break; /* B6h    officially listed as reserved */
+  case 0xB7: puts0("BSDI   "); break; /* B7h    BSDI file system (secondarily swap) */
+  case 0xB8: puts0("BSDI   "); break; /* B8h    BSDI swap partition (secondarily file system) */
+  case 0xC0: puts0("CTOS   "); break; /* C0h    CTOS */
+  case 0xC1: puts0("DR DOS "); break; /* C1h    DR DOS 6.0 LOGIN.EXE-secured 12-bit FAT partition */
+  case 0xC4: puts0("DR DOS "); break; /* C4h    DR DOS 6.0 LOGIN.EXE-secured 16-bit FAT partition < 32M */
+  case 0xC6: puts0("DR DOS "); break; /* C6h    DR DOS 6.0 LOGIN.EXE-secured Huge partition >= 32M */
+                                       /* C6h    corrupted FAT16 volume/stripe set (Windows NT) */
+  case 0xC7: puts0("Syrinx "); break; /* C7h    Syrinx Boot */
+                                       /* C7h    corrupted NTFS volume/stripe set */
+  case 0xD8: puts0("CP/M-86"); break; /* D8h    CP/M-86 */
+  case 0xDB: puts0("CP/M   "); break; /* DBh    CP/M, Concurrent CP/M, Concurrent DOS */
+                                       /* DBh    CTOS (Convergent Technologies OS -Unisys) */
+  case 0xE1: puts0("SpeedSt"); break; /* E1h    DOS access or SpeedStor 12-bit FAT extended partition */
+  case 0xE3: puts0("DOS r/o"); break; /* E3h    DOS read-only */
+                                       /* E3h    SpeedStor, Storage Dimensions */
+  case 0xE4: puts0("SpeedSt"); break; /* E4h    SpeedStor 16-bit FAT extended partition < 1024 cyl */
+  case 0xE5: puts0("reserv "); break; /* E5h    officially listed as reserved */
+  case 0xE6: puts0("reserv "); break; /* E6h    officially listed as reserved */
+  case 0xF1: puts0("Storage"); break; /* F1h    SpeedStor, Storage Dimensions */
+  #endif
+  case 0xF2: puts0("DOS sec"); break; /* F2h    DOS 3.3+ secondary partition */
+  #if 0
+  case 0xF3: puts0("reserv "); break; /* F3h    officially listed as reserved */
+  case 0xF4: puts0("SpeedSt"); break; /* F4h    SpeedStor large partition, Storage Dimensions */
+  case 0xF6: puts0("reserv "); break; /* F6h    officially listed as reserved */
+  case 0xFE: puts0("LANstep"); break; /* FEh    LANstep */
+                                       /* FEh    IBM PS/2 IML */
+                                       /*        SpeedStor > 1024 cyl. */
+  case 0xFF: puts0("XENIX  "); break; /* FFh    Xenix bad block table */
+  #endif
+  default  : puts0("unkn "); puthex_b(c);
+  }
 }

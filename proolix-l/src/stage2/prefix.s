@@ -1,6 +1,8 @@
 # assembler prefix file for c-translated text
 
-# some comments from Interrupt list http://www.ctyme.com/intr/int.htm
+# some comments from Ralf Brown Interrupt list http://www.ctyme.com/intr/int.htm
+
+# Interrupt list rulez! /prool
 
 	.text
 	.code16gcc
@@ -15,7 +17,7 @@ _start:
 	jmp	main
 	
 # variables
-	.ascii	" CT=Kernel;-) "
+	.ascii	" CT=Kernel ;-) "
 SectorsOnCyl:	.word	0,0
 TrkSecs:	.word	0,0
 HeadCnt:	.word	0,0
@@ -30,6 +32,16 @@ RootEnd:	.word	0,0
 MaxClusters:	.word	0,0
 
 global_color:	.word	0
+
+reg_ax:		.word	0
+reg_bx:		.word	0
+reg_cx:		.word	0
+reg_dx:		.word	0
+
+reg_si:		.word	0
+reg_di:		.word	0
+
+reg_es:		.word	0
 
 basic:
 	int	$0x18
@@ -286,6 +298,32 @@ poke: # poke (value, segment, offset)
 	movw	16(%ebp),%bx # offset
 	movb	%al,%ES:(%bx)
 	
+	pop	%ES
+	popl	%ebp
+	ret
+
+GetDriveParam: # GetDriveParam(char drive)
+	pushl	%ebp
+
+	movl	%esp,%ebp
+	push	%ES
+
+	movb	8(%ebp),%dl # drive
+	movb	$8,%ah # function
+	int	$0x13
+	movw	%ax,reg_ax
+	movw	%bx,reg_bx
+	movw	%cx,reg_cx
+	movw	%dx,reg_dx
+	movw	%es,reg_es
+	movw	%di,reg_di
+	jc	1f
+	xorw	%ax,%ax
+	jmp	9f
+1:	
+	movw	$0xFFFF,%ax
+
+9:
 	pop	%ES
 	popl	%ebp
 	ret

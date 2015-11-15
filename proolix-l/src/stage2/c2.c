@@ -85,7 +85,9 @@ while (1)
 	else if (!strcmp(buf,"basic")) basic();
 	else if (!strcmp(buf,"diskd0")) diskd0();
 	else if (!strcmp(buf,"diskd")) diskd();
+	else if (!strcmp(buf,"testdisk")) testdisk();
 	else if (!strcmp(buf,"ls")) ls();
+	else if (!strcmp(buf,"off")) off();
 	else
 		{
 		puts0("Unknown command '");

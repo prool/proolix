@@ -15,6 +15,16 @@ extern int FatSize;
 extern int RootEnd;
 extern int MaxClusters;
 
+extern int reg_ax;
+extern int reg_bx;
+extern int reg_cx;
+extern int reg_dx;
+
+extern int reg_si;
+extern int reg_di;
+
+extern int reg_es;
+
 #define NULL 0
 typedef unsigned int size_t;
 
@@ -52,13 +62,15 @@ void system(void);
 void test(void);
 void ascii(void);
 void cls(void);
+void off(void);
 void memd0(void);
 void memd(void);
 void basic(void);
 void diskd0(void);
 void diskd(void);
 void ls(void);
-int SecForClu (int CluNo);
+void testdisk(void);
+void out_os(unsigned char);
 
 char  *itoa (int w, char  *str, int radix);
 
@@ -66,6 +78,8 @@ void readboot (char *buffer);
 void out_boot(void *buf);
 void process_boot(void *buf);
 int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer);
+int SecForClu (int CluNo);
+short int GetDriveParam (char drive);
 
 struct __attribute__((__packed__)) BootStru /* structure of boot sector of FAT12 and FAT16*/
 {
@@ -135,3 +149,40 @@ unsigned short int FileDate;
 unsigned short int d_fileno; /* initial cluster number */
 unsigned int Size;
 };
+
+#if 0
+struct __attribute__((__packed__)) Partition_stru
+  {
+  unsigned char   indicator;
+        /*
+        00  - non-bootable partition
+        80  - bootable partition (one partition only)
+        */
+  unsigned char   begin_head;
+  unsigned char   begin_sec; /* and 2 high bits of cylinder # */
+  unsigned char   begin_cyl; /* low order bits of cylinder # */
+        /*
+        2 bytes are combined to a word similar to INT 13:
+
+        ³7³6³5³4³3³2³1³0³ 1st byte  (sector)
+         ³ ³ ÀÄÁÄÁÄÁÄÁÄÁÄÄ Sector offset within cylinder
+         ÀÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄ High order bits of cylinder #
+
+        ³7³6³5³4³3³2³1³0³ 2nd byte  (cylinder)
+         ÀÄÁÄÁÄÁÄÁÄÁÄÁÄÄÄÄÄ Low order bits of cylinder #
+         */
+  unsigned char   system_indicator;
+  unsigned char   end_head;
+  unsigned char   end_sec; /* and 2 high bits of cylinder # */
+  unsigned char   end_cyl; /* low order bits of cylinder # */
+  unsigned int   preceding_sec;
+  unsigned int   total_sec;
+  };
+
+struct __attribute__((__packed__)) MBRstru
+  {
+  char master_boot_loader [0x1BE];
+  struct Partition_stru Partition [4];
+  unsigned short int Signature; /* 55AA */
+  };
+#endif

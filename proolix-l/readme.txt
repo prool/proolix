@@ -1,3 +1,6 @@
-diskette.img - Proolix-l bootable diskette
+diskette.img - Proolix-l bootable diskette (current)
 
-Make bootable flash USB stick with 'unetbootin' utility
+proolix.iso - Proolix-l bootable CDROM (old)
+
+Make bootable flash USB stick with 'unetbootin' utility from diskette image
+

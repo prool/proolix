@@ -6,6 +6,7 @@ boot.S (in this directory!) is stage2 source
 boot - binary executable
 cmd1 - example of binary command, compiled under Linux (see Makefile.linux)
 cmd2com - example of binary command, compiled under cygwin (see Makefile.cygwin)
+ct - Proolix-l shell (sources - c2.c)
 
 ---
 
