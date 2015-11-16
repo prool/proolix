@@ -17,7 +17,7 @@ _start:
 	jmp	main
 	
 # variables
-	.ascii	" CT=Kernel ;-) "
+	.ascii	" CT-Kernel ;-) "
 SectorsOnCyl:	.word	0,0
 TrkSecs:	.word	0,0
 HeadCnt:	.word	0,0
