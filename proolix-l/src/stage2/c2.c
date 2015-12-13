@@ -52,6 +52,8 @@ process_boot(bootsector);
 
 out_boot(bootsector);
 
+mount_disk(0);
+
 //puts0("cursor coord "); puthex(get_row()); puts0(" "); puthex(get_col()); puts0("\r\n"); 
 
 #if 0
@@ -86,6 +88,7 @@ while (1)
 	else if (!strcmp(buf,"diskd0")) diskd0();
 	else if (!strcmp(buf,"diskd")) diskd();
 	else if (!strcmp(buf,"testdisk")) testdisk();
+	else if (!strcmp(buf,"mount")) mount();
 	else if (!strcmp(buf,"ls")) ls();
 	else if (!strcmp(buf,"off")) off();
 	else

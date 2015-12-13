@@ -30,6 +30,7 @@ CluSizeBytes:	.word	0,0
 FatSize:	.word	0,0
 RootEnd:	.word	0,0
 MaxClusters:	.word	0,0
+MaxCyl:		.word	0,0
 
 global_color:	.word	0
 

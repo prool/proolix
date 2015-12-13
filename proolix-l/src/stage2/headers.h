@@ -14,6 +14,7 @@ extern int CluSizeBytes;
 extern int FatSize;
 extern int RootEnd;
 extern int MaxClusters;
+extern int MaxCyl;
 
 extern int reg_ax;
 extern int reg_bx;
@@ -70,6 +71,7 @@ void diskd0(void);
 void diskd(void);
 void ls(void);
 void testdisk(void);
+void mount(void);
 void out_os(unsigned char);
 
 char  *itoa (int w, char  *str, int radix);
@@ -77,7 +79,9 @@ char  *itoa (int w, char  *str, int radix);
 void readboot (char *buffer);
 void out_boot(void *buf);
 void process_boot(void *buf);
-int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer);
+int mount_disk(unsigned char drive);
+unsigned short int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer);
+unsigned short int secread (int drive, unsigned AbsSec, char *Buffer);
 int SecForClu (int CluNo);
 short int GetDriveParam (char drive);
 

@@ -1220,11 +1220,14 @@ return ret;
 
 void process_boot (void *buf)
 {int i;
-  struct BootStru *b;
+struct BootStru *b;
+
   b=buf;
+#if 0
   HeadCnt=b->HeadCnt;
   TrkSecs=b->TrkSecs;
   SectorsOnCyl=HeadCnt*TrkSecs;
+#endif
 
   if ((i=b->ResSecs)!=0) ResSecs=i; ResSecs=b->HidnSec+1;
   if ((i=b->TotSecs)!=0) MaxSectors=i;
@@ -1416,6 +1419,7 @@ basic - call ROM BASIC (if exist)\r\n\
 diskd0 - disk dump #1 (sector/head/track)\r\n\
 diskd - disk dump #2 (absolute sector)\r\n\
 testdisk - test of disk\r\n\
+mount - mount disk\r\n\
 ls - ls\r\n\
 exit, quit - exit\r\n\
 ");
@@ -1537,29 +1541,29 @@ void diskd0(void)
 char str[MAX_LEN_STR];
 int drive, sec, head, trk, i, ii, c, line;
 
-puts0("drive? ");
+puts0("Drive, hex? ");
 getsn(str,MAX_LEN_STR);
 drive=htoi(str);
 
-puts0("\r\nsec? (1-...) ");
+puts0("\r\nsec? (1-..., hex) ");
 getsn(str,MAX_LEN_STR);
 sec=htoi(str);
 
-puts0("\r\nhead? ");
+puts0("\r\nhead, hex? ");
 getsn(str,MAX_LEN_STR);
 head=htoi(str);
 
-puts0("\r\ntrk (cyl)? ");
+puts0("\r\ntrk (cyl), hex? ");
 getsn(str,MAX_LEN_STR);
 trk=htoi(str);
 
-puts0("\r\ndrive = ");
-puthex(drive);
-puts0(" sec = ");
+puts0("\r\nDrive = 0x");
+puthex_b(drive);
+puts0(" sec = 0x");
 puthex(sec);
-puts0(" head = ");
+puts0(" head = 0x");
 puthex(head);
-puts0(" trk = ");
+puts0(" trk = 0x");
 puthex(trk);
 
 for(i=0;i<512;i++) Buffer[i]=0;
@@ -1614,6 +1618,67 @@ switch(i)
 puts0("\r\n");
 }
 
+int mount_disk(unsigned char drive)
+{
+puts0("\r\nmount drive ");
+puthex_b(drive);
+int i=GetDriveParam(drive);
+if (i)
+	{
+	puts0("\r\n error code = ");
+	puthex(i);
+	puts0("\r\n");
+	return -1;
+	}
+
+print_drive_type(reg_bx & 0xFFU);
+
+int cyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
+
+puts0(" cyl = ");
+putdec(cyl);
+
+int sec = reg_cx &0x3FU;
+
+puts0(" sec = ");
+putdec(sec);
+
+int heads = ((reg_dx & 0xFF00U) >> 8)&0xFFU;
+
+puts0(" heads = ");
+putdec(heads);
+
+puts0(" number of drives = ");
+putdec(reg_dx & 0xFFU);
+
+puts0(" size = ");
+putdec(sec*(heads+1)*(cyl+1)/2);
+puts0("K\r\n");
+
+  HeadCnt=heads+1;
+  TrkSecs=sec;
+  SectorsOnCyl=HeadCnt*TrkSecs;
+  MaxCyl=cyl;
+
+return 0;
+}
+
+void mount(void)
+{
+char str[MAX_LEN_STR];
+char drive;
+
+puts0("drive (0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
+getsn(str,MAX_LEN_STR);
+drive=htoi(str);
+
+puts0("\r\ndrive = ");
+puthex_b(drive);
+puts0("\r\n");
+
+mount_disk(drive);
+}
+
 void testdisk(void)
 {
 char str[MAX_LEN_STR];
@@ -1634,7 +1699,8 @@ if (i)
 	return;
 	}
 
-puts0("ax = ");
+#if 0
+puts0(" ax = ");
 puthex(reg_ax);
 puts0(" bx = ");
 puthex(reg_bx);
@@ -1646,6 +1712,7 @@ puts0(" es = ");
 puthex(reg_es);
 puts0(" di = ");
 puthex(reg_di);
+#endif
 
 print_drive_type(reg_bx & 0xFFU);
 
@@ -1680,11 +1747,11 @@ int drive, sec, ii, c, line;
 short int i;
 struct MBRstru *MBR;
 
-puts0("drive (0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
+puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
 drive=htoi(str);
 
-puts0("\r\nabs sec (0-...) ? ");
+puts0("\r\nabs sec (0-..., dec) ? ");
 getsn(str,MAX_LEN_STR);
 sec=atoi(str);
 
@@ -1693,8 +1760,8 @@ int quit=0;
 while(!quit)
 
 {// while
-puts0("\r\ndrive = ");
-puthex(drive);
+puts0("\r\ndrive = 0x");
+puthex_b(drive);
 puts0(" sec = ");
 putdec(sec);
 
@@ -1799,7 +1866,7 @@ switch(c)
 } // while
 }
 
-int secread (int drive, unsigned AbsSec, char *Buffer)
+unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
 {/* Read absolute sectors
 Input:
 drive (for int 13h Fn=2)

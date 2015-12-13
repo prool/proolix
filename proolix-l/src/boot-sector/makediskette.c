@@ -46,7 +46,9 @@ printf("\n");
 
 /* read new boot sector */
 if ((h2=open(argv[2],0))<=0) {printf(S2,argv[2]); return 4; }
-if (read(h2,c2,512)==-1) {printf(S3,argv[2]); return 5; }
+i=read(h2,c2,512);
+if (i==-1) {printf(S3,argv[2]); return 5; }
+//if (i>512) {printf("New boot sector too long!!!!!\n"); return 50;}
 
 // patch
 for (i=0;i<3+8;i++)c[i]=c2[i]; /* JMP and OEM name */
