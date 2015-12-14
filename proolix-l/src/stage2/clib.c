@@ -1628,6 +1628,7 @@ if (i)
 	puts0("\r\n error code = ");
 	puthex(i);
 	puts0("\r\n");
+	current_drive=0xFFU;
 	return -1;
 	}
 
@@ -1660,6 +1661,7 @@ puts0("K\r\n");
   SectorsOnCyl=HeadCnt*TrkSecs;
   MaxCyl=cyl;
 
+current_drive=drive;
 return 0;
 }
 
@@ -1859,7 +1861,9 @@ switch(c)
 		// view_mbr end
 		break;
     case 'B':
-		puts0("View boot not implemented yet...\r\n");
+		out_boot(Buffer);
+		puts0("press any key");
+		getch();
 		break;
     default: sec++;
     }	

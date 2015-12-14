@@ -2,19 +2,21 @@
 
 // variables
 
-extern int SectorsOnCyl;
-extern int TrkSecs;
-extern int HeadCnt;
-extern int RootBeg;
-extern int DataStart;
+extern short int SectorsOnCyl;
+extern short int TrkSecs;
+extern short int HeadCnt;
+extern short int RootBeg;
+extern short int DataStart;
 extern int MaxSectors;
 extern int ResSecs;
-extern int CluSize;
-extern int CluSizeBytes;
-extern int FatSize;
-extern int RootEnd;
-extern int MaxClusters;
-extern int MaxCyl;
+extern short int CluSize;
+extern short int CluSizeBytes;
+extern short int FatSize;
+extern short int RootEnd;
+extern short int MaxClusters;
+extern short int MaxCyl;
+
+extern unsigned char current_drive; // 0 - FDD A, 1 - FDD B, 80 - HDD 1, 81 - HDD 2, FF - no mount drive
 
 extern int reg_ax;
 extern int reg_bx;

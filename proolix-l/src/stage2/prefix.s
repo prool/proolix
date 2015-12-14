@@ -1,7 +1,6 @@
 # assembler prefix file for c-translated text
 
 # some comments from Ralf Brown Interrupt list http://www.ctyme.com/intr/int.htm
-
 # Interrupt list rulez! /prool
 
 	.text
@@ -9,28 +8,28 @@
 _start:	
 	.globl	_start
 
-/*
+#if 0 // for debug
 	  movb $0x0e,%ah
 	  movb $'A',%al
 	  int  $0x10	# putch ('A')
-*/
+#endif
 	jmp	main
 	
 # variables
 	.ascii	" CT-Kernel ;-) "
-SectorsOnCyl:	.word	0,0
-TrkSecs:	.word	0,0
-HeadCnt:	.word	0,0
-RootBeg:	.word	0,0
-DataStart:	.word	0,0
+SectorsOnCyl:	.word	0
+TrkSecs:	.word	0
+HeadCnt:	.word	0
+RootBeg:	.word	0
+DataStart:	.word	0
 MaxSectors:	.word	0,0
 ResSecs:	.word	0,0
-CluSize:	.word	0,0
-CluSizeBytes:	.word	0,0
-FatSize:	.word	0,0
-RootEnd:	.word	0,0
-MaxClusters:	.word	0,0
-MaxCyl:		.word	0,0
+CluSize:	.word	0
+CluSizeBytes:	.word	0
+FatSize:	.word	0
+RootEnd:	.word	0
+MaxClusters:	.word	0
+MaxCyl:		.word	0
 
 global_color:	.word	0
 
@@ -38,11 +37,11 @@ reg_ax:		.word	0
 reg_bx:		.word	0
 reg_cx:		.word	0
 reg_dx:		.word	0
-
 reg_si:		.word	0
 reg_di:		.word	0
-
 reg_es:		.word	0
+
+current_drive:	.byte	0
 
 basic:
 	int	$0x18

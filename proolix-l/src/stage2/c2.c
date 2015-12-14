@@ -22,6 +22,8 @@ int i,j;
 char c,cc;
 char bootsector[512];
 
+current_drive=0xFF;
+
 set_color(15);
 
 puts0("Proolix-l shell. Compiled ");
