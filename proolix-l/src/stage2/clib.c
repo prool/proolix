@@ -1,10 +1,11 @@
-// proolix-l c library
+// clib.c
+
+//#define DEBUG 1
 
 #include <limits.h>
 
- // for printf
 #define MAX_LEN_STR 256 
-#define EOF (-1)
+#define MAXLEN 256 
 
 #if 0
 void two_parameters(int *i, int *j) // see translated text in .s file
@@ -321,18 +322,6 @@ while (c1&&c2);
 return 0;
 }
 /****************************************************************************/
-char  *strlwr(char  *s)
-{
-char  *cc;
-/* if (s==NULL) return NULL; */
-cc=s;
-while(*s)
-  {
-  *s=tolower(*s);
-  s++;
-  }
-return cc;
-}
 /****************************************************************************/
 char  *strncat (char  *dest, const char  *src, size_t maxlen)
 {
@@ -530,20 +519,31 @@ while(i1<i2)
 return ret;
 }
 
-/****************************************************************************/
+#endif
+
+char  *strlwr(char  *s)
+{
+char  *cc;
+/* if (s==NULL) return NULL; */
+cc=s;
+while(*s)
+  {
+  *s=tolower(*s);
+  s++;
+  }
+return cc;
+}
 
 int tolower (int ch)
 {
 if ((ch>='A')&&(ch<='Z'))return ch + 'a' - 'A'; else return ch;
 }
-/****************************************************************************/
 
-/****************************************************************************/
 int isgraph(int c)
 {
 return ((c) >= 0x21 && (c) <= 0x7e);
 }
-/****************************************************************************/
+
 int isprint(int c)
 {
 return ((c) >= 0x20 && (c) <= 0x7e);
@@ -594,7 +594,6 @@ int isupper (int c) {return (c>='A')&&(c<='Z');}
 int isxdigit(int c)
   {return ((c>='0')&&(c<='9'))||((c>='a')&&(c<='f'))||((c>='A')&&(c<='F'));}
 
-#endif
 
 /****************************************************************************/
 void  *memcpy(void  *dest, const void  *src, size_t n)
@@ -1247,8 +1246,9 @@ void ls (void)
 {
 char buf[512];
 unsigned char *pp;
-int i,j,k, sec;
+int i,j,k, kk, sec;
 struct dirent16 *d;
+char path[MAXLEN];
 
 puts0("RootBeg=");putdec(RootBeg);
 puts0("\r\nFilename    Flags    Date                Size 1stClu 1stSector\r\n");
@@ -1256,14 +1256,16 @@ puts0("\r\nFilename    Flags    Date                Size 1stClu 1stSector\r\n");
 for(i=RootBeg;i<RootEnd;i++)
     {
     for (k=0;k<512;k++) buf[k]=0;
-    secread(0,i,buf);
+    secread(current_drive,i,buf);
     pp=buf;
     for (j=0;j<16;j++)
 	{
 	d=(void *)pp;
 	if ((*pp==0x0E5)||(*pp==0)||(d->AttrByte&8)) {pp+=32; continue;}
-	for (k=0;k<11;k++) putch(d->d_name[k]);
-	putch(' ');
+	//for (k=0;k<11;k++) putch(d->d_name[k]);
+	puts0(DirToPath(d->d_name, path));
+	kk=12-strlen(path);
+	for(k=0;k<kk;k++) putch(' ');
 #if 1
 	if (d->AttrByte&128)	putch('*'); else putch('.');
 	if (d->AttrByte& 64)	putch('*'); else putch('.');
@@ -1372,6 +1374,7 @@ puts0("\r\nsize of int ");putdec(sizeof(int));
 puts0("\r\nsize of long int ");putdec(sizeof(long int));
 puts0("\r\nsize of short int ");putdec(sizeof(short int));
 puts0("\r\nsize of char ");putdec(sizeof(char));
+puts0("\r\nsize of FCB ");putdec(sizeof(struct FCBstru));
 }
 
 void memmap(void)
@@ -1406,6 +1409,7 @@ void help(void)
 {
 puts0("Proolix-l shell command\r\n\r\n\
 test - test\r\n\
+testopen - test of open()\r\n\
 help, ? - this help\r\n\
 ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
@@ -2081,4 +2085,195 @@ switch(c)
   #endif
   default  : puts0("unkn "); puthex_b(c);
   }
+}
+
+// io - input output
+
+// FCB File Control Block:
+
+// FirstClu (0 if FCB not open)
+// CurrentPosition (in bytes)
+// Length (length of file, in bytes)
+// CurrentCluster
+
+int open (char *path, int flags)
+{
+char buf[512];
+unsigned char *pp;
+int i,j,k, sec;
+struct dirent16 *d;
+char dir_name[11];
+
+// searching file
+for(i=RootBeg;i<RootEnd;i++)
+    {
+    for (k=0;k<512;k++) buf[k]=0;
+    secread(current_drive,i,buf);
+    pp=buf;
+    for (j=0;j<16;j++)
+	{
+	d=(void *)pp;
+	if ((*pp==0x0E5)||(*pp==0)||(d->AttrByte&8)) {pp+=32; continue;}
+	PathToDir(path,dir_name);
+	if (!memcmp(d->d_name,dir_name,11))
+	    {// found!
+	    for (i=0; i<MAX_FCB;i++)
+		{
+		if (FCB[i].FirstClu==0)
+		    {// i - free FCB block
+		    FCB[i].FirstClu=d->d_fileno;
+		    FCB[i].CurPos=0;
+		    FCB[i].Length=d->Size;
+		    FCB[i].CurClu=d->d_fileno;
+		    return i+3; // bikoz descriptors 0-2 is reserved (STDIN, STDOUT, STDERR)
+		    }
+		}
+	    puts0("Not free FCB\n");
+	    return -1; // not free FCB
+	    }
+	pp+=32;
+	}
+     }
+puts0("File not found\n");
+return -1; // file not found
+}
+
+
+int read (int fd, char *buf, int count)
+{
+if ((fd-3)>MAX_FCB) return 0;
+if (FCB[fd-3].FirstClu==0) return 0; // FCB not open, descriptor error
+if (buf==0) return 0; 
+if (count>512) {puts0("read(): count>512. not implemented yet\n"); return 0;}
+if ((FCB[fd-3].CurPos+count)>FCB[fd-3].Length) count=FCB[fd-3].Length-FCB[fd-3].CurPos;
+if (count==0) return 0;
+
+if (count!=1) {puts0("read(): count!=1. not implemented yet\n"); return 0;}
+
+// read
+int rest=512-FCB[fd-3].CurPos % 512;
+int sector_into_cluster = (FCB[fd-3].CurPos % CluSizeBytes)/512;
+
+if ((rest!=0) || ((rest==0)&&(FCB[fd-3].CurPos==0)))
+    {// read current sector
+    int s=SecForClu(FCB[fd-3].CurClu);
+    secread(current_drive,s,buffer512);
+    memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
+    FCB[fd-3].CurPos++;
+    return 1;
+    }
+else
+    {// read next sector
+    puts0("\r\nread(): read next sector not implemented yet\r\n");
+    return 0;
+    }
+}
+
+void testopen(void)
+{
+char buf[MAXLEN];
+int i,j;
+
+puts0("Filename? ");
+getsn(buf,MAXLEN);
+if ((i=open(buf,0))==-1) {puts0("\nFile not found\n"); return;}
+puts0("\nFile found. descr=");putdec(i);puts0("\n");
+
+#if 0
+buf[0]='E';
+j=read(i,buf,1);
+puts0("return code "); putdec(j);
+puts0(" read char "); putch(buf[0]);
+#endif
+
+puts0("\r\n");
+
+while (1)
+    {
+    j=read(i,buf,1);
+    if (j==0) break;
+    putch(buf[0]); if (buf[0]=='\n') putch('\r');
+    }
+}
+
+int PathToDir(char *path, char DirName[11])
+{
+char *cc;
+char *point;
+int Counter, MsDos, i, len=2, NameLen, ExtLen, Up;
+
+#ifdef DEBUG
+printf(" P2D: path=`%s' ",path);
+#endif
+
+if (path==NULL) return -1;
+cc=path;
+Up=0;
+Counter=0;
+MsDos=1;
+if (strcmp(path,"..")==0) MsDos=2; /* 2 == ".." */
+else
+  {
+  while(*cc)
+    {
+    if (*cc=='.')
+      {
+      point=cc;
+      Counter++;
+      }
+    else
+      {
+      if (isupper(*cc)) Up=1;
+      }
+    cc++;
+    }
+  if (Up) MsDos=0;
+  len=(int)(cc-path);
+  if (MsDos)
+    {
+    if (Counter) {NameLen=(int)(point-path); ExtLen=(int)(len-NameLen-1);}
+    else {NameLen=len; ExtLen=0;}
+    if (Counter>1) {MsDos=0;}
+    else if (NameLen>8) {MsDos=0;}
+    else if (ExtLen>3) {MsDos=0;}
+    }
+  }
+  for (i=0;i<11;i++) DirName[i]=' ';
+  if (MsDos==1)
+    {
+    memcpy(DirName,path,NameLen);
+    memcpy(DirName+8,point+1,ExtLen);
+    for (i=0;i<11;i++) DirName[i]=toupper(DirName[i]);
+    }
+  else
+    {
+    memcpy(DirName,path,(len>11)?11:len);
+    }
+  #ifdef DEBUG
+  printf(" DirName=`%s' ", DirName);
+  #endif
+
+return MsDos;
+}
+char *DirToPath(char filename[11], char *path)
+{char c, *cc, *ret; int i; unsigned len;
+if (path==NULL) return NULL;
+ret=path;
+  for(i=0;i<8;i++)
+    if ((c=filename[i])!=' ') *path++=c;
+    else break;
+  if (filename[8]!=' ')
+    {
+    *path++='.';
+    for (i=8;i<11;i++)
+      if ((c=filename[i])!=' ') *path++=c;
+      else break;
+    }
+  *path=0;
+  strlwr(ret);
+#if 0
+puts0(" path= ");
+puts0(ret);
+#endif
+return ret;
 }

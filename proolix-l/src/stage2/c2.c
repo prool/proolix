@@ -93,6 +93,7 @@ while (1)
 	else if (!strcmp(buf,"mount")) mount();
 	else if (!strcmp(buf,"ls")) ls();
 	else if (!strcmp(buf,"off")) off();
+	else if (!strcmp(buf,"testopen")) testopen();
 	else
 		{
 		puts0("Unknown command '");

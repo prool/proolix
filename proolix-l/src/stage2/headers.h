@@ -1,6 +1,10 @@
 // C-headers for c utilities
 
+#define MAX_FCB		3	// see label FCB in prefix.s file
+
 // variables
+
+extern char buffer512[];
 
 extern short int SectorsOnCyl;
 extern short int TrkSecs;
@@ -63,6 +67,7 @@ void help(void);
 void memmap(void);
 void system(void);
 void test(void);
+void testopen(void);
 void ascii(void);
 void cls(void);
 void off(void);
@@ -75,6 +80,10 @@ void ls(void);
 void testdisk(void);
 void mount(void);
 void out_os(unsigned char);
+
+int open(char *path, int flags);
+int PathToDir(char *path, char DirName[11]);
+char *DirToPath(char filename[11], char *path);
 
 char  *itoa (int w, char  *str, int radix);
 
@@ -192,3 +201,21 @@ struct __attribute__((__packed__)) MBRstru
   unsigned short int Signature; /* 55AA */
   };
 #endif
+
+
+// FCB File Control Block:
+
+// FirstClu (0 if FCB not open)
+// CurrentPosition (in bytes)
+// Length (length of file, in bytes)
+// CurrentCluster
+
+struct FCBstru
+{
+short int FirstClu;
+short CurPos;
+short Length;
+short CurClu;
+};
+
+extern struct FCBstru FCB[MAX_FCB];
