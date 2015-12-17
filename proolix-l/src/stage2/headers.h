@@ -1,6 +1,8 @@
 // C-headers for c utilities
 
 #define MAX_FCB		3	// see label FCB in prefix.s file
+#define NULL 0
+#define SECTOR_SIZE	512
 
 // variables
 
@@ -32,7 +34,6 @@ extern int reg_di;
 
 extern int reg_es;
 
-#define NULL 0
 typedef unsigned int size_t;
 
 void stop(void);
@@ -40,6 +41,7 @@ void putch(char c);
 void putch2(char c);
 void putch3(char c);
 void puts0(char *s);
+int puts(char *s);
 void putch_color(char c, char attrib);
 void puthex(int c);
 void puthex_l(int c);
@@ -85,6 +87,7 @@ int open(char *path, int flags);
 int read (int fd, char *buf, int count);
 int PathToDir(char *path, char DirName[11]);
 char *DirToPath(char filename[11], char *path);
+unsigned long NextClu(unsigned long Clu);
 
 char  *itoa (int w, char  *str, int radix);
 

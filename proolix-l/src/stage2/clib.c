@@ -81,6 +81,11 @@ void puts0(char *s)
 //	putch(*s++);
 }
 
+int puts(char *s)
+{
+puts0(s);
+puts0("\r\n");
+}
 
 void test (void)
 {int i,j;
@@ -180,7 +185,7 @@ int Divisor10 [10] = {1000000000,100000000,10000000,1000000,100000,10000, 1000, 
 if ((digits<1)||(digits>10)) return;
 
 if (w<0) {putch('-'); w=-w;}
-if (w==0) {putch('0'); return;}
+if (w==0) {for(i=0;i<digits;i++) putch('0'); return;}
 
             for (i=10-digits;i<10;i++)
               {
@@ -1246,12 +1251,14 @@ void ls (void)
 {
 char buf[512];
 unsigned char *pp;
-int i,j,k, kk, sec;
+int i,j,k, kk, sec, total;
 struct dirent16 *d;
 char path[MAXLEN];
 
 puts0("RootBeg=");putdec(RootBeg);
 puts0("\r\nFilename    Flags    Date                Size 1stClu 1stSector\r\n");
+
+total=0;
 
 for(i=RootBeg;i<RootEnd;i++)
     {
@@ -1297,6 +1304,7 @@ for(i=RootBeg;i<RootEnd;i++)
 	putdec2((d->FileTime&0x0001FU) * 2,2,0); // sec
 	putch(' ');
 	putdec2(d->Size,5,1); // filesize
+	total+=d->Size;
 	putch(' ');
 	putdec2(sec=((d->d_fileno)&0xFFFFU),4,1); // 1st cluster
 	putch(' ');
@@ -1305,6 +1313,7 @@ for(i=RootBeg;i<RootEnd;i++)
 	pp+=32;
 	}
     }
+puts0("Total size "); putdec(total); puts("");
 }
 
 void out_boot(void *buf)
@@ -2139,14 +2148,15 @@ return -1; // file not found
 }
 
 int read (int fd, char *buf, int count)
-{
+{int i,s;
+
 if (count==0) {puts0("read(): msg0\r\n"); return 0;}
 if ((fd-3)>MAX_FCB) {puts0("read(): msg1\r\n"); return 0;}
 if (FCB[fd-3].FirstClu==0) {puts0("read(): msg2\r\n"); return 0;} // FCB not open, descriptor error
 if (buf==0) {puts0("read(): msg3\r\n"); return 0;} 
 if (count>512) {puts0("read(): count>512. not implemented yet\n"); return 0;}
 if ((FCB[fd-3].CurPos+count)>FCB[fd-3].Length) count=FCB[fd-3].Length-FCB[fd-3].CurPos;
-if (count==0) return 0;
+if (count==0){/*puts("read():count==0");*/return 0;}
 
 if (count!=1) {puts0("read(): count!=1. not implemented yet\n"); return 0;}
 
@@ -2156,7 +2166,7 @@ int sector_into_cluster = (FCB[fd-3].CurPos % CluSizeBytes)/512;
 
 if (!((rest==512) && (FCB[fd-3].CurPos!=0)))
     {// read current sector
-    int s=SecForClu(FCB[fd-3].CurClu);
+    s=SecForClu(FCB[fd-3].CurClu);
     secread(current_drive,s,buffer512);
     memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
     FCB[fd-3].CurPos+=count;
@@ -2164,8 +2174,28 @@ if (!((rest==512) && (FCB[fd-3].CurPos!=0)))
     }
 else
     {// read next sector
-    puts0("read(): read next sector not implemented yet\n");
-    return 0;
+    if (++sector_into_cluster>=CluSize)
+	{// read next cluster
+	i=NextClu(FCB[fd-3].CurClu);
+	if (i==-1) {puts("read(): No next cluster"); return 0;}
+	FCB[fd-3].CurClu=i;
+    	s=SecForClu(i);
+    	secread(current_drive,s,buffer512);
+    	memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
+    	FCB[fd-3].CurPos+=count;
+    	return 1;
+	}
+    else // read next sector
+	{
+	//puts("read(): read next sector");
+    	s=SecForClu(FCB[fd-3].CurClu);
+	s+=sector_into_cluster;
+    	secread(current_drive,s,buffer512);
+    	memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
+    	FCB[fd-3].CurPos+=count;
+    	return 1;
+	}
+    puts("read(): LOGIC BUG!!!"); return 0;
     }
 }
 
@@ -2276,4 +2306,120 @@ puts0(" path= ");
 puts0(ret);
 #endif
 return ret;
+}
+
+/* NextClu() - next cluster number compute */
+unsigned long NextClu (unsigned long CluNo) /* -1 for eof or error */
+{
+unsigned long j;
+unsigned long nsect;
+unsigned short int offset;
+unsigned short i;
+
+unsigned char buff[512];
+
+#define FAT12	0
+#define FAT16	1
+#define FAT32	2
+#define FAT32LBA	3
+
+char FATMode=FAT12;
+
+//puts("NextClu()");
+
+if ((CluNo>MaxClusters)||(CluNo==0))
+  return -1;
+
+switch (FATMode)
+{
+case FAT12:
+  { /* FAT 12 */
+  /* byte number in table FAT-12 */
+  j=(CluNo*3)/2;
+  /* sector number of FAT */
+  nsect=(unsigned short int)(j/SECTOR_SIZE);
+  #ifdef DEBUG
+  printf("nsect=%i ",nsect);
+  #endif
+  /* nsect-relative sector number in FAT. 0 - first sec of FAT */
+  if (nsect>=FatSize) {puts("NextClu: Invalid FAT's computing"); return -1;}
+  if ( secread(current_drive, ResSecs+nsect, buff)!=1 )
+    {puts("\nNextClu: FAT read error"); return -1;}
+
+  offset=(unsigned short int)(j%SECTOR_SIZE);
+  #ifdef DEBUG
+  printf("offset=%i ",offset);
+  #endif
+  if (offset==(SECTOR_SIZE-1))
+    {unsigned char c;
+    //puts("NextClu: bayt na granitse");
+    c=buff[SECTOR_SIZE-1];
+    if ( secread(current_drive, ResSecs+nsect+1, buff) != 1 )
+      {puts("\nNextClu: FAT read error"); return -1;}
+    #ifdef DEBUG
+    printf("c=%04X ",c);
+    #endif
+    i=((unsigned short int)c)|
+    (((unsigned short int)(buff[0]))<<8);
+    }
+  else
+    i=(unsigned short)buff[offset] | (((unsigned short)buff[offset+1])<<8);
+  #ifdef DEBUG
+  printf("word=%04X ",i);
+  #endif
+  if (CluNo & 1)
+    {
+    #ifdef DEBUG
+    putch('n');
+    #endif
+    i>>=4;
+    }
+  else
+    {
+    #ifdef DEBUG
+    putch('c');
+    #endif
+    i&=0xfff;
+    }
+  if (i>0xff0) return -1;
+  }
+break;
+#if 0 // FAT16, 32 not implemented yet
+case FAT16:
+  { /* FAT 16 */
+  j=((long)CluNo)*2;
+  nsect=(unsigned int)(j/SECTOR_SIZE);
+  if (nsect>=FatSize) {puts("NextClu: Invalid FAT's computing"); return -1;}
+  if ( (b=LoadCache(ResSecs+nsect)) == -1U )
+    {puts("\nNextClu: FAT read error"); return -1;}
+
+  offset=(unsigned int)(j%SECTOR_SIZE);
+  i=*(int *)((*(Cache+b)).M+offset);
+  if (i>0xfff0) return -1;
+  }
+break;
+case FAT32:
+case FAT32LBA:
+  {
+  j=CluNo*4;
+  nsect=j/SECTOR_SIZE;
+  if (nsect>=FatSize) {puts("NextClu: Invalid FAT's computing"); return -1;}
+  if ( (b=LoadCache(ResSecs+nsect)) == -1U )
+    {puts("\nNextClu: FAT read error"); return -1;}
+
+  offset=(unsigned int)(j%SECTOR_SIZE);
+  i=*(long *)((*(Cache+b)).M+offset);
+  if (i>0xfffffff0L) return -1;
+  i=i&0x3FFFFFFFL;
+  }
+break;
+#endif
+default: ;
+}
+
+#if 0
+printf("%i->%i ",CluNo,i);
+#endif
+
+return i;
 }

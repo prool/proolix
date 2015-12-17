@@ -10,7 +10,7 @@ _start:
 
 #if 0 // for debug
 	  movb $0x0e,%ah
-	  movb $'A',%al
+	  movb $'_',%al
 	  int  $0x10	# putch ('A')
 #endif
 	jmp	main
@@ -257,7 +257,7 @@ readboot:
 	popl	%ebp
 	ret
 
-readsec0: # void readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer)
+readsec0: # unsigned short int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer)
 	pushl	%ebp
 
 	movl	%esp,%ebp
