@@ -2138,12 +2138,12 @@ puts0("File not found\n");
 return -1; // file not found
 }
 
-
 int read (int fd, char *buf, int count)
 {
-if ((fd-3)>MAX_FCB) return 0;
-if (FCB[fd-3].FirstClu==0) return 0; // FCB not open, descriptor error
-if (buf==0) return 0; 
+if (count==0) {puts0("read(): msg0\r\n"); return 0;}
+if ((fd-3)>MAX_FCB) {puts0("read(): msg1\r\n"); return 0;}
+if (FCB[fd-3].FirstClu==0) {puts0("read(): msg2\r\n"); return 0;} // FCB not open, descriptor error
+if (buf==0) {puts0("read(): msg3\r\n"); return 0;} 
 if (count>512) {puts0("read(): count>512. not implemented yet\n"); return 0;}
 if ((FCB[fd-3].CurPos+count)>FCB[fd-3].Length) count=FCB[fd-3].Length-FCB[fd-3].CurPos;
 if (count==0) return 0;
@@ -2154,17 +2154,17 @@ if (count!=1) {puts0("read(): count!=1. not implemented yet\n"); return 0;}
 int rest=512-FCB[fd-3].CurPos % 512;
 int sector_into_cluster = (FCB[fd-3].CurPos % CluSizeBytes)/512;
 
-if ((rest!=0) || ((rest==0)&&(FCB[fd-3].CurPos==0)))
+if (!((rest==512) && (FCB[fd-3].CurPos!=0)))
     {// read current sector
     int s=SecForClu(FCB[fd-3].CurClu);
     secread(current_drive,s,buffer512);
     memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
-    FCB[fd-3].CurPos++;
+    FCB[fd-3].CurPos+=count;
     return 1;
     }
 else
     {// read next sector
-    puts0("\r\nread(): read next sector not implemented yet\r\n");
+    puts0("read(): read next sector not implemented yet\n");
     return 0;
     }
 }

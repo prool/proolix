@@ -82,6 +82,7 @@ void mount(void);
 void out_os(unsigned char);
 
 int open(char *path, int flags);
+int read (int fd, char *buf, int count);
 int PathToDir(char *path, char DirName[11]);
 char *DirToPath(char filename[11], char *path);
 
@@ -212,10 +213,10 @@ struct __attribute__((__packed__)) MBRstru
 
 struct FCBstru
 {
-short int FirstClu;
-short CurPos;
-short Length;
-short CurClu;
+unsigned short FirstClu;
+unsigned short CurPos;
+unsigned short Length;
+unsigned short CurClu;
 };
 
 extern struct FCBstru FCB[MAX_FCB];
