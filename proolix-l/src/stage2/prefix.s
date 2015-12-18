@@ -44,9 +44,9 @@ reg_es:		.word	0
 current_drive:	.byte	0
 
 FCB:
-		.word	0,0,0,0
-		.word	0,0,0,0
-		.word	0,0,0,0
+		.word	0,0,0,0,0,0
+		.word	0,0,0,0,0,0
+		.word	0,0,0,0,0,0
 
 basic:
 	int	$0x18

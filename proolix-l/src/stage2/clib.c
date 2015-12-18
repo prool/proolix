@@ -1303,7 +1303,7 @@ for(i=RootBeg;i<RootEnd;i++)
 	putch(':');
 	putdec2((d->FileTime&0x0001FU) * 2,2,0); // sec
 	putch(' ');
-	putdec2(d->Size,5,1); // filesize
+	putdec2(d->Size,7,1); // filesize
 	total+=d->Size;
 	putch(' ');
 	putdec2(sec=((d->d_fileno)&0xFFFFU),4,1); // 1st cluster
@@ -2422,4 +2422,11 @@ printf("%i->%i ",CluNo,i);
 #endif
 
 return i;
+}
+
+int close (int fd)
+{
+if ((fd-3)>MAX_FCB) {puts("close(): err1"); return -1;}
+FCB[fd-3].FirstClu=0;
+return 0;
 }

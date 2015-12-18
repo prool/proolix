@@ -216,9 +216,9 @@ struct __attribute__((__packed__)) MBRstru
 
 struct FCBstru
 {
+unsigned int Length;
+unsigned int CurPos;
 unsigned short FirstClu;
-unsigned short CurPos;
-unsigned short Length;
 unsigned short CurClu;
 };
 
