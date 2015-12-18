@@ -1418,7 +1418,6 @@ void help(void)
 {
 puts0("Proolix-l shell command\r\n\r\n\
 test - test\r\n\
-testopen - test of open()\r\n\
 help, ? - this help\r\n\
 ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
@@ -1434,6 +1433,8 @@ diskd - disk dump #2 (absolute sector)\r\n\
 testdisk - test of disk\r\n\
 mount - mount disk\r\n\
 ls - ls\r\n\
+cat - interactive cat file\r\n\
+gluck - gluck\r\n\
 exit, quit - exit\r\n\
 ");
 }
@@ -2199,7 +2200,38 @@ else
     }
 }
 
-void testopen(void)
+void gluck(void)
+{
+char buf[MAXLEN];
+int i,j;
+char *pp;
+
+puts0("gluck(): Filename? ");
+for (i=0;i<MAXLEN;i++) buf[i]=0;
+getsn(buf,MAXLEN);
+pp=buf;
+gluck2("readme.txt");
+//gluck2(pp);
+}
+
+void gluck2(char *filename)
+{
+char buf[MAXLEN];
+int i,j;
+
+if ((i=open(filename,0))==-1) {puts0("\nFile not found\n"); return;}
+puts0("\nFile found. descr=");putdec(i);puts0("\n");
+
+while (1)
+    {
+    j=read(i,buf,1);
+    if (j==0) break;
+    putch(buf[0]); if (buf[0]=='\n') putch('\r');
+    }
+close(i);
+}
+
+void cat(void)
 {
 char buf[MAXLEN];
 int i,j;
@@ -2224,6 +2256,7 @@ while (1)
     if (j==0) break;
     putch(buf[0]); if (buf[0]=='\n') putch('\r');
     }
+close(i);
 }
 
 int PathToDir(char *path, char DirName[11])

@@ -65,11 +65,14 @@ void setpos (char row, char col);
 char get_color(void);
 void set_color(char color);
 
+void gluck(void);
+void gluck2(char *);
+
 void help(void);
 void memmap(void);
 void system(void);
 void test(void);
-void testopen(void);
+void cat(void);
 void ascii(void);
 void cls(void);
 void off(void);
