@@ -2234,27 +2234,26 @@ close(i);
 void cat(void)
 {
 char buf[MAXLEN];
-int i,j;
+int i,j, line;
 
-puts0("Filename? ");
-getsn(buf,MAXLEN);
+while(1)
+	{
+	puts0("Filename (? for dir) > ");
+	getsn(buf,MAXLEN);
+	if (buf[0]=='?') ls();
+	else	break;
+	}
 if ((i=open(buf,0))==-1) {puts0("\nFile not found\n"); return;}
-puts0("\nFile found. descr=");putdec(i);puts0("\n");
+//puts0("\nFile found. descr=");putdec(i);puts0("\n");
 
-#if 0
-buf[0]='E';
-j=read(i,buf,1);
-puts0("return code "); putdec(j);
-puts0(" read char "); putch(buf[0]);
-#endif
-
-puts0("\r\n");
+line=0;
 
 while (1)
     {
     j=read(i,buf,1);
     if (j==0) break;
-    putch(buf[0]); if (buf[0]=='\n') putch('\r');
+    putch(buf[0]); if (buf[0]=='\n')
+	{if (++line>=24) {puts0("\rpress anykey (q - quit)"); if (getch()=='q') break; line=0; cls();} putch('\r');}
     }
 close(i);
 }
