@@ -6,7 +6,8 @@
 
 // variables
 
-extern char buffer512[];
+extern unsigned char buffer512[];
+extern unsigned short errno;
 
 extern short int SectorsOnCyl;
 extern short int TrkSecs;
@@ -99,7 +100,9 @@ void out_boot(void *buf);
 void process_boot(void *buf);
 int mount_disk(unsigned char drive);
 unsigned short int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer);
+unsigned short int writesec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer);
 unsigned short int secread (int drive, unsigned AbsSec, char *Buffer);
+unsigned short int secwrite (int drive, unsigned AbsSec, char *Buffer);
 int SecForClu (int CluNo);
 short int GetDriveParam (char drive);
 

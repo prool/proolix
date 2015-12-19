@@ -40,6 +40,7 @@ reg_dx:		.word	0
 reg_si:		.word	0
 reg_di:		.word	0
 reg_es:		.word	0
+errno:		.word	0
 
 current_drive:	.byte	0
 
@@ -267,15 +268,46 @@ readsec0: # unsigned short int readsec0(char drive, char sec, char head, char tr
 	movb	20(%ebp),%ch # trk (cyl)
 	movw	24(%ebp),%bx # Buffer address
 
+	push	%ES
+	
 	push	%DS
 	pop	%ES	# ES :=DS
 
 	movw	$0x0201,%ax # ah = 02 (command 'read'), al=1 - number of sectors to read
 	int	$0x13
+	
+	movw	%ax,errno
 
+	pop	%ES
 	popl	%ebp
 	ret
+	
+writesec0: # unsigned short int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer)
+	pushl	%ebp
 
+	movl	%esp,%ebp
+	movb	8(%ebp),%dl # drive
+	movb	12(%ebp),%cl # sector
+	movb	16(%ebp),%dh # head
+	movb	20(%ebp),%ch # trk (cyl)
+	movw	24(%ebp),%bx # Buffer address
+
+	push	%ES
+	
+	push	%DS
+	pop	%ES	# ES :=DS
+
+	movw	$0x0301,%ax # ah = 03 (command 'write'), al=1 - number of sectors to write
+	int	$0x13
+	jc	1f
+	jmp	2f
+1:	movw	$0xDEAD,%ax
+	
+2:
+	pop	%ES
+	popl	%ebp
+	ret
+	
 peek2: # peek2 (segment, offset)
 	pushl	%ebp
 	

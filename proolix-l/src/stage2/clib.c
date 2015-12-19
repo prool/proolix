@@ -1263,7 +1263,7 @@ total=0;
 for(i=RootBeg;i<RootEnd;i++)
     {
     for (k=0;k<512;k++) buf[k]=0;
-    secread(current_drive,i,buf);
+    if (secread(current_drive,i,buf)!=1) puts0("Disk read error #1 ");
     pp=buf;
     for (j=0;j<16;j++)
 	{
@@ -1781,9 +1781,9 @@ puthex_b(drive);
 puts0(" sec = ");
 putdec(sec);
 
-for(i=0;i<512;i++) Buffer[i]=0;
+for(i=0;i<512;i++) buffer512[i]=0;
 
-i=secread(drive, sec, Buffer);
+i=secread(drive, sec, buffer512);
 
 if (i==1) puts0(" OK");
 else {
@@ -1798,23 +1798,29 @@ for (line=0;line<32;line++)
     if (line==15) {puts0(" press any key "); getch();putch('\r');}
     for (i=0;i<MEMD_STEP;i++)
 	{
-	c=Buffer[ii++];
+	c=buffer512[ii++];
 	puthex_b(c);
 	putch(' ');
 	}
     ii=ii-MEMD_STEP;
     for (i=0;i<MEMD_STEP;i++)
 	{
-	c=(Buffer[ii++])&0xFFU;
+	c=(buffer512[ii++])&0xFFU;
 	if (c<' ') putch('.');
 	else putch(c);
 	}
     puts0("\r\n");
     }
-puts0("Next sector (q - quit, r - retry, b - back, V - view MBR, B - view boot, other key - next) ? \r\n");
+puts0("Next sector (q-quit,r-retry,b-back,V-view MBR,B-view boot,W-write,D-debug,other key-next) ? \r\n");
 char c=getch();
 switch(c)
     {
+    case 'D':	buffer512[0]='Z';
+    case 'W':	i=secwrite(drive, sec, buffer512);
+		puts0("Disk write. Return code=");
+		puthex(i);
+		puts("");
+		break;
     case 'q': quit=1; break;
     case 'r': break;
     case 'b': sec--; break;
@@ -1825,49 +1831,49 @@ switch(c)
 		int ii=446;
 		for (i=0;i<4;i++)
 		{
-		switch(Buffer[ii++])
+		switch(buffer512[ii++])
 		    {
 		    case 0: putch('N'); break; // no active partition
-		    case 0x80U: putch('A'); break; // active partititon
+		    case 0x80: putch('A'); break; // active partititon
 		    default: putch('E'); // error
 		    }
 
 		puts0("         ");
-		putdec(Buffer[ii++]); // head
+		putdec(buffer512[ii++]); // head
 		puts0("    ");
-		putdec(Buffer[ii]&0x3FU); // sector
+		putdec(buffer512[ii]&0x3FU); // sector
 		puts0("    ");
-		short int cyl=((short int)(Buffer[ii+1])) | ((Buffer[ii]&0xC0U)<<2);
+		short int cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
 		putdec(cyl); // cyl
 		ii+=2;
 		puts0(" ");
 
-		out_os(Buffer[ii++]); // OS type
+		out_os(buffer512[ii++]); // OS type
 		puts0("     ");
 
-		putdec(Buffer[ii++]); // head
+		putdec(buffer512[ii++]); // head
 		puts0(" ");
-		putdec(Buffer[ii]&0x3FU); // sector
+		putdec(buffer512[ii]&0x3FU); // sector
 		puts0(" ");
-		cyl=((short int)(Buffer[ii+1])) | ((Buffer[ii]&0xC0U)<<2);
+		cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
 		putdec(cyl); // cyl
 		ii+=2;
 		puts0("  ");
 		
 		// Horner algorythm
-		long l=Buffer[ii+3]&0xFFUL;
-		l=(l<<8) | Buffer[ii+2];
-		l=(l<<8) | Buffer[ii+1];
-		l=(l<<8) | Buffer[ii];
+		long l=buffer512[ii+3]&0xFFUL;
+		l=(l<<8) | buffer512[ii+2];
+		l=(l<<8) | buffer512[ii+1];
+		l=(l<<8) | buffer512[ii];
 		putdec(l);
 		puts0("  ");
 		ii+=4;
 
 		// Horner algorythm #2
-		l=Buffer[ii+3]&0xFFUL;
-		l=(l<<8) | Buffer[ii+2];
-		l=(l<<8) | Buffer[ii+1];
-		l=(l<<8) | Buffer[ii];
+		l=buffer512[ii+3]&0xFFUL;
+		l=(l<<8) | buffer512[ii+2];
+		l=(l<<8) | buffer512[ii+1];
+		l=(l<<8) | buffer512[ii];
 		putdec(l);
 		ii+=4;
 		puts0("\r\n");
@@ -1875,7 +1881,7 @@ switch(c)
 		// view_mbr end
 		break;
     case 'B':
-		out_boot(Buffer);
+		out_boot(buffer512);
 		puts0("press any key");
 		getch();
 		break;
@@ -1890,11 +1896,11 @@ Input:
 drive (for int 13h Fn=2)
 abs sec number
 buffer
-
 Output: return!=0 if error
 */
 int Track, SecNoOnCyl, i;
 char Head, SecOnTrk;
+short err;
 
 Track=(AbsSec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
 SecNoOnCyl=(AbsSec%SectorsOnCyl);
@@ -1914,7 +1920,32 @@ if ((i=Track &0x0300)!=0)
   {
   SecOnTrk = (SecOnTrk & 0x3F) | (short int)(i>>2);
   }
-return readsec0(drive, SecOnTrk, Head, Track, Buffer);
+err=readsec0(drive, SecOnTrk, Head, Track, buffer512);
+if (err==1) memcpy(Buffer,buffer512,512);
+return err;
+}
+
+unsigned short int secwrite (int drive, unsigned AbsSec, char *Buffer)
+{/* Write absolute sectors
+Input:
+drive (for int 13h Fn=2)
+abs sec number
+buffer
+Output: return!=0 if error
+*/
+int Track, SecNoOnCyl, i;
+char Head, SecOnTrk;
+
+Track=(int)(AbsSec/SectorsOnCyl); /* SectorsOnCyl=HeadCnt*TrkSecs, Track == Cyl */
+SecNoOnCyl=(int)(AbsSec%SectorsOnCyl);
+Head=SecNoOnCyl/TrkSecs;
+SecOnTrk=SecNoOnCyl%TrkSecs+1;
+
+if ((i=Track &0x0300)!=0)
+  {
+  SecOnTrk = (SecOnTrk & 0x3F) | (int)(i>>2);
+  }
+return writesec0(drive, SecOnTrk, Head, Track, Buffer);
 }
 
 int SecForClu (int CluNo)
@@ -2118,7 +2149,7 @@ char dir_name[11];
 for(i=RootBeg;i<RootEnd;i++)
     {
     for (k=0;k<512;k++) buf[k]=0;
-    secread(current_drive,i,buf);
+    if (secread(current_drive,i,buf)!=1) {puts0("Disk read error. errno="); puthex(errno); puts("");}
     pp=buf;
     for (j=0;j<16;j++)
 	{
@@ -2168,7 +2199,7 @@ int sector_into_cluster = (FCB[fd-3].CurPos % CluSizeBytes)/512;
 if (!((rest==512) && (FCB[fd-3].CurPos!=0)))
     {// read current sector
     s=SecForClu(FCB[fd-3].CurClu);
-    secread(current_drive,s,buffer512);
+    if (secread(current_drive,s,buffer512)!=1) puts0("Disk read error 3 ");
     memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
     FCB[fd-3].CurPos+=count;
     return 1;
@@ -2181,7 +2212,7 @@ else
 	if (i==-1) {puts("read(): No next cluster"); return 0;}
 	FCB[fd-3].CurClu=i;
     	s=SecForClu(i);
-    	secread(current_drive,s,buffer512);
+    	if (secread(current_drive,s,buffer512)!=1) puts0("Disk read error 4 ");
     	memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
     	FCB[fd-3].CurPos+=count;
     	return 1;
@@ -2191,7 +2222,7 @@ else
 	//puts("read(): read next sector");
     	s=SecForClu(FCB[fd-3].CurClu);
 	s+=sector_into_cluster;
-    	secread(current_drive,s,buffer512);
+    	if (secread(current_drive,s,buffer512)!=1) puts0("Disk read error 5 ");
     	memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
     	FCB[fd-3].CurPos+=count;
     	return 1;
@@ -2376,7 +2407,7 @@ case FAT12:
   /* nsect-relative sector number in FAT. 0 - first sec of FAT */
   if (nsect>=FatSize) {puts("NextClu: Invalid FAT's computing"); return -1;}
   if ( secread(current_drive, ResSecs+nsect, buff)!=1 )
-    {puts("\nNextClu: FAT read error"); return -1;}
+    {puts("\nNextClu: FAT read error 1"); return -1;}
 
   offset=(unsigned short int)(j%SECTOR_SIZE);
   #ifdef DEBUG
@@ -2387,7 +2418,7 @@ case FAT12:
     //puts("NextClu: bayt na granitse");
     c=buff[SECTOR_SIZE-1];
     if ( secread(current_drive, ResSecs+nsect+1, buff) != 1 )
-      {puts("\nNextClu: FAT read error"); return -1;}
+      {puts("\nNextClu: FAT read error 2"); return -1;}
     #ifdef DEBUG
     printf("c=%04X ",c);
     #endif

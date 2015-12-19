@@ -1,5 +1,4 @@
 # proolix
-  =======
 
 Simple hobby POSIX-compatible OS for i8086
 
