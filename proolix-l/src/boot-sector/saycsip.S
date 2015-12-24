@@ -5,7 +5,7 @@
 print_registers: # proc    ; REGS SAVED
         pushw %ax
 
-	newline
+#	newline
 
         print    s_ax+off
         call    ohw

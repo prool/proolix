@@ -1,4 +1,4 @@
-# Proolix-l bedug boot sector
+# Proolix-l debug experimental boot sector
 
 # russian text in UTF-8
 

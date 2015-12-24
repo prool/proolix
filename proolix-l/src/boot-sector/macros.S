@@ -16,5 +16,7 @@
     .endm
 
 .macro newline
-    putch $13 ; putch $10
+    putch $13
+    
+    putch $10
 .endm

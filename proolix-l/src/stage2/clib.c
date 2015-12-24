@@ -90,6 +90,15 @@ puts0("\r\n");
 void test (void)
 {int i,j;
 
+for (i=0;i<79;i++) putch('1');
+putch('2');
+
+puts("");
+
+for (i=0;i<79;i++) putch('1');
+putch('2');
+
+#if 0
 setpos(0,0);
 
 puts0("stroka 1\r\n");
@@ -100,7 +109,6 @@ puts0("stroka 3\r\n");
 
 //putch('a');
 
-#if 0
 setpos(0,0);putch_color('1',2);
 setpos(0,1);putch_color('2',3);
 setpos(0,2);putch_color('3',4);
@@ -1375,6 +1383,9 @@ putdec(DataStart);
 puts0(" - ");
 putdec(MaxSectors-1);
 puts0(" - data area\r\n");
+puts0("MaxClusters=");
+putdec(MaxClusters);
+puts("");
 }
 
 void system(void)
@@ -1434,6 +1445,7 @@ testdisk - test of disk\r\n\
 mount - mount disk\r\n\
 ls - ls\r\n\
 cat - interactive cat file\r\n\
+fat - out FAT\r\n\
 gluck - gluck\r\n\
 exit, quit - exit\r\n\
 ");
@@ -2175,7 +2187,7 @@ for(i=RootBeg;i<RootEnd;i++)
 	pp+=32;
 	}
      }
-puts0("File not found\n");
+puts0("\r\nFile not found\r\n");
 return -1; // file not found
 }
 
@@ -2209,7 +2221,7 @@ else
     if (++sector_into_cluster>=CluSize)
 	{// read next cluster
 	i=NextClu(FCB[fd-3].CurClu);
-	if (i==-1) {puts("read(): No next cluster"); return 0;}
+	if (i<2) {puts("read(): No next cluster"); return 0;}
 	FCB[fd-3].CurClu=i;
     	s=SecForClu(i);
     	if (secread(current_drive,s,buffer512)!=1) puts0("Disk read error 4 ");
@@ -2274,17 +2286,30 @@ while(1)
 	if (buf[0]=='?') ls();
 	else	break;
 	}
-if ((i=open(buf,0))==-1) {puts0("\nFile not found\n"); return;}
+if ((i=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
 //puts0("\nFile found. descr=");putdec(i);puts0("\n");
 
 line=0;
+
+int avto=0;
 
 while (1)
     {
     j=read(i,buf,1);
     if (j==0) break;
     putch(buf[0]); if (buf[0]=='\n')
-	{if (++line>=24) {puts0("\rpress anykey (q - quit)"); if (getch()=='q') break; line=0; cls();} putch('\r');}
+	{
+	if (!avto) if (++line>=24)
+		{char c;
+		puts0("\rpress anykey (q - quit, a - auto)");
+		c=getch();
+		if (c=='q') break;
+		if (c=='a') avto=1;
+		line=0;
+		cls();
+		}
+	putch('\r');
+	}
     }
 close(i);
 }
@@ -2492,4 +2517,26 @@ int close (int fd)
 if ((fd-3)>MAX_FCB) {puts("close(): err1"); return -1;}
 FCB[fd-3].FirstClu=0;
 return 0;
+}
+
+void out_fat(void)
+{int i,j,col,line,buzy,free;
+col=0; line=0; buzy=0; free=0;
+puts("FAT:");
+for (i=2;i<MaxClusters;i++)
+    {
+    j=(NextClu(i));
+    if (j==0) {putch('.');free++;}
+    else if (j==-1) {putch('2'); buzy++;}
+    else {putch('1');buzy++;}
+    if (col==79) {puts(""); col=0; if (line==22) {puts0("press any key ");getch();line=0;puts("");} else line++;}
+    else col++;
+    }
+puts0("\r\nBuzy clusters "); putdec(buzy);
+puts0("\r\nFree clusters "); putdec(free);
+puts0("\r\nSumma         "); putdec(buzy+free);
+puts0("\r\nMax clusters  "); putdec(MaxClusters); puts0(" = Summa+2");
+puts0("\r\nFree space    "); putdec(free/2); puts0(" K");
+puts0("\r\n");
+
 }
