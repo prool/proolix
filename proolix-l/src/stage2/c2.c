@@ -96,6 +96,7 @@ while (1)
 	else if (!strcmp(buf,"cat")) cat();
 	else if (!strcmp(buf,"gluck")) gluck();
 	else if (!strcmp(buf,"fat")) out_fat();
+	else if (!strcmp(buf,"skript")) skript();
 	else
 		{
 		puts0("Unknown command '");

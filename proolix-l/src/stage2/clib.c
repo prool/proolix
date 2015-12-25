@@ -1447,6 +1447,7 @@ ls - ls\r\n\
 cat - interactive cat file\r\n\
 fat - out FAT\r\n\
 gluck - gluck\r\n\
+skript - run prool skript\n\
 exit, quit - exit\r\n\
 ");
 }
@@ -2272,6 +2273,53 @@ while (1)
     putch(buf[0]); if (buf[0]=='\n') putch('\r');
     }
 close(i);
+}
+
+void skript(void)
+{
+char buf[MAXLEN];
+int i,j, line;
+char *cc;
+int var1;
+char buf1[MAXLEN];
+
+while(1)
+	{
+	puts0("Filename (? for dir) > ");
+	getsn(buf,MAXLEN);
+	if (buf[0]=='?') ls();
+	else	break;
+	}
+if ((i=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
+
+puts("\r\nProol Skript Interpterer v.0\r\n");
+
+cc=buf;
+
+while(1)
+	{
+    	j=read(i,cc,1);
+	if ((j==0) || (*cc=='\r') || (*cc=='\n'))
+		{// eval buf
+		*cc=0;
+		if ((buf[0]!='#')&&(buf[0]!=0)) 
+			{
+			if(buf[0]=='!') puts0(buf+1);
+			else if (!strcmp(buf,"test")) puts("TEST OK");
+			else if (!strcmp(buf,"newline")) puts("");
+			else if (!strcmp(buf,"inputstring")) getsn(buf1,MAXLEN);
+			else if (!strcmp(buf,"outputstring")) puts0(buf1);
+			else if (!strcmp(buf,"outputint")) putdec(atoi(buf1));
+			else
+				{puts0("\r\nUnknown operator: '");puts0(buf);puts("'");}
+			}
+		cc=buf;
+		}
+	else	{ cc++; continue; }
+	if (j==0) break;
+	}
+close(i);
+puts("\r\nSkript finished");
 }
 
 void cat(void)
