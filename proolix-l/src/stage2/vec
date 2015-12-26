@@ -1,0 +1,22 @@
+# vectorskript
+hex
+!Enter interrupt number 
+inputstring
+newline
+push
+4
+*
+dup
+2
++
+0
+swap
+peek2
+.
+!:
+0
+swap
+peek2
+.
+newline
+

@@ -55,7 +55,7 @@ char *strchr (const char *str, int c);
 char  * strncpy (char  * dest, const char  * src, size_t maxlen);
 
 int peek (int addr);
-char peek2(short int seg, short int offset);
+short int peek2(short int seg, short int offset);
 void poke(char value, short int seg, short int offset);
 short int end_of (void);
 

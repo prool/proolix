@@ -1,0 +1,13 @@
+# summa skript
+!Enter A 
+inputstring
+newline
+push
+!Enter B 
+inputstring
+newline
+push
++
+!Summa = 
+.
+newline

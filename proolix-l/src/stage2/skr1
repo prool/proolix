@@ -1,0 +1,13 @@
+#prool skript program
+!Vvedite stroku > 
+inputstring
+newline
+!Vy vveli stroku '
+outputstring
+!' 
+newline
+!Eto sootvetstvuet chislu 
+outputint
+newline
+!That is all, folks!
+newline

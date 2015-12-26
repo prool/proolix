@@ -317,7 +317,7 @@ peek2: # peek2 (segment, offset)
 	movw	8(%ebp),%ax
 	movw	%ax,%ES
 	movw	12(%ebp),%bx
-	movb	%ES:(%bx),%al
+	movw	%ES:(%bx),%ax
 	
 	pop	%ES
 	popl	%ebp

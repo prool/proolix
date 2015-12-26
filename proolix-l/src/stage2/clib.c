@@ -1447,7 +1447,7 @@ ls - ls\r\n\
 cat - interactive cat file\r\n\
 fat - out FAT\r\n\
 gluck - gluck\r\n\
-skript - run prool skript\n\
+skript - run prool skript\r\n\
 exit, quit - exit\r\n\
 ");
 }
@@ -2275,22 +2275,30 @@ while (1)
 close(i);
 }
 
+#define MAXSTACK	10
+#define DEC	0
+#define HEX	1
+
 void skript(void)
 {
 char buf[MAXLEN];
-int i,j, line;
+int i, line, file, rcode, console=0, mode=DEC;
 char *cc;
-int var1;
 char buf1[MAXLEN];
+int stack[MAXSTACK];
+
+for (i=0;i<MAXSTACK;i++) stack[i]=0;
 
 while(1)
 	{
-	puts0("Filename (? for dir) > ");
+	puts0("Filename (? for dir, ! for console) > ");
 	getsn(buf,MAXLEN);
 	if (buf[0]=='?') ls();
 	else	break;
 	}
-if ((i=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
+
+if (buf[0]=='!') {console=1; puts("quit for quit");}
+else if ((file=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
 
 puts("\r\nProol Skript Interpterer v.0\r\n");
 
@@ -2298,27 +2306,112 @@ cc=buf;
 
 while(1)
 	{
-    	j=read(i,cc,1);
-	if ((j==0) || (*cc=='\r') || (*cc=='\n'))
+    	if (console==0) rcode=read(file,cc,1); else {getsn(buf,MAXLEN); rcode=1; puts("");}
+	if ((rcode==0) || (*cc=='\r') || (*cc=='\n') || (console==1))
 		{// eval buf
-		*cc=0;
+		if (console==0) *cc=0;
 		if ((buf[0]!='#')&&(buf[0]!=0)) 
 			{
 			if(buf[0]=='!') puts0(buf+1);
+			else if (isdigit(buf[0]))
+				{
+				for (i=0;i<MAXSTACK-1;i++) stack[i]=stack[i+1];
+				if (mode==DEC) stack[MAXSTACK-1]=atoi(buf);
+				else stack[MAXSTACK-1]=htoi(buf);
+				}
 			else if (!strcmp(buf,"test")) puts("TEST OK");
 			else if (!strcmp(buf,"newline")) puts("");
 			else if (!strcmp(buf,"inputstring")) getsn(buf1,MAXLEN);
 			else if (!strcmp(buf,"outputstring")) puts0(buf1);
-			else if (!strcmp(buf,"outputint")) putdec(atoi(buf1));
+			else if (!strcmp(buf,"outputint"))
+				if (mode==DEC) putdec(atoi(buf1)); else puthex(atoi(buf1));
+			else if (!strcmp(buf,"push"))
+				{
+				for (i=0;i<MAXSTACK-1;i++) stack[i]=stack[i+1];
+				if (mode==DEC) stack[MAXSTACK-1]=atoi(buf1);
+				else stack[MAXSTACK-1]=htoi(buf1);
+				}
+			else if (!strcmp(buf,"swap"))
+				{int bolvan;
+				bolvan=stack[MAXSTACK-2];
+				stack[MAXSTACK-2]=stack[MAXSTACK-1];
+				stack[MAXSTACK-1]=bolvan;
+				}
+			else if (!strcmp(buf,"dup"))
+				{
+				for (i=0;i<MAXSTACK-1;i++) stack[i]=stack[i+1];
+				}
+			else if (!strcmp(buf,"peek"))
+				{
+				stack[MAXSTACK-1]=peek(stack[MAXSTACK-1]);
+				}
+			else if (!strcmp(buf,"peek2"))
+				{
+				stack[MAXSTACK-1]=peek2(stack[MAXSTACK-2],stack[MAXSTACK-1]);
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"+"))
+				{
+				stack[MAXSTACK-1]=stack[MAXSTACK-2]+stack[MAXSTACK-1];
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"-"))
+				{
+				stack[MAXSTACK-1]=stack[MAXSTACK-2]-stack[MAXSTACK-1];
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"/"))
+				{
+				stack[MAXSTACK-1]=stack[MAXSTACK-2]/stack[MAXSTACK-1];
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"%"))
+				{
+				stack[MAXSTACK-1]=stack[MAXSTACK-2]%stack[MAXSTACK-1];
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"*"))
+				{
+				stack[MAXSTACK-1]=stack[MAXSTACK-2]*stack[MAXSTACK-1];
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"."))
+				{
+				if (mode==DEC) putdec(stack[MAXSTACK-1]); else puthex(stack[MAXSTACK-1]);
+				if (console) puts("");
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,".b"))
+				{
+				puthex_b(stack[MAXSTACK-1]);
+				if (console) puts("");
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"drop"))
+				{
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"hex")) mode=HEX;
+			else if (!strcmp(buf,"dec")) mode=DEC;
+			else if (!strcmp(buf,"mode")) 
+				{switch (mode)
+					{
+					case HEX: puts("mode hex"); break;
+					case DEC: puts("mode dec"); break;
+					default: puts("mode HELL");
+					}
+				}
+			else if (!strcmp(buf,"quit")) goto l_exit;
 			else
 				{puts0("\r\nUnknown operator: '");puts0(buf);puts("'");}
 			}
 		cc=buf;
 		}
 	else	{ cc++; continue; }
-	if (j==0) break;
+	if (rcode==0) break;
 	}
-close(i);
+l_exit:
+if (console==0) close(file);
 puts("\r\nSkript finished");
 }
 
