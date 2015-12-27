@@ -1,0 +1,18 @@
+# test of IFGOTO statement
+!Enter number
+inputstring
+newline
+push
+1
+swap
+# if 1 then goto 1
+ifgoto
+!NO ONE
+2
+goto
+1
+label
+!ONE
+2
+label
+!END

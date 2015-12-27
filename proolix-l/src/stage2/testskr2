@@ -1,0 +1,13 @@
+! label 0
+newline
+0
+label
+! label 1
+newline
+1
+label
+! press any key. goto 1
+newline
+inputstring
+1
+goto

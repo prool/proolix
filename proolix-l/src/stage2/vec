@@ -1,9 +1,17 @@
-# vectorskript
+# loop
+22
+1
+label
+!Interrupt 
+dup
+22
+swap
+-
 hex
-!Enter interrupt number 
-inputstring
-newline
-push
+#begin vectorskript
+dup
+.b
+! 
 4
 *
 dup
@@ -18,5 +26,10 @@ peek2
 swap
 peek2
 .
+! 
+#end
 newline
-
+1
+loop
+!press any key
+inputstring

@@ -1,0 +1,14 @@
+# loop
+10
+1
+label
+!*
+1
+-
+dup
+1
+swap
+ifgoto
+drop
+!end-of-loop 
+newline

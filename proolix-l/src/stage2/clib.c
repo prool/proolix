@@ -2192,11 +2192,25 @@ puts0("\r\nFile not found\r\n");
 return -1; // file not found
 }
 
+int reads(int fd, char *buf, int count) // read string from file
+{
+int i, j; char c;
+
+for (i=0;i<(count-1);i++)
+	{
+	j=read(fd,&c,1);
+	if ((j==0)||(c=='\r')||(c=='\n')) {*buf=0; return 1;}
+	*buf++=c;
+	}
+*buf=0;
+return 0;
+}
+
 int read (int fd, char *buf, int count)
 {int i,s;
 
-if (count==0) {puts0("read(): msg0\r\n"); return 0;}
-if ((fd-3)>MAX_FCB) {puts0("read(): msg1\r\n"); return 0;}
+if (count==0) {puts("read(): err1"); return 0;}
+if (((fd-3)>MAX_FCB)||(fd<3)) {puts("read(): err1"); return 0;}
 if (FCB[fd-3].FirstClu==0) {puts0("read(): msg2\r\n"); return 0;} // FCB not open, descriptor error
 if (buf==0) {puts0("read(): msg3\r\n"); return 0;} 
 if (count>512) {puts0("read(): count>512. not implemented yet\n"); return 0;}
@@ -2244,6 +2258,74 @@ else
     }
 }
 
+int lseek(int fd, int offset, int whence)
+{int i; char buf;
+if (((fd-3)>MAX_FCB)||(fd<3)) {puts("lseek(): err1"); return -1;}
+if (FCB[fd-3].FirstClu==0) {puts("lseek(): err2"); return 0;} // FCB not open, descriptor error
+switch(whence)
+	{
+	case SEEK_SET: // ot nachala
+		if (offset<0) {puts("lseek: offset<0 SEEK_SET"); return -1;}
+		if (offset==0)
+			{/* REWIND FILE */
+			FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
+			FCB[fd-3].CurPos=0;
+			return 0;
+			}
+		else	{
+			// rewind
+			FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
+			FCB[fd-3].CurPos=0;
+			// seek_set
+			for (i=0;i<offset;i++) if (read(fd,&buf,1)==0) return -1;
+			return FCB[fd-3].CurPos;
+			}
+		break;
+	case SEEK_CUR:	// ot tekushch. pos.
+			if (offset==0) return FCB[fd-3].CurPos;
+			if (offset>0)
+				{
+				for (i=0;i<offset;i++) if (read(fd,&buf,1)==0) return -1;
+				return FCB[fd-3].CurPos;
+				}
+			else // offset <0
+				{int newoffset;
+				newoffset=FCB[fd-3].CurPos+offset;
+				if (newoffset<0) return -1;
+				// rewind
+				FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
+				FCB[fd-3].CurPos=0;
+				// seek_set
+				for (i=0;i<newoffset;i++) if (read(fd,&buf,1)==0) return -1;
+				return FCB[fd-3].CurPos;
+				}
+		break;
+	case SEEK_END: // ot konca
+		if (offset>0) return -1;
+		if (offset==0)
+			{// peremotka v konec
+				// rewind
+				FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
+				FCB[fd-3].CurPos=0;
+				// seek_set
+				for (i=0;i<FCB[fd-3].Length;i++) if (read(fd,&buf,1)==0) return -1;
+				return FCB[fd-3].CurPos;
+			}
+		else // offset<0 ot konca
+			{
+				// rewind
+				FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
+				FCB[fd-3].CurPos=0;
+				// seek_set
+				for (i=0;i<FCB[fd-3].Length-offset;i++)
+					if (read(fd,&buf,1)==0) return -1;
+				return FCB[fd-3].CurPos;
+			}
+		break;
+	default: puts0("lseek: whence error. whence= "); putdec(whence); puts(""); return -1;
+	}
+}
+
 void gluck(void)
 {
 char buf[MAXLEN];
@@ -2276,6 +2358,7 @@ close(i);
 }
 
 #define MAXSTACK	10
+#define MAXLABEL	10
 #define DEC	0
 #define HEX	1
 
@@ -2283,11 +2366,14 @@ void skript(void)
 {
 char buf[MAXLEN];
 int i, line, file, rcode, console=0, mode=DEC;
+int l, number;
 char *cc;
 char buf1[MAXLEN];
 int stack[MAXSTACK];
+int label[MAXLABEL];
 
 for (i=0;i<MAXSTACK;i++) stack[i]=0;
+for (i=0;i<MAXLABEL;i++) label[i]=-1;
 
 while(1)
 	{
@@ -2301,6 +2387,30 @@ if (buf[0]=='!') {console=1; puts("quit for quit");}
 else if ((file=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
 
 puts("\r\nProol Skript Interpterer v.0\r\n");
+
+// perviy prohod
+if (console==0)
+ {
+ number=MAXLABEL;
+ while(1)
+	{
+	reads(file,buf1,MAXLEN);
+	if (buf1[0])
+		{
+		//puts(buf1);
+		if (isdigit(buf1[0])) number=atoi(buf1);
+		else if (!strcmp(buf1,"label"))
+			{
+				if (number>=MAXLABEL) puts("MAXLABEL ERROR");
+				else label[number]=lseek(file,0,SEEK_CUR);
+			}
+		}
+	else break;
+	}
+ lseek(file,0,SEEK_SET);
+ }
+
+// vtoroy prohod
 
 cc=buf;
 
@@ -2391,6 +2501,79 @@ while(1)
 				{
 				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
 				}
+			else if (!strcmp(buf,"label"))
+				{
+				l=stack[MAXSTACK-1];
+				if (l>=MAXLABEL) puts("MAXLABEL ERROR");
+				else label[l]=lseek(file,0,SEEK_CUR);
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"goto"))
+				{
+				l=stack[MAXSTACK-1];
+				if (l>=MAXLABEL) puts("GOTO MAXLABEL ERROR");
+				else lseek(file,label[l],SEEK_SET);
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"ifgoto"))
+				{
+				if (stack[MAXSTACK-1]!=0)
+					{
+					l=stack[MAXSTACK-2];
+					if (l>=MAXLABEL) puts("IFGOTO MAXLABEL ERROR");
+					else lseek(file,label[l],SEEK_SET);
+					}
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1]; // drop
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1]; // drop
+				}
+			else if (!strcmp(buf,"loop"))
+				{int c, lbl;
+				lbl=stack[MAXSTACK-1];
+				c=stack[MAXSTACK-2]-1;
+				if (c==0)
+					{// end of cycle
+					for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1]; // drop
+					for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1]; // drop
+					}
+				else 	// cycle
+					{
+					for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1]; // drop
+					stack[MAXSTACK-1]=c;
+					if (l>=MAXLABEL) puts("LOOP MAXLABEL ERROR");
+					else lseek(file,label[l],SEEK_SET);
+					}
+				}
+			else if (!strcmp(buf,"=="))
+				{
+				stack[MAXSTACK-1]=(stack[MAXSTACK-2]==stack[MAXSTACK-1])?1:0;
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"!="))
+				{
+				stack[MAXSTACK-1]=(stack[MAXSTACK-2]!=stack[MAXSTACK-1])?1:0;
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,">="))
+				{
+				stack[MAXSTACK-1]=(stack[MAXSTACK-2]>=stack[MAXSTACK-1])?1:0;
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"<="))
+				{
+				stack[MAXSTACK-1]=(stack[MAXSTACK-2]<=stack[MAXSTACK-1])?1:0;
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"<"))
+				{
+				stack[MAXSTACK-1]=(stack[MAXSTACK-2]<stack[MAXSTACK-1])?1:0;
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,">"))
+				{
+				stack[MAXSTACK-1]=(stack[MAXSTACK-2]>stack[MAXSTACK-1])?1:0;
+				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"rewind")) lseek(file,0,SEEK_SET);
 			else if (!strcmp(buf,"hex")) mode=HEX;
 			else if (!strcmp(buf,"dec")) mode=DEC;
 			else if (!strcmp(buf,"mode")) 

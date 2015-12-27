@@ -4,6 +4,10 @@
 #define NULL 0
 #define SECTOR_SIZE	512
 
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
 // variables
 
 extern unsigned char buffer512[];
@@ -91,6 +95,8 @@ void skript(void);
 
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);
+int reads (int fd, char *buf, int count);
+int lseek(int fd, int offset, int whence);
 int PathToDir(char *path, char DirName[11]);
 char *DirToPath(char filename[11], char *path);
 unsigned long NextClu(unsigned long Clu);
