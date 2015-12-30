@@ -94,6 +94,7 @@ while (1)
 	else if (!strcmp(buf,"ls")) ls();
 	else if (!strcmp(buf,"off")) off();
 	else if (!strcmp(buf,"cat")) cat();
+	else if (!strcmp(buf,"catw")) catw();
 	else if (!strcmp(buf,"gluck")) gluck();
 	else if (!strcmp(buf,"fat")) out_fat();
 	else if (!strcmp(buf,"skript")) skript();

@@ -78,6 +78,7 @@ void memmap(void);
 void system(void);
 void test(void);
 void cat(void);
+void catw(void);
 void ascii(void);
 void cls(void);
 void off(void);

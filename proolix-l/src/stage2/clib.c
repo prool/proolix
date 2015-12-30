@@ -2206,6 +2206,42 @@ for (i=0;i<(count-1);i++)
 return 0;
 }
 
+int readw(int fd, char *buf, int count) // read word from file (skrypt-style)
+{
+int i, j; char c;
+
+for (i=0;i<(count-1);i++)
+	{
+	j=read(fd,&c,1);
+	if ((j==0)||(c=='\r')||(c=='\n')||(c==' ')) {*buf=0; return 1;}
+	if (c=='#')
+		{
+		while(1)
+			{
+			j=read(fd,&c,1);
+			if (j==0) {*buf=0; return 1;}
+			if ((c=='\r')||(c=='\n')) break;
+			}
+		continue;
+		}
+	if (c=='!')
+		{
+		*buf++=c;
+		for (i=1;i<(count-1);i++)
+			{
+			j=read(fd,&c,1);
+			if ((j==0)||(c=='\r')||(c=='\n')) {*buf=0; return 1;}
+			*buf++=c;
+			}
+		*buf=0;
+		return 0;
+		}
+	*buf++=c;
+	}
+*buf=0;
+return 0;
+}
+
 int read (int fd, char *buf, int count)
 {int i,s;
 
@@ -2355,6 +2391,35 @@ while (1)
     putch(buf[0]); if (buf[0]=='\n') putch('\r');
     }
 close(i);
+}
+
+void catw(void)
+{
+char buf[MAXLEN];
+int i,j, line;
+
+while(1)
+	{
+	puts0("Filename (? for dir) > ");
+	getsn(buf,MAXLEN);
+	if (buf[0]=='?') ls();
+	else	break;
+	}
+if ((i=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
+
+puts("");
+
+while(1)
+	{
+	readw(i,buf,MAXLEN);
+	if (buf[0]==0) break;
+	puts0("'");
+	puts0(buf);
+	puts0("' ");
+	}
+
+close(i);
+
 }
 
 void cat(void)

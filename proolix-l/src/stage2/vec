@@ -1,10 +1,9 @@
 # loop
-22
-1
-label
-!Interrupt 
+! 
+hex 090
+1 label
 dup
-22
+090
 swap
 -
 hex
@@ -26,10 +25,19 @@ peek2
 swap
 peek2
 .
-! 
-#end
-newline
+dup
+090
+swap
+-
 1
-loop
++
+6
+%
+2 swap ifgoto
+newline
+2 label
+#end
+! 
+1 loop
 !press any key
 inputstring

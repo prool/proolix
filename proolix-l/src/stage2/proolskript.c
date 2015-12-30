@@ -1,15 +1,21 @@
+#define MAXLEN2	256
+
 #define MAXSTACK	10
 #define MAXLABEL	10
 #define DEC	0
 #define HEX	1
 
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
 void skript(void)
 {
-char buf[MAXLEN];
+char buf[MAXLEN2];
 int i, line, file, rcode, console=0, mode=DEC;
 int l, number;
 char *cc;
-char buf1[MAXLEN];
+char buf1[MAXLEN2];
 int stack[MAXSTACK];
 int label[MAXLABEL];
 
@@ -19,7 +25,7 @@ for (i=0;i<MAXLABEL;i++) label[i]=-1;
 while(1)
 	{
 	puts0("Filename (? for dir, ! for console) > ");
-	getsn(buf,MAXLEN);
+	getsn(buf,MAXLEN2);
 	if (buf[0]=='?') ls();
 	else	break;
 	}
@@ -35,7 +41,7 @@ if (console==0)
  number=MAXLABEL;
  while(1)
 	{
-	reads(file,buf1,MAXLEN);
+	readw(file,buf1,MAXLEN2);
 	if (buf1[0])
 		{
 		//puts(buf1);
@@ -53,14 +59,12 @@ if (console==0)
 
 // vtoroy prohod
 
-cc=buf;
-
 while(1)
 	{
-    	if (console==0) rcode=read(file,cc,1); else {getsn(buf,MAXLEN); rcode=1; puts("");}
-	if ((rcode==0) || (*cc=='\r') || (*cc=='\n') || (console==1))
+    	if (console==0) readw(file,buf,MAXLEN2); else {getsn(buf,MAXLEN2); puts("");}
+	if (buf[0]==0) break;
+	if (1)
 		{// eval buf
-		if (console==0) *cc=0;
 		if ((buf[0]!='#')&&(buf[0]!=0)) 
 			{
 			if(buf[0]=='!') puts0(buf+1);
@@ -72,7 +76,7 @@ while(1)
 				}
 			else if (!strcmp(buf,"test")) puts("TEST OK");
 			else if (!strcmp(buf,"newline")) puts("");
-			else if (!strcmp(buf,"inputstring")) getsn(buf1,MAXLEN);
+			else if (!strcmp(buf,"inputstring")) getsn(buf1,MAXLEN2);
 			else if (!strcmp(buf,"outputstring")) puts0(buf1);
 			else if (!strcmp(buf,"outputint"))
 				if (mode==DEC) putdec(atoi(buf1)); else puthex(atoi(buf1));
@@ -168,8 +172,8 @@ while(1)
 				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1]; // drop
 				}
 			else if (!strcmp(buf,"loop"))
-				{int c, lbl;
-				lbl=stack[MAXSTACK-1];
+				{int c, l;
+				l=stack[MAXSTACK-1];
 				c=stack[MAXSTACK-2]-1;
 				if (c==0)
 					{// end of cycle
@@ -229,10 +233,7 @@ while(1)
 			else
 				{puts0("\r\nUnknown operator: '");puts0(buf);puts("'");}
 			}
-		cc=buf;
 		}
-	else	{ cc++; continue; }
-	if (rcode==0) break;
 	}
 l_exit:
 if (console==0) close(file);

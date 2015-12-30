@@ -9,7 +9,8 @@ ASFLAG =
 
 all:	boot ct pskr
 
-pskr:	pskr.c
+pskr:	pskr.c proolskript.c
+	$(CC) pskr.c -o pskr
 
 boot: boot.o
 	$(LD) --oformat binary -Ttext 0x0 -M -s -o $@ $< > map.lst
@@ -50,7 +51,7 @@ lib2.s:		lib2.c
 #boot.s: boot.S macros.S
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ kernc *.lst *.o a.out ct cmd1
+	rm boot boot_ *.lst *.o ct
 
 saycsip.s: saycsip.S macros.S
 	$(CPP) -traditional $< -o $@
@@ -99,7 +100,7 @@ c1s:	c1s.s
 	chmod a-x c1s
 
 # cross-compile for Proolix: .c file -> asm .s file -> modified .s file -> binary
-ct:	c2.c clib.c prefix.s headers.h suffix.s
+ct:	c2.c clib.c prefix.s headers.h suffix.s proolskript.c
 	gcc -S -m16 c2.c
 	./britva.sh c2.s
 	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s
