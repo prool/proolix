@@ -24,13 +24,13 @@ for (i=0;i<MAXLABEL;i++) label[i]=-1;
 
 while(1)
 	{
-	puts0("Filename (? for dir, ! for console) > ");
+	puts0("Filename (? for dir, enter for console) > ");
 	getsn(buf,MAXLEN2);
 	if (buf[0]=='?') ls();
 	else	break;
 	}
 
-if (buf[0]=='!') {console=1; puts("quit for quit");}
+if (buf[0]==0) {console=1; puts("quit for quit");}
 else if ((file=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
 
 puts("\r\nProol Skript Interpterer v.0\r\n");
@@ -62,7 +62,7 @@ if (console==0)
 while(1)
 	{
     	if (console==0) readw(file,buf,MAXLEN2); else {getsn(buf,MAXLEN2); puts("");}
-	if (buf[0]==0) break;
+	if (buf[0]==0) if (console) continue; else break;
 	if (1)
 		{// eval buf
 		if ((buf[0]!='#')&&(buf[0]!=0)) 

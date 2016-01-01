@@ -106,6 +106,7 @@ ct:	c2.c clib.c prefix.s headers.h suffix.s proolskript.c
 	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o ct ctmp.o > map.lst
 	chmod a-x ct
+	ls -l ct
 #	dd if=ctmp of=ct skip=4096
 
 vexe:	vexe.c
