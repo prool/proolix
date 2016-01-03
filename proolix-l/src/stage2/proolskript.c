@@ -18,6 +18,7 @@ char *cc;
 char buf1[MAXLEN2];
 int stack[MAXSTACK];
 int label[MAXLABEL];
+int j;
 
 for (i=0;i<MAXSTACK;i++) stack[i]=0;
 for (i=0;i<MAXLABEL;i++) label[i]=-1;
@@ -41,10 +42,10 @@ if (console==0)
  number=MAXLABEL;
  while(1)
 	{
-	readw(file,buf1,MAXLEN2);
+	j=readw(file,buf1,MAXLEN2);
 	if (buf1[0])
 		{
-		//puts(buf1);
+		//puts0("1: ");puts(buf1);
 		if (isdigit(buf1[0])) number=atoi(buf1);
 		else if (!strcmp(buf1,"label"))
 			{
@@ -52,7 +53,7 @@ if (console==0)
 				else label[number]=lseek(file,0,SEEK_CUR);
 			}
 		}
-	else break;
+	else if (j==0) break;
 	}
  lseek(file,0,SEEK_SET);
  }
@@ -61,10 +62,11 @@ if (console==0)
 
 while(1)
 	{
-    	if (console==0) readw(file,buf,MAXLEN2); else {getsn(buf,MAXLEN2); puts("");}
-	if (buf[0]==0) if (console) continue; else break;
+    	if (console==0) j=readw(file,buf,MAXLEN2); else {getsn(buf,MAXLEN2); puts("");}
+	if (buf[0]==0) if (console) continue; else if (j==0) break;;
 	if (1)
 		{// eval buf
+		//puts0("2: "); puts(buf);
 		if ((buf[0]!='#')&&(buf[0]!=0)) 
 			{
 			if(buf[0]=='!') puts0(buf+1);

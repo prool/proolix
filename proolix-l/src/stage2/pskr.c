@@ -9,41 +9,8 @@
 #define peek(ADR) 0
 #define peek2(SEG,OFFSET) 0
 
-int readw(int fd, char *buf, int count) // read word from file (skrypt-style)
-{
-int i, j; char c;
+#include "readw.c"
 
-for (i=0;i<(count-1);i++)
-	{
-	j=read(fd,&c,1);
-	if ((j==0)||(c=='\r')||(c=='\n')||(c==' ')) {*buf=0; return 1;}
-	if (c=='#')
-		{
-		while(1)
-			{
-			j=read(fd,&c,1);
-			if (j==0) {*buf=0; return 1;}
-			if ((c=='\r')||(c=='\n')) break;
-			}
-		continue;
-		}
-	if (c=='!')
-		{
-		*buf++=c;
-		for (i=1;i<(count-1);i++)
-			{
-			j=read(fd,&c,1);
-			if ((j==0)||(c=='\r')||(c=='\n')) {*buf=0; return 1;}
-			*buf++=c;
-			}
-		*buf=0;
-		return 0;
-		}
-	*buf++=c;
-	}
-*buf=0;
-return 0;
-}
 char *getsn(char *buf, int len)
 {char *c;
 fgets(buf, len, stdin);

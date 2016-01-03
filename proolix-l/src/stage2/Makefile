@@ -9,7 +9,7 @@ ASFLAG =
 
 all:	boot ct pskr
 
-pskr:	pskr.c proolskript.c
+pskr:	pskr.c proolskript.c readw.c
 	$(CC) pskr.c -o pskr
 
 boot: boot.o
@@ -100,7 +100,7 @@ c1s:	c1s.s
 	chmod a-x c1s
 
 # cross-compile for Proolix: .c file -> asm .s file -> modified .s file -> binary
-ct:	c2.c clib.c prefix.s headers.h suffix.s proolskript.c
+ct:	c2.c clib.c prefix.s headers.h suffix.s proolskript.c readw.c
 	gcc -S -m16 c2.c
 	./britva.sh c2.s
 	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s

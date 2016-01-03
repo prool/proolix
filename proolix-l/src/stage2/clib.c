@@ -2206,6 +2206,9 @@ for (i=0;i<(count-1);i++)
 return 0;
 }
 
+#include "readw.c"
+
+#if 0
 int readw(int fd, char *buf, int count) // read word from file (skrypt-style)
 {
 int i, j; char c;
@@ -2241,6 +2244,7 @@ for (i=0;i<(count-1);i++)
 *buf=0;
 return 0;
 }
+#endif
 
 int read (int fd, char *buf, int count)
 {int i,s;

@@ -1,9 +1,7 @@
-# loop
+#/skript
 10
-1
-label
+1 label
 !*
-1
-loop
+1 loop
 !end-of-loop 
 newline
