@@ -1,6 +1,8 @@
 # Proolix-l stage2
 # makefile for cygwin
 
+#status of this file: OBSOLETE!
+
 LD = ld
 AS = as
 CPP = cpp

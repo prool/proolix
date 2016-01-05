@@ -41,6 +41,8 @@ else if ((file=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
 puts("\r\nProol Skript Interpterer v.2\r\n");
 
 // read file to fayl
+if (console==0)
+{
 faylp=0;
 while(1)
 	{
@@ -54,6 +56,7 @@ while(1)
 	else if (j==0) break;
 	}
 close(file);
+}
 
 #if 0 // debug output
 ii=0; while(fayl[ii]) {char c=fayl[ii++];if (c=='\r') {putchar('\r');putchar('\n');} else putchar(c);}
@@ -89,7 +92,7 @@ puts("debug mode. press any key or control C, Luc"); getchar();
 // vtoroy prohod
 
 faylp=0;
-while(fayl[faylp])
+while(1/*fayl[faylp]*/)
 	{
     	if (console==0) {
 			// readw:
@@ -149,8 +152,10 @@ while(fayl[faylp])
 				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
 				}
 			else if (!strcmp(buf,"/"))
-				{
-				stack[MAXSTACK-1]=stack[MAXSTACK-2]/stack[MAXSTACK-1];
+				{int div;
+				div=stack[MAXSTACK-1];
+				if (div==0) puts("DIVIDE BY ZERO");
+				else stack[MAXSTACK-1]=stack[MAXSTACK-2]/div;
 				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
 				}
 			else if (!strcmp(buf,"%"))
@@ -266,6 +271,7 @@ while(fayl[faylp])
 				{puts0("\r\nUnknown operator: '");puts0(buf);puts("'");}
 			}
 		}
+	if ((console==0)&&(fayl[faylp]==0)) break;
 	}
 puts("\r\nSkript finished");
 }
