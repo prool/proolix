@@ -115,7 +115,7 @@ while(1/*fayl[faylp]*/)
 			else if (!strcmp(buf,"inputstring")) getsn(buf1,MAXLEN1);
 			else if (!strcmp(buf,"outputstring")) puts0(buf1);
 			else if (!strcmp(buf,"outputint"))
-				if (mode==DEC) putdec(atoi(buf1)); else puthex(atoi(buf1));
+				if (mode==DEC) putdec(atoi(buf1)); else puthex_l(atoi(buf1));
 			else if (!strcmp(buf,"push"))
 				{
 				for (i=0;i<MAXSTACK-1;i++) stack[i]=stack[i+1];
@@ -170,13 +170,25 @@ while(1/*fayl[faylp]*/)
 				}
 			else if (!strcmp(buf,"."))
 				{
-				if (mode==DEC) putdec(stack[MAXSTACK-1]); else puthex(stack[MAXSTACK-1]);
+				if (mode==DEC) putdec(stack[MAXSTACK-1]); else puthex_l(stack[MAXSTACK-1]);
 				if (console) puts("");
 				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
 				}
 			else if (!strcmp(buf,".b"))
 				{
 				puthex_b(stack[MAXSTACK-1]);
+				if (console) puts("");
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,".w"))
+				{
+				puthex(stack[MAXSTACK-1]);
+				if (console) puts("");
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,".l"))
+				{
+				puthex_l(stack[MAXSTACK-1]);
 				if (console) puts("");
 				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
 				}

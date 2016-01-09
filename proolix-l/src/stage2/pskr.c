@@ -5,6 +5,7 @@
 #define puts0(STR) printf("%s",STR)
 #define putdec(DIGIT) printf("%i", DIGIT)
 #define puthex(DIGIT) printf("%04X", DIGIT)
+#define puthex_l(DIGIT) printf("%08X", DIGIT)
 #define puthex_b(DIGIT) printf("%02X", DIGIT)
 #define peek(ADR) 0
 #define peek2(SEG,OFFSET) 0

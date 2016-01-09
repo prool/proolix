@@ -19,12 +19,12 @@ dup
 0
 swap
 peek2
-.
+.w
 !:
 0
 swap
 peek2
-.
+.w
 dup
 090
 swap
