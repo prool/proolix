@@ -2,7 +2,7 @@
 
 //#define DEBUG 1
 
-#include <limits.h>
+//#include <limits.h>
 
 #define MAX_LEN_STR 256 
 #define MAXLEN 256 

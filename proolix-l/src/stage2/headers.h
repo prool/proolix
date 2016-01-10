@@ -57,6 +57,7 @@ char *getsn(char *str, int len);
 size_t strlen (const char *s);
 char *strchr (const char *str, int c);
 char  * strncpy (char  * dest, const char  * src, size_t maxlen);
+int strcmp (const char  *s1, const char  *s2);
 
 int peek (int addr);
 short int peek2(short int seg, short int offset);
@@ -81,6 +82,7 @@ void cat(void);
 void catw(void);
 void ascii(void);
 void cls(void);
+void scroll(void);
 void off(void);
 void memd0(void);
 void memd(void);

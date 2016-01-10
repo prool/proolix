@@ -8,7 +8,7 @@ Installation of boot sector to diskette:
 
 1.
 run make
-and use patchboot utility
+and use 'makediskette' utility
 
 2.
 install stage2 to diskette (see stage2 directory)

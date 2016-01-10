@@ -5,6 +5,8 @@ LD = ld
 AS = as
 CPP = cpp
 
+all:	boots boote patchboot analyzeboot makediskette
+
 # experimental debug boot sector
 boote: boote.o patchboot analyzeboot makediskette
 	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<

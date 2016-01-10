@@ -1,6 +1,8 @@
 # Proolix-l boot sector makefile for cygwin
 # for install boot sector to diskette /dev/fd0 usage 'make install'
 
+# Status of this makefile: OBSOLETE
+
 LD = ld
 AS = as
 CPP = cpp
