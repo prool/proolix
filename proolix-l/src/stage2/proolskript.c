@@ -39,7 +39,7 @@ if (buf[0]==0) {console=1; puts("quit for quit");}
 else if ((file=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
 
 puts("\r\nProol Skript Interpterer v.2\r\n");
-
+l_begin: ;
 // read file to fayl
 if (console==0)
 {
@@ -57,6 +57,10 @@ while(1)
 	}
 close(file);
 }
+else	{
+	getsn(fayl,MAXFAJL);
+	for (ii=0; ii<MAXFAJL; ii++) if (fayl[ii]==' ') fayl[ii]='\r';
+	}
 
 #if 0 // debug output
 ii=0; while(fayl[ii]) {char c=fayl[ii++];if (c=='\r') {putchar('\r');putchar('\n');} else putchar(c);}
@@ -66,7 +70,7 @@ puts("debug mode. press any key or control C, Luc"); getchar();
 
 // perviy prohod
 faylp=0;
-if (console==0)
+if (1/*console==0*/)
  {
  number=MAXLABEL;
  while(fayl[faylp])
@@ -94,7 +98,7 @@ puts("debug mode. press any key or control C, Luc"); getchar();
 faylp=0;
 while(1/*fayl[faylp]*/)
 	{
-    	if (console==0) {
+    	if (1/*console==0*/) {
 			// readw:
 			ii=0; while(fayl[faylp]) {if (fayl[faylp]!='\r') buf[ii++]=fayl[faylp++]; else break;} faylp++; buf[ii]=0;
 			} else {getsn(buf,MAXLEN1); puts("");}
@@ -283,7 +287,8 @@ while(1/*fayl[faylp]*/)
 				{puts0("\r\nUnknown operator: '");puts0(buf);puts("'");}
 			}
 		}
-	if ((console==0)&&(fayl[faylp]==0)) break;
+	if (/*(console==0)&&*/(fayl[faylp]==0)) break;
 	}
+if (console==1) goto l_begin;
 puts("\r\nSkript finished");
 }
