@@ -40,6 +40,7 @@ else if ((file=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
 
 puts("\r\nProol Skript Interpterer v.2\r\n");
 l_begin: ;
+for (ii=0;ii<MAXFAJL; ii++) fayl[ii]=0;
 // read file to fayl
 if (console==0)
 {
