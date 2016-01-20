@@ -196,6 +196,11 @@ while(1/*fayl[faylp]*/)
 				if (console) puts("");
 				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
 				}
+			else if (!strcmp(buf,".c"))
+				{
+				putch(stack[MAXSTACK-1]);
+				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];
+				}
 			else if (!strcmp(buf,"drop"))
 				{
 				for (i=MAXSTACK-1;i>0;i--) stack[i]=stack[i-1];

@@ -9,6 +9,7 @@
 #define puthex_b(DIGIT) printf("%02X", DIGIT)
 #define peek(ADR) 0
 #define peek2(SEG,OFFSET) 0
+#define putch(a) putchar(a)
 
 #include "readw.c"
 
