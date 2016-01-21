@@ -289,6 +289,7 @@ while(1/*fayl[faylp]*/)
 					}
 				}
 			else if (!strcmp(buf,"quit")) return;
+#include	"aux-skripts.c"
 			else
 				{puts0("\r\nUnknown operator: '");puts0(buf);puts("'");}
 			}
