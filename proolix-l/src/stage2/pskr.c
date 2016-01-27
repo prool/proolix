@@ -1,3 +1,5 @@
+#define PROOLSKRIPT_IN_LINUX
+
 #include <stdio.h>
 #include <string.h>
 

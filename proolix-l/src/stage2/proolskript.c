@@ -38,7 +38,7 @@ while(1)
 if (buf[0]==0) {console=1; puts("quit for quit");}
 else if ((file=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
 
-puts("\r\nProol Skript Interpterer v.2\r\n");
+puts("\r\nProol Skript Interpterer v.2.1\r\n");
 l_begin: ;
 for (ii=0;ii<MAXFAJL; ii++) fayl[ii]=0;
 // read file to fayl
@@ -59,7 +59,17 @@ while(1)
 close(file);
 }
 else	{
+#ifdef PROOLSKRIPT_IN_LINUX
+	puts0("skript> ");
+#else
+	puts0("skript> ");
+#endif
 	getsn(fayl,MAXFAJL);
+#ifdef PROOLSKRIPT_IN_LINUX
+	//
+#else
+	puts0("\r\n");
+#endif
 	for (ii=0; ii<MAXFAJL; ii++) if (fayl[ii]==' ') fayl[ii]='\r';
 	}
 
