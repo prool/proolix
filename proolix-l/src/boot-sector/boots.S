@@ -3,7 +3,7 @@
 
 # russian text in KOI-8R cyrillic codetable
 
-# by Serge Pustovoitoff, 1993-2015
+# by Serge Pustovoitoff, 1993-2016
 
 # При отладке бута учитывались многочисленные полезные замечания, которые
 # сделали Алекс Семеняка и Юрий Белотицкий

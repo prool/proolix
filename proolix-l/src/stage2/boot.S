@@ -2439,7 +2439,7 @@ keystroke: .fill STRLEN,1,0
 Filename:  .fill STRLEN,1,0
 
 str1:	.byte		13,10
-	.ascii		"Proolix-l stage2. (c) 1993-2015, Prool, GPLv2. <proolix@gmail.com>"
+	.ascii		"Proolix-l stage2. (c) 1993-2016, Prool, GPLv2. <proolix@gmail.com>"
 	.byte		13,10
 	.ascii		"www.prool.kharkov.org github.com/prool/proolix"
 	.byte 		13,10
