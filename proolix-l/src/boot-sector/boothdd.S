@@ -298,8 +298,26 @@ l_out: movb     $0xe,%ah
         ret
 # ohb1    endp
 
+/*
+	. = 446
+	# partition
+	.byte 0x80 # partition bootable (active)
+	.byte 0
+	.byte 1
+	.byte 1
+	.byte 1 # FAT12 ;)
+	.byte 3
+	.byte 17
+	.byte 166
+	.word 68
+	.word 0
+	.word 11288
+	.word 0
+proolfool
+*/
+
 	. = 510
-	.word 0x55AA
+	.word 0xAA55
 	. = 512
 
 	jmp	l_2
