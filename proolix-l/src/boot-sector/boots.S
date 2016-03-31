@@ -1,7 +1,7 @@
 # Proolix-l boot sector for diskette 1.44 M 3 inch FAT12 filesystem
 # for install boot sector to diskette /dev/fd0 usage make install
 
-# russian text in KOI-8R cyrillic codetable
+# russian text in UTF-8
 
 # by Serge Pustovoitoff, 1993-2016
 

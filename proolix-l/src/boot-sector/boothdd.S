@@ -1,11 +1,8 @@
-# Proolix-l boot sector for HDD FAT12 filesystem (experimantal)
+# Proolix-l boot sector for HDD (experimantal)
 
-# russian text in KOI-8R cyrillic codetable
+# russian text in UTF-8
 
 # by Serge Pustovoitoff, 1993-2016
-
-# При отладке бута учитывались многочисленные полезные замечания, которые
-# сделали Алекс Семеняка и Юрий Белотицкий
 
 #include	"macros.S"
 
@@ -19,8 +16,6 @@ Drive   =     0x80       # HDD 0
 
 stage2_seg          =     0x3050       # Сегментный адрес, куда будет
                                        # загружен stage2
-
-FATaddr         =     Buff
 
         .code16
 	.text
@@ -106,67 +101,47 @@ start:
         pushw   %CS
         popw    %DS
 
-        # Вычисления
-        movb    FatCnt+off,%al
-        cbw
-        movw    FatSize+off,%cx
-	mulw    %cx      # %ax*%cx -> %dx:%ax
-        addw    ResSecs+off,%ax
-        # %ax - Root Beginning Sector
-        movw    %ax,StartClu+off
-        PUSHW   %ax
+	movw	$stage2_seg,%ax
+	movw	%ax,%ES
+	xorw	%bx,%bx
 
-        movw    RootSiz+off,%ax
-        movw    $32,%cx
-        mulw    %cx
+	movw	$1, %ax
+	movw	$1, %cx
 
-        movw    SectSiz+off,%cx
-        divw    %cx      # %dx:%ax / %cx -> %ax; mod -> %dx
-        orw     %dx,%dx   # Если остаток ненулевой, то прибавляем еще один
-        jz      l_ll    # сектор (последний неполный сектор rootа)
-        inc     %ax
-l_ll:
-        # %ax - Root Size in Sectors
-        addw    %ax,StartClu+off
-        movw    %ax,%cx
-        movw    %ax,RootSize+off
-        POPW    %ax      # %ax - Root Bg Sec
-loop1:  # Загрузка корневого каталога посекторно и посекторный поиск в нем
+loop1:  # Загрузка stage2 посекторно
         # имени ядра
         pushw   %cx
 
         pushw   %ax
-        movw    $Buff+off,%bx
         movb    $Drive,%dl
         pushw   %ax
         call    SecRead
-        jc      l_err2
+        jc      l_err
         popw    %ax
 
 #               pushw   %ax
 #               CHR1    'R'
 #               popw    %ax
 
-        movw    $16,%cx   # root entryes in 1 sector
-loop2:          pushw   %cx
-
-                movw    $11,%cx
-                movw    %bx,%di
-		movw    $Lbl+off,%si
-                rep     cmpsb
-                je      l_found
-
-                popw    %cx
-                addw    $32,%bx
-                loop    loop2
-
         popw    %ax
         incw    %ax
 
         popw    %cx
         loop    loop1
-        # end of load root dir
-        # HЕ HАШЛИ ЯДРА
+        # EXEC!
+
+#       sayr    OEM+off
+
+        movw    $stage2_seg,%ax
+        movw    %ax,%DS
+        cli
+        movw    %ax,%SS
+        movw    $0xfffe,%SP
+        sti
+
+        .byte      0xea    # JMP stage2_seg:0000
+        .word      0x0000,stage2_seg
+
 
 l_err:
         putch   $'e'
@@ -176,9 +151,6 @@ l_err:
         int     $0x16
         int     $0x19
 #Vis:    jmp     short Vis
-
-l_err2: putch $'2'
-	jmp l_err
 
 sayr_proc: # proc       Ver 0.0.1 9-Dec-93
                         # Процедура вывода строки при помощи функций BIOS
@@ -196,160 +168,6 @@ sayr_l1:
 sayrret:
         ret
 # sayr_proc       endp
-
-l_found:        # HАШЛИ !
-        popw    %cx
-        # Found kernel
-        # %bx - kernel dir record
-        # word ptr (%bx+0x1a) - 1st cluster
-        movw    0x1a(%bx),%ax    # %ax - 1st cluster
-
-        # Загрузка FAT в ОЗУ
-        PUSHW   %ax      # save %ax with 1st clu no
-
-        movw    ResSecs+off,%ax
-        movw    $FATaddr+off,%bx
-        movw    FatSize+off,%cx
-
-        # Загрузка ядра покластерно (по цепочке из FATа)
-        # Загрузка FAT
-loop3:  movb    $Drive,%dl
-        pushw   %ax
-        call    SecRead
-        jc      l_err
-        popw    %ax
-        addw    $512,%bx
-        incw    %ax      # Next sector!
-
-#       pushw   %ax
-#       CHR1    'F'
-#       popw    %ax
-
-        loop    loop3
-
-        movb    ClustSiz+off,%al
-        cbw
-        movw    SectSiz+off,%dx
-        mul     %dx
-        movw    %ax,%cx   # Cluster Size in Bytes
-
-        POPW    %ax      # restore %ax (1st clu no)
-        movw    $stage2_seg,%bx
-        movw    %bx,%ES
-        xorw    %bx,%bx
-l2:     movb    $Drive,%dl
-        call    CluRead
-          pushw   %ax
-	  movw $0x0e00+176,%ax
-	  int  $0x10
-          popw    %ax
-        addw    %cx,%bx
-        call    NextClu # set %ax
-        jnc     l2
-
-        # EXEC!       
-	
-#       sayr    OEM+off
-
-        movw    $stage2_seg,%ax
-        movw    %ax,%DS
-        cli
-        movw    %ax,%SS
-        movw    $0xfffe,%SP
-        sti
-
-        .byte      0xea    # JMP stage2_seg:0000
-        .word      0x0000,stage2_seg
-
-
-#ifdef FAT12
-NextClu: # proc # Input: %ax - cluster no
-                # Output: %ax - next cluster from FAT
-                # cf=1 if EOF
-                # Use global var:
-                # FATaddr               .word      0
-                # REGS SAVED !
-
-        pushw    %bx
-        pushw    %cx
-        pushw    %dx
-        pushw    %si
-        pushw    %di
-
-        movw    %ax,%di
-        movw    $3,%bx
-        mul     %bx      # %dx:%ax := %ax * %bx
-        shrw    $1,%ax   # %ax := %ax /2
-        # %ax - addr in FAT
-        movw    %ax,%si
-        movw    $FATaddr+off,%bx
-        movw    (%bx,%si),%ax
-        testw   $1,%di
-        jz      lbl5
-        movb    $4,%cl
-        shrw    %cl,%ax
-        jmp     lbl6
-lbl5:   andw    $0xfff,%ax
-lbl6:
-#       cmpw    $0xfff,%ax
-#       je      l_cf
-#       cmpw    $0xff7,%ax
-#       je      l_cf
-        cmpw    TotSecs+off,%ax
-        ja      l_cf # $$$
-
-        clc
-l_ret1:
-        popw     %di
-        popw     %si
-        popw     %dx
-        popw     %cx
-        popw     %bx
-
-        ret
-l_cf:   stc
-        jmp     l_ret1
-# NextClu endp # FAT12
-#endif
-
-#ifdef FAT16
-NextClu:        # Input: ax - cluster no
-                # Output: ax - next cluster from FAT
-                # cf=1 if EOF
-                # REGS SAVED !
-
-        push    %bx
-        push    %dx
-        push    %ES
-
-        movw    $2,%bx
-        mul     %bx       # dx:ax := ax * bx
-        # dx:ax - relative address in FAT
-        add     $FATaddr+off,%ax
-        # dx:ax - absolute address in FAT
-        # mov     %dx,%ES # dx, то есть старшее слово адреса игнорируем. на дискете FAT не может быть таким большим
-        mov     %ax,%bx
-
-        movw    (%bx),%ax
-#       cmp     ax,0fffh
-#       je      l_cf
-#       cmp     ax,0ff7h
-#       je      l_cf
-
-#        cmpw    MaxClusters+off,%ax
-#        ja      l_cf
-
-        clc
-l_ret1:
-        pop     %ES
-        pop     %dx
-        pop     %bx
-
-        ret
-l_cf:   stc
-        jmp     l_ret1
-#NextClu endp	# FAT16
-#endif
 
 SecRead:        # Read absolute sectors
                 # Input: %ax - abs sec number
@@ -420,57 +238,6 @@ l_ret:
         ret
 # SecRead endp
 
-CluRead: # proc    # Read cluster
-                # Input: %ax - cluster number
-                #        %dl - drive (for int 0x13 Fn=2)
-                #        ES:%bx - buffer
-                #        DS - data segment reg
-
-                # Use global variables:
-                # StartClu      .word      0       # Number sector of 1st cluster
-                # ClustSiz      .byte      2
-                # SectSiz       .word
-
-                # ALL REGS SAVED !!!
-
-        pushw    %ax
-        pushw    %bx
-        pushw    %cx
-
-        # Sector = StartClu + ((Clu-2) * ClustSiz)
-        PUSHW    %bx
-        PUSHW    %dx
-        decw     %ax      # %ax:=%ax-2
-        decw     %ax      #
-        movw    %ax,%bx
-        movb    ClustSiz+off,%al
-        cbw
-        movw    %ax,%cx
-        mul     %bx
-        addw    StartClu+off,%ax
-        # %ax - sector
-        POPW     %dx      # Restore %dl
-        POPW     %bx
-        # %cx - ClustSiz
-loop4:
-        pushw    %ax
-        call    SecRead
-          # jc      l_err
-	  jnc	obhod
-	  jmp	l_err
-obhod:	  
-        popw     %ax
-        addw    SectSiz+off,%bx
-        incw     %ax
-        loop    loop4
-
-        popw     %cx
-        popw     %bx
-        popw     %ax
-
-        ret
-# CluRead endp
-
 ohw: #     proc
 
 #       Вывод слова в HEX-виде. Вход: слово в %ax.
@@ -531,4 +298,12 @@ l_out: movb     $0xe,%ah
         ret
 # ohb1    endp
 
-Buff:
+	. = 510
+	.word 0x55AA
+	. = 512
+
+	jmp	l_2
+	.word 0xDEAD
+l_2:	putch $'0'
+	putch $'k'
+l_stop: jmp l_stop
