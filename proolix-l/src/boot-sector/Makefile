@@ -5,7 +5,7 @@ LD = ld
 AS = as
 CPP = cpp
 
-all:	boots boote patchboot analyzeboot makediskette
+all:	boots boote patchboot analyzeboot makediskette boothdd
 
 # experimental debug boot sector
 boote: boote.o patchboot analyzeboot makediskette
@@ -39,6 +39,17 @@ boots16.o: boots16.s
 
 boots16.s: boots.S
 	$(CPP) -traditional -DFAT16 $< -o $@
+# boot sector for HDD with FAT12 filesystem (experimental)
+boothdd: boothdd.o patchboot analyzeboot makediskette
+	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
+	chmod a-x boothdd
+
+boothdd.o: boothdd.s
+	$(AS) -a=boothdd.lst -o $@ $<
+
+boothdd.s: boothdd.S
+	$(CPP) -traditional -DFAT12 $< -o $@
+
 #############################################################
 
 clean:

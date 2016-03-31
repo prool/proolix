@@ -1,5 +1,4 @@
-# Proolix-l boot sector for diskette 1.44 M 3 inch FAT12 filesystem
-# for install boot sector to diskette /dev/fd0 usage make install
+# Proolix-l boot sector for HDD FAT12 filesystem (experimantal)
 
 # russian text in KOI-8R cyrillic codetable
 
@@ -7,21 +6,6 @@
 
 # При отладке бута учитывались многочисленные полезные замечания, которые
 # сделали Алекс Семеняка и Юрий Белотицкий
-
-# History in stack order
-# 0.0.5.1 21-Oct-2004
-# 0.0.5.0 12-Oct-2004 - переделано под Linux (tasm->as)
-################################################################################
-# 0.0.4.0 20-Apr-96 загружаемый файл /boot может быть сжат pklite
-# 0.0.3.1 24-Mar-96 replace chr1 '.' -> char1  176
-# 0.0.3.1 12-Mar-96 PSPSeg (stage2_seg) = 0x3050
-# 0.0.3.0 25-Feb-96 PSPSeg = 0x1050
-# 0.0.3.0 10-Jan-96 - загружаем не /kernel, а /boot (см. файл history,
-# запись 0.0.1.4 10-Jan-96
-# 0.0.2.3 16-Sep-95
-# 0.0.2.2 15-Sep-95 - разветвление на FDD и HDD бут сектора
-# 0.0.2.1 25-Feb-95 - до этого история не велась... (см. также общую историю
-# в файле kernel/history.doc
 
 #include	"macros.S"
 
@@ -31,7 +15,7 @@
 
 off     =     0x7c00
 
-Drive   =     0       # Загрузочный диск A: (FDD 0)
+Drive   =     0x80       # HDD 0
 
 stage2_seg          =     0x3050       # Сегментный адрес, куда будет
                                        # загружен stage2
@@ -56,8 +40,8 @@ RootSiz:         .word      112
 TotSecs:         .word      720
 Media:           .byte      0xfd
 FatSize:         .word      2
-TrkSecs:         .word      9
-HeadCnt:         .word      2
+TrkSecs:         .word      63
+HeadCnt:         .word      16
 HidnSec:         .word      0,0
 BigNo:           .word      0,0       # Big total no of sectors
                 .byte      0       # Head No
@@ -85,9 +69,8 @@ start:
 
 #       cli
         # Модификация diskette param table (взято из бута MSDOS 6.0)
-
-# нужен ли в нижеследующей команде префикс ES: ?
-	lds  %es:(0x78),%si # DS:si - vector diskette param table
+	# нужен ли в нижеследующей команде префикс ES: ?
+#	lds  %es:(0x78),%si # DS:si - vector diskette param table
 
 /*
 # diskette param table
@@ -104,6 +87,7 @@ start:
 # 9 - head settle time (in ms)
 # a - motor start time (in 1/8 s)
 */
+/*
                 movb    $0xf,9(%si)  # head settle := f 
                 movw    TrkSecs+off,%cx # TrkSecs
                 movb    %cl,6(%si) # Data Transfer Length
@@ -113,6 +97,8 @@ start:
                 int     $0x13   # Disk  %dl=drive %ah=func 00
                                 # reset disk, %al=return status
                 jc      l_err
+		proolfool
+*/
 
         pushw   %CS
         popw    %ES
@@ -154,7 +140,7 @@ loop1:  # Загрузка корневого каталога посектор�
         movb    $Drive,%dl
         pushw   %ax
         call    SecRead
-        jc      l_err
+        jc      l_err2
         popw    %ax
 
 #               pushw   %ax
@@ -190,6 +176,9 @@ l_err:
         int     $0x16
         int     $0x19
 #Vis:    jmp     short Vis
+
+l_err2: putch $'2'
+	jmp l_err
 
 sayr_proc: # proc       Ver 0.0.1 9-Dec-93
                         # Процедура вывода строки при помощи функций BIOS
