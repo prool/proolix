@@ -1,11 +1,14 @@
 # Proolix-l boot sector makefile for linux
-# for install boot sector to diskette /dev/fd0 usage 'make install'
+# for install boot sector to diskette /dev/fd0 usage 'make installd'
 
 LD = ld
 AS = as
 CPP = cpp
 
 all:	boots boote patchboot analyzeboot makediskette boothdd
+
+installvm:	all
+	dd if=boothdd of=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd conv=notrunc
 
 # experimental debug boot sector
 boote: boote.o patchboot analyzeboot makediskette
@@ -53,13 +56,13 @@ boothdd.s: boothdd.S
 #############################################################
 
 clean:
-	rm boots.s boots.o boots boots.lst patchboot analyzeboot makediskette boot boots
+	rm *.s *.o boots *.lst patchboot analyzeboot makediskette boot boots
 
 patchboot:	patchboot.c
 
 analyzeboot:	analyzeboot.c
 
-install: boots patchboot
+installd: boots patchboot
 	dd if=/dev/fd0 of=boot-orig count=1
 	./patchboot boot-orig boots boot-result
 	dd if=boot-result of=/dev/fd0 count=1

@@ -76,13 +76,13 @@ ohb1: #    proc    # Regs not saved !!!
         pushw    %ax
 
         cmpb     $9,%al
-        ja      l_1    # %al > 9
+        ja      ohw_l_1    # %al > 9
         # %al <= 9
         addb     $0x30,%al	# addb '0',%al
-        jmp     l_out
+        jmp     ohw_l_out
 
-l_1:   addb     $0x37,%al #  addb    'A'-10,%al 
-l_out: movb     $0xe,%ah
+ohw_l_1:   addb     $0x37,%al #  addb    'A'-10,%al 
+ohw_l_out: movb     $0xe,%ah
         int     $0x10
 
         popw     %ax

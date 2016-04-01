@@ -24,32 +24,8 @@ stage2_seg          =     0x3050       # Сегментный адрес, куд
 _start:
 
 Begin:          jmp     start
-# Таблица параметров диска
-                 .byte      0x90     # NOP
-OEM:             .ascii     "Proolix "
-SectSiz:         .word      512
-ClustSiz:        .byte      2
-ResSecs:         .word      1
-FatCnt:          .byte      2
-RootSiz:         .word      112
-TotSecs:         .word      720
-Media:           .byte      0xfd
-FatSize:         .word      2
 TrkSecs:         .word      63
 HeadCnt:         .word      16
-HidnSec:         .word      0,0
-BigNo:           .word      0,0       # Big total no of sectors
-                .byte      0       # Head No
-                .byte      0       # Physical drive no
-                .byte      0x29    # Extended boot signature
-                # .dword     1       # Volume serial no
-# FATaddr:        label   word    # !
-                 .word      0       # ! internal vars
-StartClu:        .word      0       # !
-Lbl:             .ascii      "BOOT       "   # Volume label
-                 .ascii      "FAT12 " # File system ID
-RootSize:        .ascii	     "  " # use 2 last bytes of File system id
-OldVec:          .word      0,0
 
 start:
 #        pushw   %CS
@@ -106,7 +82,7 @@ start:
 	xorw	%bx,%bx
 
 	movw	$1, %ax
-	movw	$1, %cx
+	movw	$2, %cx		# number of blocks
 
 loop1:  # Загрузка stage2 посекторно
         # имени ядра
@@ -126,6 +102,7 @@ loop1:  # Загрузка stage2 посекторно
         popw    %ax
         incw    %ax
 
+	addw	$512,%bx
         popw    %cx
         loop    loop1
         # EXEC!
@@ -142,7 +119,6 @@ loop1:  # Загрузка stage2 посекторно
         .byte      0xea    # JMP stage2_seg:0000
         .word      0x0000,stage2_seg
 
-
 l_err:
         putch   $'e'
         putch	$'r'
@@ -151,7 +127,7 @@ l_err:
         int     $0x16
         int     $0x19
 #Vis:    jmp     short Vis
-
+/*
 sayr_proc: # proc       Ver 0.0.1 9-Dec-93
                         # Процедура вывода строки при помощи функций BIOS
                         # Вход: %DS:%si - ASCIIZ строка.
@@ -168,7 +144,7 @@ sayr_l1:
 sayrret:
         ret
 # sayr_proc       endp
-
+*/
 SecRead:        # Read absolute sectors
                 # Input: %ax - abs sec number
                 #        %dl - drive (for int 0x13 Fn=2)
@@ -318,10 +294,14 @@ proolfool
 
 	. = 510
 	.word 0xAA55
-	. = 512
 
+/*
+	. = 512
 	jmp	l_2
-	.word 0xDEAD
+	.byte 0xDE
+	.byte 0xAD
 l_2:	putch $'0'
 	putch $'k'
 l_stop: jmp l_stop
+
+*/

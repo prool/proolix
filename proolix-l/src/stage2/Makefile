@@ -7,7 +7,10 @@ CPP = cpp
 
 ASFLAG =
 
-all:	boot ct pskr
+all:	boot ct pskr stage15
+
+installvm:	all
+	dd if=stage15 of=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd seek=1 conv=notrunc
 
 pskr:	pskr.c proolskript.c readw.c
 	$(CC) pskr.c -o pskr
@@ -19,6 +22,14 @@ boot: boot.o
 boot.o: boot.S macros.S ohw.S sayr.S saycsip.S
 	sh date.sh
 	$(AS) $(ASFLAG) -a=boot.lst -o $@ $<
+
+stage15: stage15.o
+	$(LD) --oformat binary -Ttext 0x0 -M -s -o $@ $< > map.lst
+	chmod a-x stage15
+
+stage15.o: stage15.S macros.S ohw.S sayr.S saycsip.S
+	sh date.sh
+	$(AS) $(ASFLAG) -a=stage15.lst -o $@ $<
 
 ccc:	c1.c
 	gcc c1.c -o ccc.exe
