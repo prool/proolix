@@ -335,7 +335,6 @@ while (c1&&c2);
 return 0;
 }
 /****************************************************************************/
-/****************************************************************************/
 char  *strncat (char  *dest, const char  *src, size_t maxlen)
 {
 char  *cc;
@@ -475,6 +474,8 @@ while(*s1)
 return NULL;
 }
 /****************************************************************************/
+
+#if 0
 static char  *strtok_ptr;
 /****************************************************************************/
 char  *strtok(char  *s1, const char  *s2)
@@ -500,7 +501,8 @@ while(*s1)
 if (*s1) {*s1=0; strtok_ptr=s1;} else strtok_ptr=NULL;
 return cc;
 }
-/****************************************************************************/
+#endif
+
 char  *strupr(char  *s)
 {
 char  *cc;
@@ -1230,6 +1232,7 @@ return ret;
 }
 #endif // itoa package
 
+#if 0
 void process_boot (void *buf)
 {int i;
 struct BootStru *b;
@@ -1254,7 +1257,9 @@ struct BootStru *b;
   MaxClusters=((MaxSectors-DataStart)/CluSize+1);
 //  puts0("process_boot end\r\n");
 }
+#endif
 
+#if 0
 void ls (void)
 {
 char buf[512];
@@ -1323,6 +1328,7 @@ for(i=RootBeg;i<RootEnd;i++)
     }
 puts0("Total size "); putdec(total); puts("");
 }
+#endif
 
 void out_boot(void *buf)
 {int i;
@@ -1394,25 +1400,28 @@ puts0("\r\nsize of int ");putdec(sizeof(int));
 puts0("\r\nsize of long int ");putdec(sizeof(long int));
 puts0("\r\nsize of short int ");putdec(sizeof(short int));
 puts0("\r\nsize of char ");putdec(sizeof(char));
-puts0("\r\nsize of FCB ");putdec(sizeof(struct FCBstru));
+//puts0("\r\nsize of FCB ");putdec(sizeof(struct FCBstru));
 }
 
 void memmap(void)
-{
+{ /*
+600 =0060:0000 - load kernel address (see src/stage2/boot.S, KernelSeg constant)\r\n\
+A0000 EGA (in graph modes)\r\n\
+B0000 MDA, Hercules 1st videopage\r\n\
+
+*/
+
 puts0("\
 Memory map for Proolix-l (real mode)\r\n\
 0 - 1FF  Vectors\r\n\
 200 - 3FF free area (stack of boot sector)\r\n\
 400 - 4FF ROM BIOS data: 475: count of HDD\r\n\
-600 =0060:0000 - load kernel address (see src/stage2/boot.S, KernelSeg constant)\r\n\
-end of Kernel (CT) 0060:");
+end of Kernel (CT) XXXX:");
 puthex(end_of());
 puts0("\r\n07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
 07E00                      Boot sector end\r\n\
-30500 (=3050:0000) stage2 (see src/boot-sector/boots.S, stage2_seg constant)\r\n\
+30500 (=3050:0000) stage2 (CT)\r\n\
 MemTop (f.e. 9FFFF)\r\n\
-A0000 EGA (in graph modes)\r\n\
-B0000 MDA, Hercules 1st videopage\r\n\
 B8000 CGA, EGA, VGA 1st videopage (mode=3, symbol mode)\r\n\
 C8000 Additional ROM modules (2K blocks)\r\n\
 E0000 Bg  AT ROM BIOS\r\n\
@@ -1443,12 +1452,7 @@ diskd0 - disk dump #1 (sector/head/track)\r\n\
 diskd - disk dump #2 (absolute sector)\r\n\
 testdisk - test of disk\r\n\
 mount - mount disk\r\n\
-ls - ls\r\n\
-cat - interactive cat file\r\n\
-fat - out FAT\r\n\
-gluck - gluck\r\n\
 skript - run prool skript\r\n\
-exit, quit - exit\r\n\
 ");
 }
 
@@ -1638,8 +1642,8 @@ switch(i)
 	case 4: puts0("1.44M"); break;
 	case 5: puts0("2.88M?"); break;
 	case 6: puts0("2.88M"); break;
-	case 7: puts0("HDD?"); break;
-	case 0x10: puts0("ATAPI removable media"); break;
+	case 7: puts0("HDD"); break;
+	case 0x10: puts0("ATAPI removable"); break;
 	default: puts0("unknown");
 	}
 puts0("\r\n");
@@ -1961,6 +1965,7 @@ if ((i=Track &0x0300)!=0)
 return writesec0(drive, SecOnTrk, Head, Track, Buffer);
 }
 
+#if 0
 int SecForClu (int CluNo)
 {unsigned long l;
 /*
@@ -1982,6 +1987,7 @@ printf("sec4clu: return %li ",l);
 #endif
 return l;
 }
+#endif
 
 void off (void)
 {int i;
@@ -1996,8 +2002,8 @@ switch(c)
 
   case 0x00: puts0("none   "); break; /* 00h    empty */
   case 0x01: puts0("FAT-12 "); break; /* 01h    DOS 12-bit FAT */
-  #if 0
   case 0x02: puts0("XENIX /"); break; /* 02h    XENIX root file system */
+  #if 0
   case 0x03: puts0("XENIX u"); break; /* 03h    XENIX /usr file system (obsolete) */
   #endif
   case 0x04: puts0("FAT-16 "); break; /* 04h    DOS 16-bit FAT < 32M */
@@ -2150,6 +2156,7 @@ switch(c)
 // Length (length of file, in bytes)
 // CurrentCluster
 
+#if 0
 int open (char *path, int flags)
 {
 char buf[512];
@@ -2525,6 +2532,7 @@ else
 
 return MsDos;
 }
+
 char *DirToPath(char filename[11], char *path)
 {char c, *cc, *ret; int i; unsigned len;
 if (path==NULL) return NULL;
@@ -2692,5 +2700,7 @@ puts0("\r\nFree space    "); putdec(free/2); puts0(" K");
 puts0("\r\n");
 
 }
+
+#endif
 
 #include "proolskript.c"

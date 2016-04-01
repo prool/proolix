@@ -15,6 +15,25 @@ for (i=0;i<256;i++) {if (i%16==0) puts0("\r\n");set_color(i); puts0("W");}
 set_color(7); puts0("end of palette");
 }
 
+#if 1 // ЗАГЛУШКИ
+void ls(void)
+{
+puts0("no ls!\r\n");
+}
+int open (char *filename, int flag)
+{
+return -1;
+}
+int close(int descriptor)
+{
+return 0;
+}
+int readw(int fd, char *buf, int count)
+{
+return 0;
+}
+#endif
+
 void main(void)
 {
 char buf [BUFLEN];
@@ -31,6 +50,12 @@ puts0(__DATE__);
 puts0(" ");
 puts0(__TIME__);
 puts0("\r\n");
+
+puts0("AX = ");
+puthex(boot_drive);
+puts0("\r\n");
+
+puts0("? - for help\r\n");
 
 #if 0 // test of putdec()
 puts0("digit 0. putdec: "); putdec(0); puts0("\r\n");
@@ -50,13 +75,20 @@ set_color(7);
 
 #if 0
 readboot(bootsector);
-
 process_boot(bootsector);
-
 out_boot(bootsector);
-
 mount_disk(0);
 #endif
+
+if (boot_drive==0xDDDDU)
+	{
+	mount_disk(0x80U);
+	}
+else if (boot_drive==0xAAAAU)
+	{
+	mount_disk(0);
+	}
+else puts0("Boot from unknown device\r\n");
 
 //puts0("cursor coord "); puthex(get_row()); puts0(" "); puthex(get_col()); puts0("\r\n"); 
 
@@ -77,8 +109,6 @@ while (1)
 	if (buf[0]==0) puts0("");
 	else if (!strcmp(buf,"help")) help();
 	else if (!strcmp(buf,"?")) help();
-	else if (!strcmp(buf,"exit")) break;
-	else if (!strcmp(buf,"quit")) break;
 	else if (!strcmp(buf,"test")) test();
 	else if (!strcmp(buf,"ascii")) ascii();
 	else if (!strcmp(buf,"cls")) cls();
@@ -93,12 +123,7 @@ while (1)
 	else if (!strcmp(buf,"diskd")) diskd();
 	else if (!strcmp(buf,"testdisk")) testdisk();
 	else if (!strcmp(buf,"mount")) mount();
-	else if (!strcmp(buf,"ls")) ls();
 	else if (!strcmp(buf,"off")) off();
-	else if (!strcmp(buf,"cat")) cat();
-	else if (!strcmp(buf,"catw")) catw();
-	else if (!strcmp(buf,"gluck")) gluck();
-	else if (!strcmp(buf,"fat")) out_fat();
 	else if (!strcmp(buf,"skript")) skript();
 	else
 		{
@@ -108,6 +133,7 @@ while (1)
 		}
 	}
 
+puts0("QUIT\r\n");
 stop();
 }
 

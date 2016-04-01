@@ -28,6 +28,7 @@ extern short int MaxClusters;
 extern short int MaxCyl;
 
 extern unsigned char current_drive; // 0 - FDD A, 1 - FDD B, 80 - HDD 1, 81 - HDD 2, FF - no mount drive
+extern unsigned short int boot_drive;
 
 extern int reg_ax;
 extern int reg_bx;
@@ -82,6 +83,7 @@ void cat(void);
 void catw(void);
 void ascii(void);
 void cls(void);
+void cls_(void);
 void scroll(void);
 void off(void);
 void memd0(void);
@@ -99,12 +101,25 @@ void skript(void);
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);
 int reads (int fd, char *buf, int count);
+int readw(int fd, char *buf, int count); // read word from file (skrypt-style)
 int lseek(int fd, int offset, int whence);
 int PathToDir(char *path, char DirName[11]);
 char *DirToPath(char filename[11], char *path);
 unsigned long NextClu(unsigned long Clu);
 
 char  *itoa (int w, char  *str, int radix);
+int tolower (int ch);
+int isgraph(int c);
+int isprint(int c);
+int isalnum (int c);
+int isalpha (int c);
+int iscntrl (int c);
+int isdigit (int c);
+int islower (int c);
+int ispunct (int c);
+int isspace (int c);
+int isupper (int c);
+int isxdigit(int c);
 
 void readboot (char *buffer);
 void out_boot(void *buf);

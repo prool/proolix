@@ -8,11 +8,14 @@
 _start:	
 	.globl	_start
 
-#if 0 // for debug
+	movw	%ax,boot_drive
+
+/* // for debug
 	  movb $0x0e,%ah
 	  movb $'_',%al
-	  int  $0x10	# putch ('A')
-#endif
+	  int  $0x10	# putch
+	proolfool
+*/
 	jmp	main
 
 # variables
@@ -43,6 +46,7 @@ reg_es:		.word	0
 errno:		.word	0
 
 current_drive:	.byte	0
+boot_drive:	.word	0
 
 FCB:
 		.word	0,0,0,0,0,0

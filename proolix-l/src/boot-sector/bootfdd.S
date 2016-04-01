@@ -118,6 +118,8 @@ loop1:  # Загрузка stage2 посекторно
         movw    $0xfffe,%SP
         sti
 
+	movw	$0xAAAA, %ax	# magick AAAA - boot from FDD
+
         .byte      0xea    # JMP stage2_seg:0000
         .word      0x0000,stage2_seg
 

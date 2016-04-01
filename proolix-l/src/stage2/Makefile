@@ -10,7 +10,7 @@ ASFLAG =
 all:	boot ct pskr stage15
 
 installvm:	all
-	dd if=stage15 of=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd seek=1 conv=notrunc
+	dd if=ct of=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd seek=1 conv=notrunc
 
 pskr:	pskr.c proolskript.c readw.c
 	$(CC) pskr.c -o pskr

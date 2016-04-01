@@ -24,6 +24,7 @@ stage2_seg          =     0x3050       # Сегментный адрес, куд
 _start:
 
 Begin:          jmp     start
+		.ascii		"MBR"	# magick
 TrkSecs:         .word      17
 HeadCnt:         .word      4
 
@@ -117,6 +118,7 @@ loop1:  # Загрузка stage2 посекторно
         movw    %ax,%SS
         movw    $0xfffe,%SP
         sti
+	movw	$0xDDDD,%ax	# DDDD - magick, boot from HDD
 
         .byte      0xea    # JMP stage2_seg:0000
         .word      0x0000,stage2_seg
