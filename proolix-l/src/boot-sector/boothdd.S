@@ -24,8 +24,8 @@ stage2_seg          =     0x3050       # Сегментный адрес, куд
 _start:
 
 Begin:          jmp     start
-TrkSecs:         .word      63
-HeadCnt:         .word      16
+TrkSecs:         .word      17
+HeadCnt:         .word      4
 
 start:
 #        pushw   %CS
@@ -82,7 +82,7 @@ start:
 	xorw	%bx,%bx
 
 	movw	$1, %ax
-	movw	$2, %cx		# number of blocks
+	movw	$80, %cx		# number of blocks: 23 - boot, 80 - ct
 
 loop1:  # Загрузка stage2 посекторно
         # имени ядра
@@ -105,12 +105,14 @@ loop1:  # Загрузка stage2 посекторно
 	addw	$512,%bx
         popw    %cx
         loop    loop1
+
         # EXEC!
 
 #       sayr    OEM+off
 
         movw    $stage2_seg,%ax
         movw    %ax,%DS
+	movw	%ax,%ES		# set ES register
         cli
         movw    %ax,%SS
         movw    $0xfffe,%SP

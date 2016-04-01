@@ -48,6 +48,7 @@ puts0("End of code "); puthex(end_of()); puts0("\r\n");
 
 set_color(7);
 
+#if 0
 readboot(bootsector);
 
 process_boot(bootsector);
@@ -55,6 +56,7 @@ process_boot(bootsector);
 out_boot(bootsector);
 
 mount_disk(0);
+#endif
 
 //puts0("cursor coord "); puthex(get_row()); puts0(" "); puthex(get_col()); puts0("\r\n"); 
 

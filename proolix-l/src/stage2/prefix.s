@@ -14,7 +14,7 @@ _start:
 	  int  $0x10	# putch ('A')
 #endif
 	jmp	main
-	
+
 # variables
 	.ascii	" CT-Kernel ;-) "
 SectorsOnCyl:	.word	0
