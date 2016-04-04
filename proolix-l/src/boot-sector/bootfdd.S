@@ -12,7 +12,7 @@
 
 off     =     0x7c00
 
-Drive   =     0x0       # FDD 0
+Drive   =     0       # FDD 0
 
 stage2_seg          =     0x3050       # Сегментный адрес, куда будет
                                        # загружен stage2
@@ -28,6 +28,15 @@ TrkSecs:         .word      18
 HeadCnt:         .word      2
 
 start:
+	call	print_registers
+
+# get drive parameters
+	movb	$8,%ah
+	movb	$Drive,%dl
+	int	$0x13
+
+	call	print_registers
+
 #        pushw   %CS
 #        popw    %DS
 #        sayr    OEM+off
@@ -277,6 +286,9 @@ l_out: movb     $0xe,%ah
 
         ret
 # ohb1    endp
+
+#include "sayr.S"
+#include "saycsip.S"
 
 /*
 	. = 446

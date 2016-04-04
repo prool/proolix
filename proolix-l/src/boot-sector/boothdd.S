@@ -24,15 +24,26 @@ stage2_seg          =     0x3050       # Сегментный адрес, куд
 _start:
 
 Begin:          jmp     start
-		.ascii		"MBR"	# magick
+message:	.ascii	"MBR "
+		.byte 13,10,0
 TrkSecs:         .word      17
 HeadCnt:         .word      4
 
 start:
 #        pushw   %CS
 #        popw    %DS
-#        sayr    OEM+off
-# Значения регистров после загрузки boot-сектора
+#        print    message+off
+
+	call	print_registers
+
+# get drive parameters
+	movb	$8,%ah
+	movb	$Drive,%dl
+	int	$0x13
+
+	call	print_registers
+
+# Значения регистров после загрузки из boot-сектора дискеты
 # CS:IP = 0:7C00 SS=30 SP=F6 ES=0
 
 # /* 0:0 - 0:200 - таблица прерываний */
@@ -131,24 +142,7 @@ l_err:
         int     $0x16
         int     $0x19
 #Vis:    jmp     short Vis
-/*
-sayr_proc: # proc       Ver 0.0.1 9-Dec-93
-                        # Процедура вывода строки при помощи функций BIOS
-                        # Вход: %DS:%si - ASCIIZ строка.
-                        # NO REG SAVED !!!
-# В графических режимах не работает
-#       cld
-sayr_l1:
-        lodsb
-        orb     %al,%al
-        jz      sayrret
-        movb    $0x0e,%ah
-        int     $0x10
-        jmp     sayr_l1
-sayrret:
-        ret
-# sayr_proc       endp
-*/
+
 SecRead:        # Read absolute sectors
                 # Input: %ax - abs sec number
                 #        %dl - drive (for int 0x13 Fn=2)
@@ -277,6 +271,9 @@ l_out: movb     $0xe,%ah
 
         ret
 # ohb1    endp
+
+#include "sayr.S"
+#include "saycsip.S"
 
 /*
 	. = 446

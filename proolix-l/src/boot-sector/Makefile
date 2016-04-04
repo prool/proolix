@@ -5,10 +5,16 @@ LD = ld
 AS = as
 CPP = cpp
 
-all:	boots boote patchboot analyzeboot makediskette boothdd
+VMDISK = /home/prool/VirtualBox\ VMs/mach1/mach1.vhd
+VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
+
+all:	boots patchboot analyzeboot makediskette boothdd bootfdd
 
 installvm:	all
-	dd if=boothdd of=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd conv=notrunc
+	dd if=boothdd of=$(VMDISK) conv=notrunc
+
+installvmfloppy:	all
+	dd if=bootfdd of=$(VMFLOPPY) conv=notrunc
 
 # experimental debug boot sector
 boote: boote.o patchboot analyzeboot makediskette
@@ -42,7 +48,8 @@ boots16.o: boots16.s
 
 boots16.s: boots.S
 	$(CPP) -traditional -DFAT16 $< -o $@
-# boot sector for HDD with FAT12 filesystem (experimental)
+
+# master boot sector for HDD with fool filesystem
 boothdd: boothdd.o patchboot analyzeboot makediskette
 	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
 	chmod a-x boothdd
@@ -51,6 +58,17 @@ boothdd.o: boothdd.s
 	$(AS) -a=boothdd.lst -o $@ $<
 
 boothdd.s: boothdd.S
+	$(CPP) -traditional -DFAT12 $< -o $@
+
+# boot sector for FDD with fool filesystem
+bootfdd: bootfdd.o patchboot analyzeboot makediskette
+	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
+	chmod a-x bootfdd
+
+bootfdd.o: bootfdd.s
+	$(AS) -a=bootfdd.lst -o $@ $<
+
+bootfdd.s: bootfdd.S
 	$(CPP) -traditional -DFAT12 $< -o $@
 
 #############################################################

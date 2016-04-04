@@ -45,7 +45,7 @@ current_drive=0xFF;
 
 set_color(15);
 
-puts0("Proolix-l shell. Compiled ");
+puts0("\r\nProolix-l shell. Compiled ");
 puts0(__DATE__);
 puts0(" ");
 puts0(__TIME__);

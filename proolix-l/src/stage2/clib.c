@@ -1828,7 +1828,7 @@ for (line=0;line<32;line++)
 	}
     puts0("\r\n");
     }
-puts0("Next sector (q-quit,r-retry,b-back,V-view MBR,B-view boot,W-write,D-debug,other key-next) ? \r\n");
+puts0("Next sector(q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next)?\r\n");
 char c=getch();
 switch(c)
     {

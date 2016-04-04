@@ -5,12 +5,13 @@ LD = ld
 AS = as
 CPP = cpp
 
+VMDISK=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd
 ASFLAG =
 
 all:	boot ct pskr stage15
 
 installvm:	all
-	dd if=ct of=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd seek=1 conv=notrunc
+	dd if=ct of=$(VMDISK) seek=1 conv=notrunc
 
 pskr:	pskr.c proolskript.c readw.c
 	$(CC) pskr.c -o pskr
@@ -62,7 +63,7 @@ lib2.s:		lib2.c
 #boot.s: boot.S macros.S
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ *.lst *.o ct
+	rm boot boot_ *.lst *.o ct ctmp.s
 
 saycsip.s: saycsip.S macros.S
 	$(CPP) -traditional $< -o $@
