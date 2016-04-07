@@ -1636,6 +1636,7 @@ puthex_b(i);
 puts0(", type ");
 switch(i)
 	{
+	case 0: puts0("flash?"); break;
 	case 1: puts0("360K"); break;
 	case 2: puts0("1.2M"); break;
 	case 3: puts0("720K"); break;
@@ -1779,6 +1780,8 @@ char str[MAX_LEN_STR];
 int drive, sec, ii, c, line;
 short int i;
 struct MBRstru *MBR;
+int quit;
+int Track, SecNoOnCyl, Head, SecOnTrk;
 
 puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
@@ -1788,7 +1791,7 @@ puts0("\r\nabs sec (0-..., dec) ? ");
 getsn(str,MAX_LEN_STR);
 sec=atoi(str);
 
-int quit=0;
+quit=0;
 
 while(!quit)
 
@@ -1797,6 +1800,19 @@ puts0("\r\ndrive = 0x");
 puthex_b(drive);
 puts0(" sec = ");
 putdec(sec);
+
+Track=(sec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
+SecNoOnCyl=(sec%SectorsOnCyl);
+Head=SecNoOnCyl/TrkSecs;
+SecOnTrk=SecNoOnCyl%TrkSecs+1;
+
+puts0(" CHS = ( ");
+putdec(Track);
+puts0(" ");
+putdec(Head);
+puts0(" ");
+putdec(SecOnTrk);
+puts0(" ) ");
 
 for(i=0;i<512;i++) buffer512[i]=0;
 

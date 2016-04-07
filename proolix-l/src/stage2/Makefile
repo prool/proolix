@@ -6,12 +6,17 @@ AS = as
 CPP = cpp
 
 VMDISK=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd
+VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
+
 ASFLAG =
 
 all:	boot ct pskr stage15
 
 installvm:	all
 	dd if=ct of=$(VMDISK) seek=1 conv=notrunc
+
+installvmfloppy:	all
+	dd if=ct of=$(VMFLOPPY) seek=1 conv=notrunc
 
 pskr:	pskr.c proolskript.c readw.c
 	$(CC) pskr.c -o pskr
