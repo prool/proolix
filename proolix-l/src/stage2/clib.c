@@ -2114,6 +2114,7 @@ switch(c)
   case 0x86: puts0("WinNT  "); break; /* 86h    NTFS, FAT16 volume/stripe set (Windows NT) */
   case 0x87: puts0("HPFS/NT"); break; /* 87h    HPFS Fault-Tolerant mirrored partition */
                                        /* 87h    NTFS volume/stripe set */
+  case 0x8E: puts0("LVM    "); break; // Раздел LVM
   #if 0
   case 0x93: puts0("Amoeba "); break; /* 93h    Amoeba file system */
   case 0x94: puts0("Amoeba "); break; /* 94h    Amoeba bad block table */
