@@ -7,6 +7,7 @@ CPP = cpp
 
 VMDISK = /home/prool/VirtualBox\ VMs/mach1/mach1.vhd
 VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
+FLASHDEVICE = /dev/sdb1
 
 all:	boots patchboot analyzeboot makediskette boothdd bootfdd
 
@@ -15,6 +16,14 @@ installvm:	all
 
 installvmfloppy:	all
 	dd if=bootfdd of=$(VMFLOPPY) conv=notrunc
+
+installflash:	boot_f32.bin
+		dd if=S(FLASHDEVICE) of=boot_f32.bin bs=1 skip=3 seek=3 count=87 conv=notrunc
+		dd if=boot_f32.bin of=$(FLASHDEVICE) bs=512 count=1 conv=notrunc
+		rm boot_f32.bin
+
+boot_f32.bin:	boot_f32.asm
+	    fasm boot_f32.asm
 
 # experimental debug boot sector
 boote: boote.o patchboot analyzeboot makediskette

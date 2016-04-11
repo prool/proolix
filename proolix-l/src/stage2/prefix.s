@@ -1,21 +1,37 @@
 # assembler prefix file for c-translated text
 
 # some comments from Ralf Brown Interrupt list http://www.ctyme.com/intr/int.htm
-# Interrupt list rulez! /prool
+# Interrupt list rulez! prool
 
 	.text
 	.code16gcc
 _start:	
 	.globl	_start
 
+	push	%cs
+	pop	%ds
+
+	push	%cs
+	pop	%es
+
+	push	%cs
+	pop	%bx
+
+	cli
+	mov	%bx,%SS
+	movw	0xFFFC,%SP
+	sti
+
+//	call	print_reg2
+//	call	print_reg2
+
 	movw	%ax,boot_drive
 
-/* // for debug
+// for debug
 	  movb $0x0e,%ah
-	  movb $'_',%al
+	  movb $'~',%al
 	  int  $0x10	# putch
-	proolfool
-*/
+
 	jmp	main
 
 # variables
@@ -372,3 +388,163 @@ GetDriveParam: # GetDriveParam(char drive)
 end_of: # short int end_of (void)
 	lea	EndOfCT,%ax
 	ret
+
+print_reg2: # proc    ; ГЛЮЧИТ! по ret не выходит (скорее всего что-то со стеком)
+        pushw %ax
+
+	  movb $0x0e,%ah
+	  movb $'R',%al
+	  int  $0x10	# putch
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        pushw   %CS
+        popw    %ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+	call next
+next:
+	popw	%ax
+	call	ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw    %SS,%ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw     %SP,%ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+	movw	%BP,%ax
+	call	ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw     %DS,%ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw     %ES,%ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw     %bx,%ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw     %cx,%ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw     %dx,%ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw     %si,%ax
+        call    ohw
+
+	  movb $0x0e,%ah
+	  movb $'-',%al
+	  int  $0x10	# putch
+        movw     %di,%ax
+        call    ohw
+
+        popw    %ax
+        ret
+ohd: # ÷Ù×ÏÄ ÄÌÉÎÎÏÇÏ ÓÌÏ×Á (%eax, ÔÏ ÅÓÔØ 8 ÂÁÊÔ) × hex ×ÉÄÅ
+	# òÅÇÉÓÔÒÙ ÓÏÈÒÁÎÅÎÙ
+	pushl	%eax
+	pushl	%ecx
+	
+	pushl	%eax
+	movb	$16,%cl
+	shr	%cl,%eax
+	call ohw
+	popl	%eax
+	call ohw
+	popl	%ecx
+	popl	%eax
+	ret
+    
+ohw: #     proc
+
+#       ÷Ù×ÏÄ ÓÌÏ×Á × HEX-×ÉÄÅ. ÷ÈÏÄ: ÓÌÏ×Ï × %ax.
+#       ÷ÓÅ ÒÅÇÉÓÔÒÙ ÓÏÈÒÁÎÑÀÔÓÑ.
+#       ÷ÙÚÙ×ÁÅÔ ÐÏÄÐÒÏÇÒÁÍÍÕ ohb
+
+        pushw    %ax      # óÏÈÒ. ÒÁÄÉ %al.
+        movb     %ah,%al
+        call    ohb
+        popw     %ax              # ÷ÏÓÓÔ. %al.
+        call    ohb
+        ret
+# ohw     endp
+ohb: #     proc
+
+# Procedure output hex byte Ver 0.1.1 6 Dec 93 via BIOS
+# Input: %al - byte
+# All regs. reserved ;)
+
+# Not worked in graph mode. bl - bg color ???
+
+        pushw    %ax
+        pushw    %cx
+        pushw    %dx
+
+        movb     %al,%dl
+        movb     $4,%cl
+        shrb     %cl,%al
+        call    ohb1
+
+        movb    %dl,%al
+        andb    $0xf,%al
+        call    ohb1
+
+        popw     %dx
+        popw     %cx
+        popw     %ax
+
+        ret
+
+# ohb     endp
+
+ohb1: #    proc    # Regs not saved !!!
+        pushw    %ax
+
+        cmpb     $9,%al
+        ja      ohw_l_1    # %al > 9
+        # %al <= 9
+        addb     $0x30,%al	# addb '0',%al
+        jmp     ohw_l_out
+
+ohw_l_1:   addb     $0x37,%al #  addb    'A'-10,%al 
+ohw_l_out: movb     $0xe,%ah
+        int     $0x10
+
+        popw     %ax
+
+        ret
+# ohb1    endp

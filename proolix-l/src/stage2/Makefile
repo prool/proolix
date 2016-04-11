@@ -7,6 +7,8 @@ CPP = cpp
 
 VMDISK=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd
 VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
+FLASHDEVICE = /dev/sdb1
+FLASHDIR = /media/prool/7A66-B17B
 
 ASFLAG =
 
@@ -17,6 +19,11 @@ installvm:	all
 
 installvmfloppy:	all
 	dd if=ct of=$(VMFLOPPY) seek=1 conv=notrunc
+
+installflash:		all
+# install to FAT-32 flash stick with KolibriOS's bootsector (Kolibri OS rilez!)
+	cp ct $(FLASHDIR)/MTLD_F32
+	umount $(FLASHDEVICE)
 
 pskr:	pskr.c proolskript.c readw.c
 	$(CC) pskr.c -o pskr
