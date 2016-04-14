@@ -82,10 +82,12 @@ mount_disk(0);
 
 if (boot_drive==0xDDDDU)
 	{
+	puts0("Boot from HDD0\r\n");
 	mount_disk(0x80U);
 	}
 else if (boot_drive==0xAAAAU)
 	{
+	puts0("Boot from FDD0\r\n");
 	mount_disk(0);
 	}
 else puts0("Boot from unknown device\r\n");
@@ -124,6 +126,7 @@ while (1)
 	else if (!strcmp(buf,"testdisk")) testdisk();
 	else if (!strcmp(buf,"mount")) mount();
 	else if (!strcmp(buf,"off")) off();
+	else if (!strcmp(buf,"vec")) vectors();
 	else if (!strcmp(buf,"skript")) skript();
 	else
 		{

@@ -1447,6 +1447,7 @@ system - print system parameters\r\n\
 memd0 - memory dump for extended processor mode\r\n\
 memd - memory dump for real mode\r\n\
 memmap - print memory map\r\n\
+vec - print interrupt vectors\r\n\
 basic - call ROM BASIC (if exist)\r\n\
 diskd0 - disk dump #1 (sector/head/track)\r\n\
 diskd - disk dump #2 (absolute sector)\r\n\
@@ -1800,6 +1801,8 @@ puts0("\r\ndrive = 0x");
 puthex_b(drive);
 puts0(" sec = ");
 putdec(sec);
+puts0("/");
+putdec(MaxSectors);
 
 Track=(sec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
 SecNoOnCyl=(sec%SectorsOnCyl);
@@ -1808,10 +1811,16 @@ SecOnTrk=SecNoOnCyl%TrkSecs+1;
 
 puts0(" CHS = ( ");
 putdec(Track);
+puts0("/");
+putdec(MaxCyl);
 puts0(" ");
 putdec(Head);
+puts0("/");
+putdec(HeadCnt);
 puts0(" ");
 putdec(SecOnTrk);
+puts0("/");
+putdec(TrkSecs);
 puts0(" ) ");
 
 for(i=0;i<512;i++) buffer512[i]=0;
@@ -1844,10 +1853,25 @@ for (line=0;line<32;line++)
 	}
     puts0("\r\n");
     }
-puts0("Next sector(q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next)?\r\n");
+puts0("Next sector(q-quit,b-back,V-viewMBR,B-viewboot,?-help,otherkey-next)?\r\n");
 char c=getch();
 switch(c)
-    {
+    {int delta;
+    case '?':
+puts0("=Diskd help=\r\n\
+q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
++ - skip sectors, = - go to sector\r\n");
+		break;
+    case '+':	puts0("delta? ");
+		getsn(str,MAX_LEN_STR);
+		delta=atoi(str);
+		sec+=delta;	
+		break;
+    case '=':	puts0("go to sector? ");
+		getsn(str,MAX_LEN_STR);
+		delta=atoi(str);
+		sec=delta;	
+		break;
     case 'D':	buffer512[0]='Z';
     case 'W':	i=secwrite(drive, sec, buffer512);
 		puts0("Disk write. Return code=");
@@ -2719,5 +2743,19 @@ puts0("\r\n");
 }
 
 #endif
+
+void vectors(void)
+{short int i;
+for (i=0;i<128+10;i++)
+	{
+	puthex_b(i);
+	puts0(" ");
+	puthex(peek(i*4+2));
+	puts0(":");
+	puthex(peek(i*4));
+	if ((i+1)%6==0) puts0("\r\n");
+	else puts0(" ");
+	}
+}
 
 #include "proolskript.c"

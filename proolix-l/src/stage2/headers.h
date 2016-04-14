@@ -97,6 +97,7 @@ void mount(void);
 void out_os(unsigned char);
 void out_fat(void);
 void skript(void);
+void vectors(void);
 
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);
