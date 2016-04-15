@@ -19,11 +19,11 @@ _start:
 
 	cli
 	mov	%bx,%SS
-	movw	0xFFFC,%SP
+	movw	$0xFFFC,%SP
 	sti
 
 //	call	print_reg2
-//	call	print_reg2
+//l_stop:		jmp	l_stop
 
 	movw	%ax,boot_drive
 
