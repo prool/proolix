@@ -87,8 +87,13 @@ if (boot_drive==0xDDDDU)
 	}
 else if (boot_drive==0xAAAAU)
 	{
-	puts0("Boot from FDD0\r\n");
+	puts0("Boot from FDD0 or CD\r\n");
 	mount_disk(0);
+	}
+else if (boot_drive==0xFFFF)
+	{
+	puts0("Boot from flashcka\r\n");
+	mount_disk(0x80U);
 	}
 else puts0("Boot from unknown device\r\n");
 

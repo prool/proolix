@@ -1637,7 +1637,7 @@ puthex_b(i);
 puts0(", type ");
 switch(i)
 	{
-	case 0: puts0("flash?"); break;
+	//case 0: puts0("flash?"); break;
 	case 1: puts0("360K"); break;
 	case 2: puts0("1.2M"); break;
 	case 3: puts0("720K"); break;
@@ -1695,6 +1695,8 @@ puts0("K\r\n");
   MaxCyl=cyl;
 
 current_drive=drive;
+
+if (sec==0) return -1;
 return 0;
 }
 
@@ -1787,6 +1789,12 @@ int Track, SecNoOnCyl, Head, SecOnTrk;
 puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
 drive=htoi(str);
+
+if (mount_disk(drive)==-1)
+	{
+	puts0("No disk\r\n");
+	return;
+	}
 
 puts0("\r\nabs sec (0-..., dec) ? ");
 getsn(str,MAX_LEN_STR);
