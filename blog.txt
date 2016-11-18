@@ -1,0 +1,17 @@
+Built-in Proolix blog
+
+18-Nov-2016. Proolix-l нормально собирается в Ubuntu 15.10 64bit, gcc 5.2.1
+
+И НЕ собирается в Ubuntu 16.10 64bit, gcc 6.2.0
+
+Ошибка при сборке stage2
+
+ctmp.s:590: Error: 8-byte relocation cannot be applied to 4-byte field
+
+в строке
+
+	leal	.LC0@GOTOFF(%ebx), %eax
+
+Буду думать
+
+Пруль

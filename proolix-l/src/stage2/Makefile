@@ -5,7 +5,7 @@ LD = ld
 AS = as
 CPP = cpp
 
-VMDISK=/home/prool/VirtualBox\ VMs/mach1/mach1.vhd
+VMDISK=/home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
 VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
 FLASHDEVICE = /dev/sdb1
 FLASHDIR = /media/prool/7A66-B17B
