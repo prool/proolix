@@ -4,6 +4,10 @@
 LD = ld
 AS = as
 CPP = cpp
+CC = gcc
+#CC = clang
+#CFLAGS = --target=x86-win32-gcc
+CFLAGS = --target=prool
 
 VMDISK=/home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
 VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
@@ -26,7 +30,7 @@ installflash:		all
 	umount $(FLASHDEVICE)
 
 pskr:	pskr.c proolskript.c readw.c
-	$(CC) pskr.c -o pskr
+	$(CC) $(CFLAGS) pskr.c -o pskr
 
 boot: boot.o
 	$(LD) --oformat binary -Ttext 0x0 -M -s -o $@ $< > map.lst
@@ -45,7 +49,7 @@ stage15.o: stage15.S macros.S ohw.S sayr.S saycsip.S
 	$(AS) $(ASFLAG) -a=stage15.lst -o $@ $<
 
 ccc:	c1.c
-	gcc c1.c -o ccc.exe
+	$(CC) $(CFLAGS) c1.c -o ccc.exe
 	strip ccc.exe
 	mv ccc.exe ccc
 
@@ -54,23 +58,23 @@ CKERNELboot: kernc.o c0.o
 	chmod a-x boot
 
 kernc.o:		kernc.c
-	gcc -c -fno-asynchronous-unwind-tables kernc.c
+	$(CC) $(CFLAGS) -c -fno-asynchronous-unwind-tables kernc.c
 
 kernc.s:	kernc.c
-	gcc -m32 -S -fno-asynchronous-unwind-tables kernc.c
+	$(CC) $(CFLAGS) -m32 -S -fno-asynchronous-unwind-tables kernc.c
 
 libc.o:		libc.c
-	gcc -m32 -c libc.c
+	$(CC) $(CFLAGS) -m32 -c libc.c
 #	$(AS) $(ASFLAG) -a=libc.lst -o libc.o libc.s
 
 lib2.o:		lib2.c
-	gcc -m32 -c lib2.c
+	$(CC) $(CFLAGS) -m32 -c lib2.c
 
 libc.s:		libc.c
-	gcc -m16 -S libc.c
+	$(CC) $(CFLAGS) -m16 -S libc.c
 
 lib2.s:		lib2.c
-	gcc -m16 -S lib2.c
+	$(CC) $(CFLAGS) -m16 -S lib2.c
 
 #boot.s: boot.S macros.S
 #	$(CPP) -traditional $< -o $@
@@ -124,16 +128,28 @@ c1s:	c1s.s
 	chmod a-x c1s
 
 # cross-compile for Proolix: .c file -> asm .s file -> modified .s file -> binary
-ct:	c2.c clib.c prefix.s headers.h suffix.s proolskript.c readw.c
-	gcc -S -m16 c2.c
+ctmp.s: c2.c clib.c prefix.s headers.h suffix.s proolskript.c readw.c
+	$(CC) $(CFLAGS) -S -m16 c2.c
 	./britva.sh c2.s
+ct:	ctmp.s
 	$(AS) $(ASFLAG) -a=ctmp.lst -o ctmp.o ctmp.s
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o ct ctmp.o > map.lst
 	chmod a-x ct
 	ls -l ct
 #	dd if=ctmp of=ct skip=4096
 
+# cross-compile for Proolix: .c file -> asm .s file -> modified .s file -> binary
+ctmp2.s: ctest.c clib.c prefix.s headers.h suffix.s proolskript.c readw.c
+	$(CC) $(CFLAGS) -S -m16 ctest.c
+	./britva.sh ctest.s
+	mv ctmp.s ctmp2.s
+ctt:	ctmp2.s
+	$(AS) $(ASFLAG) -a=ctmp2.lst -o ctmp2.o ctmp2.s
+	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o ctt ctmp2.o > map.lst
+	chmod a-x ctt
+	ls -l ctt
+
 vexe:	vexe.c
-	gcc vexe.c -o vexe.exe
+	$(CC) $(CFLAGS) vexe.c -o vexe.exe
 vpeexe:	vpeexe.c
-	gcc vpeexe.c -o vpeexe.exe
+	$(CC) $(CFLAGS) vpeexe.c -o vpeexe.exe

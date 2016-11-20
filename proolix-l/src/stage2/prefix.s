@@ -102,7 +102,6 @@ get_color:
 	movb	global_color,%al
 	ret
 
-
 putch2:
 # VIDEO - WRITE CHARACTER AND ATTRIBUTE AT CURSOR POSITION
 
@@ -120,6 +119,29 @@ putch2:
 	movl	8(%ebp), %eax
 	movb	%al, -4(%ebp)
 	movb $9,%ah
+	movzbl	-4(%ebp), %edx
+	movb %dl,%al
+	xorb %bh,%bh
+	movb	$3,%bl
+	movw	$1,%cx
+	int $0x10
+	leave
+	ret
+
+putch_tty:
+# VIDEO -  TELETYPE OUTPUT
+
+# AH = 0Eh
+# AL = character to write
+# BH = page number
+# BL = foreground color (graphics modes only)
+# CX = number of times to write character
+	pushl	%ebp
+	movl	%esp, %ebp
+	subl	$4, %esp
+	movl	8(%ebp), %eax
+	movb	%al, -4(%ebp)
+	movb $0x0E,%ah
 	movzbl	-4(%ebp), %edx
 	movb %dl,%al
 	xorb %bh,%bh
