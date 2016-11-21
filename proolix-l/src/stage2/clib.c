@@ -569,6 +569,7 @@ int isalpha (int c) {return islower(c)||isupper(c);}
 int iscntrl (int c) {return c<' ';}
 int isdigit (int c) {return (c>='0')&&(c<='9');}
 int islower (int c) {return (c>='a')&&(c<='z');}
+#if 0
 int ispunct (int c)
 {
 switch(c)
@@ -603,6 +604,7 @@ switch(c)
   default:  return 0;
   }
 }
+#endif
 /****************************************************************************/
 int isspace (int c) {if ((c==' ')||(c=='\t')) return 1; else return 0;}
 int isupper (int c) {return (c>='A')&&(c<='Z');}

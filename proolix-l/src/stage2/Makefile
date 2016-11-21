@@ -6,8 +6,6 @@ AS = as
 CPP = cpp
 CC = gcc
 #CC = clang
-#CFLAGS = --target=x86-win32-gcc
-CFLAGS = --target=prool
 
 VMDISK=/home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
 VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
@@ -79,7 +77,7 @@ lib2.s:		lib2.c
 #boot.s: boot.S macros.S
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ *.lst *.o ct ctmp.s
+	rm boot boot_ *.lst *.o ct ctmp.s ctmp2.s
 
 saycsip.s: saycsip.S macros.S
 	$(CPP) -traditional $< -o $@
