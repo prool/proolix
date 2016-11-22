@@ -38,6 +38,8 @@ void pause(void)
 	{
 		case ' ': puts0(" SPACE "); break;
 		case 'z': puts0(" z "); break;
+		case 'a': puts0(" a "); break;
+		case 'b': puts0(" b "); break;
 		default: puts0(" fucking thing ");
 	}
 }

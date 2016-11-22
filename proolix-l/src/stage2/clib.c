@@ -1505,7 +1505,7 @@ for (line=0;line<23;line++)
 
 void memd(void)
 {
-#if PROOLFOOL
+#if 1 // PROOLFOOL
 char c;
 int i;
 char Option = 'M';
@@ -1524,24 +1524,25 @@ while (1)
   putch(':');
   puthex(off);
   putch(' ');
-  switch (Option)
+  //switch (Option)
     {
-    case 'A': for(i=0;i<16;i++)
+    if (Option=='A') {
+    			for(i=0;i<16;i++)
                             {
                                 if ((c=peek2(segm,off+i))>=' ') putch(c);
                                 else putch('.');
                             }
-	break;
-    case 'M':
+	}
+    else if (Option=='M') {
     	for(i=0;i<16;i++){puthex_b(peek2(segm,off+i));putch(' ');}
     	for(i=0;i<16;i++)
                             {
                                 if ((c=peek2(segm,off+i))>=' ') putch(c);
                                 else putch('.');
                             }
-	break;
-    case 'H': for(i=0;i<16;i++){puthex_b(peek2(segm,off+i));putch(' ');}
-                          break;
+	}
+    else if (Option=='H') { for(i=0;i<16;i++){puthex_b(peek2(segm,off+i));putch(' ');}
+                          }
     }
   puts0("\r\n");
   putch(':');
@@ -1551,17 +1552,16 @@ while (1)
 
   if (cmd[0]=='/')
     {
-    switch (c=toupper(cmd[1]))
+    //switch (c=toupper(cmd[1]))
+    c=toupper(cmd[1]);
       {
-      case 'Q': puts0("\r\n"); return;
-      case 'A':
-      case 'H':
-      case 'M': Option=c; break;
-      case 'S': segm=htoi(cmd+2); break;
-      case 'O': off=htoi(cmd+2); break;
-      case 'K': memmap(); break;
-      case 'Z': poke(htoi(cmd+2),segm,off); break;
-      case '?':puts0(
+      if (c=='Q') { puts0("\r\n"); return; }
+      else if ((c=='A') || (c=='H') || (c=='M')) Option=c;
+      else if (c=='S') segm=htoi(cmd+2);
+      else if (c=='O') off=htoi(cmd+2);
+      else if (c=='K') memmap();
+      else if (c=='Z') poke(htoi(cmd+2),segm,off);
+      else if (c=='?') puts0(
 "Commands:\r\n\
 /Q - Quit\r\n\
 /A - Ascii mode\r\n\
@@ -1571,8 +1571,8 @@ while (1)
 /O<hex_value> - set Offset\r\n\
 /K - print memory map\r\n\
 Enter - next string\r\n\
-/Z<hex_value> - poke hex_value to memory\r\n"); break;
-      default: puts0("Invalid command\r\n");
+/Z<hex_value> - poke hex_value to memory\r\n");
+      else puts0("Invalid command\r\n");
       }
     puts0("\r\n");
     }
