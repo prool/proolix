@@ -2,6 +2,8 @@
 
 //#define DEBUG 1
 
+#define PROOLFOOL 0 // =1 old code; =0 - restricted test code
+
 //#include <limits.h>
 
 #define MAX_LEN_STR 256 
@@ -55,6 +57,7 @@ cls_();
 setpos(0,0);
 }
 
+#if PROOLFOOL
 void putch(char c)
 {char g_col,g_row;
 g_row=get_row();
@@ -73,6 +76,13 @@ switch(c)
 		setpos(g_row,g_col);
 	}
 }
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#else
+void putch(char c)
+{
+putch_tty(c);
+}
+#endif
 
 void puts0(char *s)
 {
@@ -1495,6 +1505,7 @@ for (line=0;line<23;line++)
 
 void memd(void)
 {
+#if PROOLFOOL
 char c;
 int i;
 char Option = 'M';
@@ -1568,7 +1579,8 @@ Enter - next string\r\n\
   else if (!cmd[0]) {off+=16;}
   else ;
   }
-}
+#endif // PROOLFOOL
+} // end of memd()
 
 void diskd0(void)
 {char Buffer [512];
@@ -1636,6 +1648,7 @@ void print_drive_type(char i)
 {
 puts0("\r\nDrive code ");
 puthex_b(i);
+#if PROOLFOOL
 puts0(", type ");
 switch(i)
 	{
@@ -1650,6 +1663,7 @@ switch(i)
 	case 0x10: puts0("ATAPI removable"); break;
 	default: puts0("unknown");
 	}
+#endif
 puts0("\r\n");
 }
 
@@ -1780,6 +1794,7 @@ puts0("K\r\n");
 
 void diskd(void)
 {
+#if PROOLFOOL
 unsigned char Buffer [512];
 char str[MAX_LEN_STR];
 int drive, sec, ii, c, line;
@@ -1955,7 +1970,8 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
     default: sec++;
     }	
 } // while
-}
+#endif // PROOLFOOL
+} // end of diskd()
 
 unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
 {/* Read absolute sectors
@@ -2765,6 +2781,19 @@ for (i=0;i<128+10;i++)
 	puthex(peek(i*4));
 	if ((i+1)%6==0) puts0("\r\n");
 	else puts0(" ");
+	}
+}
+
+void pause(void)
+{int c;
+	puts0(" Pause. Press any key ");
+	c=getch();
+	puts0("Keycode "); puthex(c);
+	switch(c)
+	{
+		case ' ': puts0(" SPACE "); break;
+		case 'z': puts0(" z "); break;
+		default: puts0(" fucking thing ");
 	}
 }
 

@@ -22,9 +22,6 @@ _start:
 	movw	$0xFFFC,%SP
 	sti
 
-//	call	print_reg2
-//l_stop:		jmp	l_stop
-
 	movw	%ax,boot_drive
 
 // for debug
@@ -411,6 +408,7 @@ end_of: # short int end_of (void)
 	lea	EndOfCT,%ax
 	ret
 
+#if 0
 print_reg2: # proc    ; ГЛЮЧИТ! по ret не выходит (скорее всего что-то со стеком)
         pushw %ax
 
@@ -496,6 +494,8 @@ next:
 
         popw    %ax
         ret
+#endif
+
 ohd: # ÷Ù×ÏÄ ÄÌÉÎÎÏÇÏ ÓÌÏ×Á (%eax, ÔÏ ÅÓÔØ 8 ÂÁÊÔ) × hex ×ÉÄÅ
 	# òÅÇÉÓÔÒÙ ÓÏÈÒÁÎÅÎÙ
 	pushl	%eax

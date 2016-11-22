@@ -41,15 +41,18 @@ int i,j;
 char c,cc;
 char bootsector[512];
 
+#if PROOLFOOL
 current_drive=0xFF;
 
 set_color(15);
+#endif
 
 puts0("\r\nProolix-l shell. Compiled ");
 puts0(__DATE__);
 puts0(" ");
 puts0(__TIME__);
 puts0("\r\n");
+pause();
 
 puts0("AX = ");
 puthex(boot_drive);

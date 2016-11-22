@@ -44,6 +44,7 @@ typedef unsigned int size_t;
 
 void stop(void);
 void putch(char c);
+void putch_tty(char c);
 void putch2(char c);
 void putch3(char c);
 void puts0(char *s);
@@ -132,6 +133,8 @@ unsigned short int secread (int drive, unsigned AbsSec, char *Buffer);
 unsigned short int secwrite (int drive, unsigned AbsSec, char *Buffer);
 int SecForClu (int CluNo);
 short int GetDriveParam (char drive);
+
+void pause(void);
 
 struct __attribute__((__packed__)) BootStru /* structure of boot sector of FAT12 and FAT16*/
 {
