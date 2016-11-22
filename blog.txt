@@ -14,4 +14,7 @@ ctmp.s:590: Error: 8-byte relocation cannot be applied to 4-byte field
 
 Буду думать
 
+22-Nov-2016. Проблему с методом адресации GOTOFF частично решил.
+Двигаюсь дальше
+
 Пруль

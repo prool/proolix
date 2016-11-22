@@ -52,11 +52,13 @@ puts0(__DATE__);
 puts0(" ");
 puts0(__TIME__);
 puts0("\r\n");
-pause();
+//pause();
 
+#if PROOLFOOL
 puts0("AX = ");
 puthex(boot_drive);
 puts0("\r\n");
+#endif
 
 puts0("? - for help\r\n");
 
@@ -83,6 +85,7 @@ out_boot(bootsector);
 mount_disk(0);
 #endif
 
+#if PROOLFOOL
 if (boot_drive==0xDDDDU)
 	{
 	puts0("Boot from HDD0\r\n");
@@ -99,6 +102,7 @@ else if (boot_drive==0xFFFF)
 	mount_disk(0x80U);
 	}
 else puts0("Boot from unknown device\r\n");
+#endif
 
 //puts0("cursor coord "); puthex(get_row()); puts0(" "); puthex(get_col()); puts0("\r\n"); 
 
