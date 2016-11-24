@@ -100,6 +100,7 @@ void out_os(unsigned char);
 void out_fat(void);
 void skript(void);
 void vectors(void);
+void screensaver(void);
 
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);
@@ -134,6 +135,9 @@ unsigned short int secread (int drive, unsigned AbsSec, char *Buffer);
 unsigned short int secwrite (int drive, unsigned AbsSec, char *Buffer);
 int SecForClu (int CluNo);
 short int GetDriveParam (char drive);
+short int GetDriveParam_bx (char drive);
+short int GetDriveParam_cx (char drive);
+short int GetDriveParam_dx (char drive);
 
 void pause(void);
 

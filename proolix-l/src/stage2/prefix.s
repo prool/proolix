@@ -392,6 +392,7 @@ poke: # poke (value, segment, offset)
 	popl	%ebp
 	ret
 
+/************************************************************************************/
 GetDriveParam: # GetDriveParam(char drive)
 	pushl	%ebp
 
@@ -417,7 +418,67 @@ GetDriveParam: # GetDriveParam(char drive)
 	pop	%ES
 	popl	%ebp
 	ret
+/************************************************************************************/
+/************************************************************************************/
+GetDriveParam_bx: # GetDriveParam(char drive)
+	pushl	%ebp
 
+	movl	%esp,%ebp
+	push	%ES
+
+	movb	8(%ebp),%dl # drive
+	movb	$8,%ah # function
+	int	$0x13
+	movw	%bx, %ax # return value
+	jc	1f
+	jmp	9f
+1:
+	movw	$0xFFFF,%ax
+9:
+	pop	%ES
+	popl	%ebp
+	ret
+/************************************************************************************/
+/************************************************************************************/
+GetDriveParam_cx: # GetDriveParam(char drive)
+	pushl	%ebp
+
+	movl	%esp,%ebp
+	push	%ES
+
+	movb	8(%ebp),%dl # drive
+	movb	$8,%ah # function
+	int	$0x13
+	movw	%cx, %ax # return value
+	jc	1f
+	jmp	9f
+1:
+	movw	$0xFFFF,%ax
+9:
+	pop	%ES
+	popl	%ebp
+	ret
+/************************************************************************************/
+/************************************************************************************/
+GetDriveParam_dx: # GetDriveParam(char drive)
+	pushl	%ebp
+
+	movl	%esp,%ebp
+	push	%ES
+
+	movb	8(%ebp),%dl # drive
+	movb	$8,%ah # function
+	int	$0x13
+	movw	%dx, %ax # return value
+	jc	1f
+	jmp	9f
+1:
+	movw	$0xFFFF,%ax
+9:
+	pop	%ES
+	popl	%ebp
+	ret
+/************************************************************************************/
 end_of: # short int end_of (void)
 	lea	EndOfCT,%ax
 	ret

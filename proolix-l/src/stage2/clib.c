@@ -1355,6 +1355,8 @@ void out_boot(void *buf)
 unsigned long DiskSize;
 unsigned long TrueSectors;
 struct BootStru *b;
+int RootBeg;
+
 b=buf;
 puts0("Jump command ");
 puthex_b((*b).Jmp[0]);
@@ -1398,6 +1400,7 @@ else
   puts0("\r\nDisk size ");putdec(DiskSize);puts0(" Kb\r\n");
   }
 
+#if 0
 puts0("\r\n0 - boot sector; 1 - "); // %i - FAT\n%i-%i - root dir\n%i-%i - data area\n");
 putdec(RootBeg-1);
 puts0(" - FAT; ");
@@ -1412,6 +1415,7 @@ puts0(" - data area\r\n");
 puts0("MaxClusters=");
 putdec(MaxClusters);
 puts("");
+#endif
 }
 
 void system(void)
@@ -1657,8 +1661,9 @@ void print_drive_type(char i)
 {
 puts0("\r\nDrive code ");
 puthex_b(i);
-#if PROOLFOOL
+#if 1 // PROOLFOOL
 puts0(", type ");
+#if 0
 switch(i)
 	{
 	//case 0: puts0("flash?"); break;
@@ -1672,6 +1677,21 @@ switch(i)
 	case 0x10: puts0("ATAPI removable"); break;
 	default: puts0("unknown");
 	}
+#else
+//switch(i)
+	{
+	//case 0: puts0("flash?"); break;
+	if (i==1) puts0("360K");
+	else if (i==2) puts0("1.2M");
+	else if (i==3) puts0("720K");
+	else if (i==4) puts0("1.44M");
+	else if (i==5) puts0("2.88M?");
+	else if (i==6) puts0("2.88M");
+	else if (i==7) puts0("HDD");
+	else if (i==0x10) puts0("ATAPI removable");
+	else puts0("unknown");
+	}
+#endif
 #endif
 puts0("\r\n");
 }
@@ -1803,28 +1823,81 @@ puts0("K\r\n");
 
 void diskd(void)
 {
-#if PROOLFOOL
+#if 1 // PROOLFOOL
 unsigned char Buffer [512];
 char str[MAX_LEN_STR];
-int drive, sec, ii, c, line;
+int drive, asec, ii, c, line;
 short int i;
 struct MBRstru *MBR;
 int quit;
 int Track, SecNoOnCyl, Head, SecOnTrk;
+short int reg_bx, reg_cx, reg_dx;
+int cyl, sectors, heads;
+unsigned short int HeadCnt, TrkSecs, SectorsOnCyl, MaxCyl;
+int MaxSectors=0;
+unsigned char buffer512 [512];
 
 puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
 drive=htoi(str);
 
+#if 0
 if (mount_disk(drive)==-1)
 	{
 	puts0("No disk\r\n");
 	return;
 	}
+#else
+{
+puts0("\r\ntest drive ");
+puthex_b(drive);
+reg_bx=GetDriveParam_bx(drive);
+if (reg_bx==-1)
+	{
+	puts0("\r\n error code = ");
+	puthex(i);
+	puts0("\r\n");
+	return;
+	}
+reg_cx=GetDriveParam_cx(drive);
+reg_dx=GetDriveParam_dx(drive);
+
+print_drive_type(reg_bx & 0xFFU);
+
+cyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
+
+puts0(" cyl = ");
+putdec(cyl);
+
+sectors = reg_cx &0x3FU;
+
+puts0(" sec = ");
+putdec(sectors);
+
+heads = ((reg_dx & 0xFF00U) >> 8)&0xFFU;
+
+puts0(" heads = ");
+putdec(heads);
+
+puts0(" number of drives = ");
+putdec(reg_dx & 0xFFU);
+
+puts0(" size = ");
+putdec(sectors*(heads+1)*(cyl+1)/2);
+puts0("K\r\n");
+
+  HeadCnt=heads+1;
+  TrkSecs=sectors;
+  SectorsOnCyl=HeadCnt*TrkSecs;
+  MaxCyl=cyl;
+
+if (sectors==0) {puts0(" error: sectors==0\r\n");return;}
+}
+#endif
 
 puts0("\r\nabs sec (0-..., dec) ? ");
 getsn(str,MAX_LEN_STR);
-sec=atoi(str);
+asec=atoi(str);
 
 quit=0;
 
@@ -1834,12 +1907,12 @@ while(!quit)
 puts0("\r\ndrive = 0x");
 puthex_b(drive);
 puts0(" sec = ");
-putdec(sec);
+putdec(asec);
 puts0("/");
 putdec(MaxSectors);
 
-Track=(sec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
-SecNoOnCyl=(sec%SectorsOnCyl);
+Track=(asec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
+SecNoOnCyl=(asec%SectorsOnCyl);
 Head=SecNoOnCyl/TrkSecs;
 SecOnTrk=SecNoOnCyl%TrkSecs+1;
 
@@ -1859,7 +1932,9 @@ puts0(" ) ");
 
 for(i=0;i<512;i++) buffer512[i]=0;
 
-i=secread(drive, sec, buffer512);
+//pause();
+//i=secread(drive, asec, buffer512);
+i=readsec0(drive, SecOnTrk, Head, Track /* or cyl */, buffer512);
 
 if (i==1) puts0(" OK");
 else {
@@ -1889,6 +1964,7 @@ for (line=0;line<32;line++)
     }
 puts0("Next sector(q-quit,b-back,V-viewMBR,B-viewboot,?-help,otherkey-next)?\r\n");
 char c=getch();
+#if 0
 switch(c)
     {int delta;
     case '?':
@@ -1977,7 +2053,95 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		getch();
 		break;
     default: sec++;
-    }	
+    }
+#else
+//switch(c)
+    {int delta;
+    if (c=='?')
+puts0("=Diskd help=\r\n\
+q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
++ - skip sectors, = - go to sector\r\n");
+    else if (c=='+') {puts0("delta? ");
+		getsn(str,MAX_LEN_STR);
+		delta=atoi(str);
+		asec+=delta;}
+    else if (c=='=') {puts0("go to sector? ");
+		getsn(str,MAX_LEN_STR);
+		delta=atoi(str);
+		asec=delta;}
+    else if (c=='D') buffer512[0]='Z';
+    else if (c=='W') {/*i=secwrite(drive, asec, buffer512);*/
+		i=writesec0(drive, SecOnTrk, Head, Track /* or cyl */, buffer512);
+		puts0("Disk write. Return code=");
+		puthex(i);
+		puts(""); }
+    else if (c=='q') quit=1;
+    else if (c=='r') {delta++; delta--;} // NOP
+    else if (c=='b') asec--;
+    else if (c=='V') { // view_mbr begin
+
+		puts0("System    ----Begin----       ----End-----  Prec. sec Total sec\r\n");
+		puts0("          head sec  cyl       head sec cyl\r\n");
+		int ii=446;
+		for (i=0;i<4;i++)
+		{
+		switch(buffer512[ii++])
+		    {
+		    case 0: putch('N'); break; // no active partition
+		    case 0x80: putch('A'); break; // active partititon
+		    default: putch('E'); // error
+		    }
+
+		puts0("         ");
+		putdec(buffer512[ii++]); // head
+		puts0("    ");
+		putdec(buffer512[ii]&0x3FU); // sector
+		puts0("    ");
+		short int cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
+		putdec(cyl); // cyl
+		ii+=2;
+		puts0(" ");
+
+		out_os(buffer512[ii++]); // OS type
+		puts0("     ");
+
+		putdec(buffer512[ii++]); // head
+		puts0(" ");
+		putdec(buffer512[ii]&0x3FU); // sector
+		puts0(" ");
+		cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
+		putdec(cyl); // cyl
+		ii+=2;
+		puts0("  ");
+		
+		// Horner algorythm
+		long l=buffer512[ii+3]&0xFFUL;
+		l=(l<<8) | buffer512[ii+2];
+		l=(l<<8) | buffer512[ii+1];
+		l=(l<<8) | buffer512[ii];
+		putdec(l);
+		puts0("  ");
+		ii+=4;
+
+		// Horner algorythm #2
+		l=buffer512[ii+3]&0xFFUL;
+		l=(l<<8) | buffer512[ii+2];
+		l=(l<<8) | buffer512[ii+1];
+		l=(l<<8) | buffer512[ii];
+		putdec(l);
+		ii+=4;
+		puts0("\r\n");
+		} // end for
+		// view_mbr end
+		}
+    else if (c=='B') {
+		out_boot(buffer512);
+		puts0("press any key");
+		getch();
+		}
+    else asec++;
+    }
+#endif
 } // while
 #endif // PROOLFOOL
 } // end of diskd()
@@ -2797,6 +2961,7 @@ void pause(void)
 {int c;
 	puts0(" Pause. Press any key ");
 	c=getch();
+#if 0
 	puts0("Keycode "); puthex(c);
 	switch(c)
 	{
@@ -2804,6 +2969,7 @@ void pause(void)
 		case 'z': puts0(" z "); break;
 		default: puts0(" fucking thing ");
 	}
+#endif
 }
 
 void screensaver(void)
