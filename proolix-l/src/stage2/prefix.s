@@ -142,7 +142,6 @@ putch_tty:
 	movzbl	-4(%ebp), %edx
 	movb %dl,%al
 	xorb %bh,%bh
-	movb	$3,%bl
 	movw	$1,%cx
 	int $0x10
 	leave
@@ -168,6 +167,21 @@ putch_color:
 	xorb	%bh,%bh
 	int	$0x10
 	leave
+	ret
+
+kbhit:
+	movb	$0x01, %ah
+	int	$0x16
+#Return:
+#ZF set if no keystroke available
+#ZF clear if keystroke available
+#AH = BIOS scan code
+#AL = ASCII character
+	jnz	1f
+	xorw	%ax,%ax
+	ret
+1:
+	movw	$0x01,%ax
 	ret
 
 setpos:

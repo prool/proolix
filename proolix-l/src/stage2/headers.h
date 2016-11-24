@@ -55,6 +55,7 @@ void puthex_l(int c);
 void putdec(int);
 void putdec2(int, int, int);
 int getch(void);
+int kbhit(void);
 char *getsn(char *str, int len);
 size_t strlen (const char *s);
 char *strchr (const char *str, int c);

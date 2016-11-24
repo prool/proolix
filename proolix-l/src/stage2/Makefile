@@ -8,13 +8,19 @@ CC = gcc
 #CC = clang
 
 VMDISK=/home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
-VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
+VMFLOPPY = /home/prool/Proj/proolix/proolix-l/diskette.img
 FLASHDEVICE = /dev/sdb1
 FLASHDIR = /media/prool/7A66-B17B
 
 ASFLAG =
 
-all:	boot ct pskr stage15
+all:	boot ct pskr stage15 ctt
+
+install: all
+	sudo mount $(VMFLOPPY) /mnt/fdd
+	sudo cp ct /mnt/fdd
+	sudo cp ctt /mnt/fdd
+	sudo umount /mnt/fdd
 
 installvm:	all
 	dd if=ct of=$(VMDISK) seek=1 conv=notrunc

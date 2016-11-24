@@ -100,6 +100,7 @@ puts0("\r\n");
 void test (void)
 {int i,j;
 
+#if 0
 for (i=0;i<79;i++) putch('1');
 putch('2');
 
@@ -107,6 +108,13 @@ puts("");
 
 for (i=0;i<79;i++) putch('1');
 putch('2');
+#endif
+
+while (1)
+{
+	i=kbhit();
+	putdec(i);
+}
 
 #if 0
 setpos(0,0);
@@ -1454,6 +1462,7 @@ help, ? - this help\r\n\
 ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
 off - screensaver (clear screen and wait of press any key\r\n\
+scr - screensaver #2\r\n\
 palette - print color palette\r\n\
 system - print system parameters\r\n\
 memd0 - memory dump for extended processor mode\r\n\
@@ -2795,6 +2804,25 @@ void pause(void)
 		case 'z': puts0(" z "); break;
 		default: puts0(" fucking thing ");
 	}
+}
+
+void screensaver(void)
+{long i,j;
+while(1)
+{
+	puts0("\r\nscreensaver. press anykey to quit ");
+	putch_color('*',3);
+	for (i=0;i<24;i++)
+	{
+		for (j=0;j<i;j++) puts0(" ");
+		// pause
+		if (kbhit()) {getch();return;}
+		for (j=0;j<100000000; j++) 	{
+						j++; j--;
+						}
+		puts0("\r\n");
+	}
+} // end while
 }
 
 #include "proolskript.c"
