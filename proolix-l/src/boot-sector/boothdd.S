@@ -1,4 +1,4 @@
-# Proolix-l boot sector for HDD (experimantal)
+# Proolix-l boot sector for HDD
 
 # russian text in UTF-8
 
@@ -19,7 +19,7 @@ stage2_seg          =     0x3050       # Сегментный адрес, куд
 
         .code16
 	.text
-	
+
 .global _start
 _start:
 
@@ -41,7 +41,7 @@ start:
 	movb	$Drive,%dl
 	int	$0x13
 
-	call	print_registers
+#	call	print_registers
 
 # Значения регистров после загрузки из boot-сектора дискеты
 # CS:IP = 0:7C00 SS=30 SP=F6 ES=0
@@ -56,21 +56,6 @@ start:
 #	lds  %es:(0x78),%si # DS:si - vector diskette param table
 
 /*
-# diskette param table
-# Bytes:
-# 0 - bit 0-3 - SRT (step rate time), 4-7 head unload time
-# 1 - bit 0: 1 if DMA, 2-7 head load time
-# 2 - motor wait (in 55 ms)
-# 3 - sec size (0 - 128, 1 - 256, 2 - 512, 3 - 1024)
-# 4 - EOT (finish sector on track)
-# 5 - interval length for ReadWrite
-# 6 - DTL - Data Transfer Length (maximal)
-# 7 - interval length for formatting
-# 8 - Filler
-# 9 - head settle time (in ms)
-# a - motor start time (in 1/8 s)
-*/
-/*
                 movb    $0xf,9(%si)  # head settle := f 
                 movw    TrkSecs+off,%cx # TrkSecs
                 movb    %cl,6(%si) # Data Transfer Length
@@ -82,7 +67,6 @@ start:
                 jc      l_err
 		proolfool
 */
-
         pushw   %CS
         popw    %ES
 

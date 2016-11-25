@@ -1,4 +1,4 @@
-# Proolix-l boot sector for HDD (experimantal)
+# Proolix-l boot sector for HDD
 
 # russian text in UTF-8
 

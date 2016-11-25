@@ -67,7 +67,7 @@ boothdd.o: boothdd.s
 	$(AS) -a=boothdd.lst -o $@ $<
 
 boothdd.s: boothdd.S
-	$(CPP) -traditional -DFAT12 $< -o $@
+	$(CPP) -traditional $< -o $@
 
 # boot sector for FDD with fool filesystem
 bootfdd: bootfdd.o patchboot analyzeboot makediskette
@@ -78,7 +78,7 @@ bootfdd.o: bootfdd.s
 	$(AS) -a=bootfdd.lst -o $@ $<
 
 bootfdd.s: bootfdd.S
-	$(CPP) -traditional -DFAT12 $< -o $@
+	$(CPP) -traditional $< -o $@
 
 #############################################################
 

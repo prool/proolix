@@ -335,7 +335,7 @@ readsec0: # unsigned short int readsec0(char drive, char sec, char head, char tr
 	popl	%ebp
 	ret
 	
-writesec0: # unsigned short int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer)
+writesec0: # unsigned short int writesec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer)
 	pushl	%ebp
 
 	movl	%esp,%ebp

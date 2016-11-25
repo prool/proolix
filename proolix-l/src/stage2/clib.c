@@ -2060,7 +2060,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
     if (c=='?')
 puts0("=Diskd help=\r\n\
 q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
-+ - skip sectors, = - go to sector\r\n");
++ - skip sectors, = - go to sector, W - write\r\n");
     else if (c=='+') {puts0("delta? ");
 		getsn(str,MAX_LEN_STR);
 		delta=atoi(str);
@@ -2069,11 +2069,17 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		getsn(str,MAX_LEN_STR);
 		delta=atoi(str);
 		asec=delta;}
-    else if (c=='D') buffer512[0]='Z';
+    else if (c=='D') {buffer512[0]='Z'; puts0("buffer[512]='Z'");
+		i=writesec0(drive, SecOnTrk, Head, Track /* or cyl */, buffer512);
+		puts0("Disk write. Return code=");
+		puthex(i);
+		if (i==1) puts0(" OK");
+		puts(""); }
     else if (c=='W') {/*i=secwrite(drive, asec, buffer512);*/
 		i=writesec0(drive, SecOnTrk, Head, Track /* or cyl */, buffer512);
 		puts0("Disk write. Return code=");
 		puthex(i);
+		if (i==1) puts0(" OK");
 		puts(""); }
     else if (c=='q') quit=1;
     else if (c=='r') {delta++; delta--;} // NOP
