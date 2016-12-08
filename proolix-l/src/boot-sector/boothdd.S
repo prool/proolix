@@ -24,7 +24,7 @@ stage2_seg          =     0x3050       # Сегментный адрес, куд
 _start:
 
 Begin:          jmp     start
-message:	.ascii	"MBR "
+message:	.ascii	"MBR"
 		.byte 13,10,0
 TrkSecs:         .word      17
 HeadCnt:         .word      4

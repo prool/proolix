@@ -9,7 +9,7 @@ VMDISK = /home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
 VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
 FLASHDEVICE = /dev/sdb1
 
-all:	boots patchboot analyzeboot makediskette boothdd bootfdd
+all:	boots patchboot analyzeboot makediskette boothdd bootfdd toc
 
 installvm:	all
 	dd if=boothdd of=$(VMDISK) conv=notrunc
@@ -88,6 +88,8 @@ clean:
 patchboot:	patchboot.c
 
 analyzeboot:	analyzeboot.c
+
+toc:	toc.c
 
 installd: boots patchboot
 	dd if=/dev/fd0 of=boot-orig count=1
