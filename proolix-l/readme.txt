@@ -10,11 +10,12 @@ How to make bootable CDROM:
 
 genisoimage -o iso.iso -b diskette.img .
 
-(point '.' in end of line NEED! it's 'unix current path')
+(point '.' in end of line NEED!
+it's 'unix current path')
 
 -----
 
-how to make empty diskette image:
+how to make empty diskette image with FAT-12 filesystem:
 
 dd if=/dev/zero of=empty-diskette2.img bs=512 count=2880
-mkfs.fat empty-diskette2.img
+mkfs.vfat -F 12 empty-diskette2.img

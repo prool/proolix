@@ -15,7 +15,7 @@ Install
 
 1. install boot sector (see in boot-sector directory)
 
-2. copy file 'boot' to diskette (file must be FIRST on diskette!)
+2. copy files 'boot' and 'cp' to diskette (file must be FIRST on diskette!)
 
 3. Boot from this diskette
 
@@ -24,7 +24,8 @@ Install
 How to install boot to image of diskette:
 
 sudo mount diskette /mnt/fdd
-cp boots /mnt/fdd
+cp boot /mnt/fdd
+cp ct /mnt/fdd
 sudo umount /mnt/fdd
 
 ---

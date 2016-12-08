@@ -1460,7 +1460,7 @@ FFFFE PC/XT/AT identefication byte\r\n\
 
 void help(void)
 {
-puts0("Proolix-l shell command\r\n\r\n\
+puts0("Proolix-l shell command:\r\n\r\n\
 test - test\r\n\
 help, ? - this help\r\n\
 ascii - write ascii table\r\n\
@@ -1604,26 +1604,26 @@ puts0("Drive, hex? ");
 getsn(str,MAX_LEN_STR);
 drive=htoi(str);
 
-puts0("\r\nsec? (1-..., hex) ");
+puts0("\r\nsec? (1-..., dec) ");
 getsn(str,MAX_LEN_STR);
-sec=htoi(str);
+sec=atoi(str);
 
-puts0("\r\nhead, hex? ");
+puts0("\r\nhead, dec? ");
 getsn(str,MAX_LEN_STR);
-head=htoi(str);
+head=atoi(str);
 
-puts0("\r\ntrk (cyl), hex? ");
+puts0("\r\ntrk (cyl), dec? ");
 getsn(str,MAX_LEN_STR);
-trk=htoi(str);
+trk=atoi(str);
 
 puts0("\r\nDrive = 0x");
 puthex_b(drive);
-puts0(" sec = 0x");
-puthex(sec);
-puts0(" head = 0x");
-puthex(head);
-puts0(" trk = 0x");
-puthex(trk);
+puts0(" sec = ");
+putdec(sec);
+puts0(" head = ");
+putdec(head);
+puts0(" trk = ");
+putdec(trk);
 
 for(i=0;i<512;i++) Buffer[i]=0;
 
@@ -2982,8 +2982,8 @@ void screensaver(void)
 {long i,j;
 while(1)
 {
-	puts0("\r\nscreensaver. press anykey to quit ");
-	putch_color('*',3);
+	puts0("\r\nProolix screensaver. Press anykey to quit ");
+	//putch_color('*',3);
 	for (i=0;i<24;i++)
 	{
 		for (j=0;j<i;j++) puts0(" ");

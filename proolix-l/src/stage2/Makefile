@@ -10,7 +10,7 @@ CC = gcc
 VMDISK=/home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
 VMFLOPPY = /home/prool/Proj/proolix/proolix-l/diskette.img
 FLASHDEVICE = /dev/sdb1
-FLASHDIR = /media/prool/7A66-B17B
+FLASHDIR = /media/prool/6A15-B63F
 
 ASFLAG =
 
@@ -18,17 +18,22 @@ all:	boot ct pskr stage15 ctt
 
 install: all
 	sudo mount $(VMFLOPPY) /mnt/fdd
+	sudo cp boot /mnt/fdd
 	sudo cp ct /mnt/fdd
 	sudo cp ctt /mnt/fdd
 	sudo umount /mnt/fdd
 
-installvm:	all
+installflash: all
+	sudo cp $(VMFLOPPY) $(FLASHDIR)/ubninit
+	umount $(FLASHDEVICE)
+
+installvm_:	all
 	dd if=ct of=$(VMDISK) seek=1 conv=notrunc
 
-installvmfloppy:	all
+installvmfloppy_:	all
 	dd if=ct of=$(VMFLOPPY) seek=1 conv=notrunc
 
-installflash:		all
+installflash_:		all
 # install to FAT-32 flash stick with KolibriOS's bootsector (Kolibri OS rilez!)
 	cp ct $(FLASHDIR)/MTLD_F32
 	umount $(FLASHDEVICE)
