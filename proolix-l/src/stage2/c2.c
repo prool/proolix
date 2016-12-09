@@ -34,6 +34,14 @@ return 0;
 }
 #endif
 
+void time(void)
+{
+	short int ii=get_rtc();
+	puts0("time ");
+	puthex(ii);
+	puts0("\r\n");
+}
+
 void main(void)
 {
 char buf [BUFLEN];
@@ -137,12 +145,11 @@ while (1)
 	else if (!strcmp(buf,"basic")) basic();
 	else if (!strcmp(buf,"diskd0")) diskd0();
 	else if (!strcmp(buf,"diskd")) diskd();
-	else if (!strcmp(buf,"testdisk")) testdisk();
-	else if (!strcmp(buf,"mount")) mount();
 	else if (!strcmp(buf,"off")) off();
 	else if (!strcmp(buf,"vec")) vectors();
 	else if (!strcmp(buf,"skript")) skript();
 	else if (!strcmp(buf,"scr")) screensaver();
+	else if (!strcmp(buf,"time")) time();
 	else
 		{
 		puts0("Unknown command '");

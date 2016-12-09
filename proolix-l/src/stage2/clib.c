@@ -1476,9 +1476,8 @@ vec - print interrupt vectors\r\n\
 basic - call ROM BASIC (if exist)\r\n\
 diskd0 - disk dump #1 (sector/head/track)\r\n\
 diskd - disk dump #2 (absolute sector)\r\n\
-testdisk - test of disk\r\n\
-mount - mount disk\r\n\
 skript - run prool skript\r\n\
+time - print time\r\n\
 ");
 }
 
@@ -1745,6 +1744,7 @@ if (sec==0) return -1;
 return 0;
 }
 
+#if 0
 void mount(void)
 {
 char str[MAX_LEN_STR];
@@ -1820,6 +1820,7 @@ puts0(" size = ");
 putdec(sec*(heads+1)*(cyl+1)/2);
 puts0("K\r\n");
 }
+#endif
 
 void diskd(void)
 {
@@ -2982,7 +2983,9 @@ void screensaver(void)
 {long i,j;
 while(1)
 {
-	puts0("\r\nProolix screensaver. Press anykey to quit ");
+	puts0("\r\nProolix screensaver. Time ");
+	puthex(get_rtc());
+	puts0(" Press anykey to quit ");
 	//putch_color('*',3);
 	for (i=0;i<24;i++)
 	{

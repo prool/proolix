@@ -483,6 +483,12 @@ end_of: # short int end_of (void)
 	lea	EndOfCT,%ax
 	ret
 
+get_rtc:
+	movb	$0x02, %ah
+	int $0x1A
+	movw	%cx, %ax
+	ret
+
 #if 0
 print_reg2: # proc    ; ГЛЮЧИТ! по ret не выходит (скорее всего что-то со стеком)
         pushw %ax
