@@ -2086,8 +2086,8 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
     else if (c=='b') asec--;
     else if (c=='V') { // view_mbr begin
 
-		puts0("System    ----Begin----       ----End-----  Prec. sec Total sec\r\n");
-		puts0("          head sec  cyl       head sec cyl\r\n");
+		puts0("         ----Begin---------            ----End-----  Prec. sec   Total sec\r\n");
+		puts0("         head   sec     cyl            head sec cyl\r\n");
 		int ii=446;
 		for (i=0;i<4;i++)
 		{
@@ -2099,24 +2099,24 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		    }
 
 		puts0("         ");
-		putdec(buffer512[ii++]); // head
+		putdec2(buffer512[ii++], 3, 1); // head
 		puts0("    ");
-		putdec(buffer512[ii]&0x3FU); // sector
+		putdec2(buffer512[ii]&0x3FU, 2, 1); // sector
 		puts0("    ");
 		short int cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
-		putdec(cyl); // cyl
+		putdec2(cyl, 4, 1); // cyl
 		ii+=2;
 		puts0(" ");
 
 		out_os(buffer512[ii++]); // OS type
 		puts0("     ");
 
-		putdec(buffer512[ii++]); // head
+		putdec2(buffer512[ii++], 3, 1); // head
 		puts0(" ");
-		putdec(buffer512[ii]&0x3FU); // sector
+		putdec2(buffer512[ii]&0x3FU, 2, 1); // sector
 		puts0(" ");
 		cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
-		putdec(cyl); // cyl
+		putdec2(cyl, 4, 1); // cyl
 		ii+=2;
 		puts0("  ");
 		
@@ -2125,7 +2125,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		l=(l<<8) | buffer512[ii+2];
 		l=(l<<8) | buffer512[ii+1];
 		l=(l<<8) | buffer512[ii];
-		putdec(l);
+		putdec2(l, 10, 1);
 		puts0("  ");
 		ii+=4;
 
@@ -2134,7 +2134,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		l=(l<<8) | buffer512[ii+2];
 		l=(l<<8) | buffer512[ii+1];
 		l=(l<<8) | buffer512[ii];
-		putdec(l);
+		putdec2(l, 10, 1);
 		ii+=4;
 		puts0("\r\n");
 		} // end for
