@@ -102,6 +102,7 @@ void out_fat(void);
 void skript(void);
 void vectors(void);
 void screensaver(void);
+void install(void);
 
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);

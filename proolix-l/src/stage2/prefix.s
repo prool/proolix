@@ -26,7 +26,7 @@ _start:
 
 // for debug
 	  movb $0x0e,%ah
-	  movb $'~',%al
+	  movb $'#',%al
 	  int  $0x10	# putch
 
 	jmp	main

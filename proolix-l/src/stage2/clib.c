@@ -1440,11 +1440,12 @@ Memory map for Proolix-l (real mode)\r\n\
 0 - 1FF  Vectors\r\n\
 200 - 3FF free area (stack of boot sector)\r\n\
 400 - 4FF ROM BIOS data: 475: count of HDD\r\n\
+600 (=0060:0000) - kernel ('ct' file)\r\n\
 end of Kernel (CT) XXXX:");
 puthex(end_of());
 puts0("\r\n07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
 07E00                      Boot sector end\r\n\
-30500 (=3050:0000) stage2 (CT)\r\n\
+30500 (=3050:0000) stage2 ('boot' file)\r\n\
 MemTop (f.e. 9FFFF)\r\n\
 B8000 CGA, EGA, VGA 1st videopage (mode=3, symbol mode)\r\n\
 C8000 Additional ROM modules (2K blocks)\r\n\
@@ -1454,7 +1455,7 @@ F6000 ROM Basic\r\n\
 FE000 ROM BIOS, POST\r\n\
 FFFF0 JMP - COLD REBOOT\r\n\
 FFFF5 BIOS version/date (ASCII)\r\n\
-FFFFE PC/XT/AT identefication byte\r\n\
+FFFFE PC/XT/AT identification byte\r\n\
 ");
 }
 
@@ -1478,6 +1479,7 @@ diskd0 - disk dump #1 (sector/head/track)\r\n\
 diskd - disk dump #2 (absolute sector)\r\n\
 skript - run prool skript\r\n\
 time - print time\r\n\
+install - install Proolix-l to other disk\r\n\
 ");
 }
 
@@ -1825,7 +1827,6 @@ puts0("K\r\n");
 void diskd(void)
 {
 #if 1 // PROOLFOOL
-unsigned char Buffer [512];
 char str[MAX_LEN_STR];
 int drive, asec, ii, c, line;
 short int i;
@@ -2998,6 +2999,119 @@ while(1)
 		puts0("\r\n");
 	}
 } // end while
+}
+
+void install (void)
+{
+unsigned char Buffer [512];
+char str[MAX_LEN_STR];
+int drive, asec, ii, jj, c, line;
+short int i;
+struct MBRstru *MBR;
+int quit;
+int Track, SecNoOnCyl, Head, SecOnTrk;
+short int reg_bx, reg_cx, reg_dx;
+int cyl, sectors, heads;
+unsigned short int HeadCnt, TrkSecs, SectorsOnCyl, MaxCyl;
+int MaxSectors=0;
+unsigned char buffer512 [512];
+unsigned short int seg, off;
+
+/* Boot sector for boot from HDD */
+/*                                      0      1     2   3    4   5 ; 4 - sec, 5 - heads+1     */
+unsigned short int boothdd [256] = {0xAEB,0x424D,0xD52,0xA,0x11,0x4,0xD3E8,0xB400,0xB208,0xCD80,0xE13,0xE07,0xB81F,0x3050,0xC08E,0xDB31,0x1B8,0xB900,0x50,0x5051,0x80B2,0xE850,0x3B,0x2072,0x5858,0x8140,0xC3,0x5902,0xECE2,0x50B8,0x8E30,0x8ED8,0xFAC0,0xD08E,0xFEBC,0xFBFF,0xDDB8,0xEADD,0x0,0x3050,0xB450,0xB00E,0xCD65,0x5810,0xB450,0xB00E,0xCD72,0x5810,0x3EE8,0x3000,0xCDE4,0xCD16,0x5319,0x5251,0x5756,0xDE89,0xD789,0xA150,0x7C0A,0xE8B,0x7C08,0xE1F7,0xC389,0x3158,0xF7D2,0x89F3,0x89C3,0x31D0,0xF7D2,0x42F1,0xD188,0xDD88,0xF389,0xFA89,0xC688,0x1B8,0xCD02,0x5F13,0x5A5E,0x5B59,0x50C3,0xE088,0x5E8,0x5800,0x1E8,0xC300,0x5150,0x8852,0xB1C2,0xD204,0xE8E8,0xB,0xD088,0xF24,0x4E8,0x5A00,0x5859,0x50C3,0x93C,0x477,0x3004,0x2EB,0x3704,0xEB4,0x10CD,0xC358,0xAC50,0xC008,0x674,0xEB4,0x10CD,0xF5EB,0xC358,0x5650,0xA7BE,0xE87D,0xFFEA,0xE85E,0xFFB3,0xBE56,0x7D8E,0xDFE8,0x5EFF,0x580E,0xA6E8,0x56FF,0xC9BE,0xE87D,0xFFD2,0xE85E,0x0,0xE858,0xFF97,0xBE56,0x7D93,0xC3E8,0x5EFF,0xD08C,0x8AE8,0x56FF,0x98BE,0xE87D,0xFFB6,0x895E,0xE8E0,0xFF7D,0xBE56,0x7DBA,0xA9E8,0x5EFF,0xE889,0x70E8,0x56FF,0x9DBE,0xE87D,0xFF9C,0x8C5E,0xE8D8,0xFF63,0xBE56,0x7DA2,0x8FE8,0x5EFF,0xC08C,0x56E8,0x56FF,0xABBE,0xE87D,0xFF82,0x895E,0xE8D8,0xFF49,0xBE56,0x7DB0,0x75E8,0x5EFF,0xC889,0x3CE8,0x56FF,0xB5BE,0xE87D,0xFF68,0x895E,0xE8D0,0xFF2F,0xBE56,0x7DBF,0x5BE8,0x5EFF,0xF089,0x22E8,0x56FF,0xC4BE,0xE87D,0xFF4E,0x895E,0xE8F8,0xFF15,0xC358,0x4320,0x3D53,0x2000,0x5353,0x3D,0x5320,0x3D50,0x2000,0x5344,0x3D,0x4520,0x3D53,0x4100,0x3D58,0x2000,0x5842,0x3D,0x4320,0x3D58,0x2000,0x5844,0x3D,0x4220,0x3D50,0x2000,0x4953,0x3D,0x4420,0x3D49,0x2000,0x5049,0x3D,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xAA55};
+
+puts0("Proolix-l installator\r\n");
+
+// ask drive number
+puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
+getsn(str,MAX_LEN_STR);
+drive=htoi(str);
+
+// get drive parameters
+{
+puts0("\r\ntest drive ");
+puthex_b(drive);
+reg_bx=GetDriveParam_bx(drive);
+if (reg_bx==-1)
+	{
+	puts0("\r\n error code = ");
+	puthex(i);
+	puts0("\r\n");
+	return;
+	}
+reg_cx=GetDriveParam_cx(drive);
+reg_dx=GetDriveParam_dx(drive);
+
+print_drive_type(reg_bx & 0xFFU);
+
+cyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
+
+puts0(" cyl = ");
+putdec(cyl);
+
+sectors = reg_cx &0x3FU;
+
+puts0(" sec = ");
+putdec(sectors);
+
+heads = ((reg_dx & 0xFF00U) >> 8)&0xFFU;
+
+puts0(" heads = ");
+putdec(heads);
+
+puts0(" number of drives = ");
+putdec(reg_dx & 0xFFU);
+
+puts0(" size = ");
+putdec(sectors*(heads+1)*(cyl+1)/2);
+puts0("K\r\n");
+
+  HeadCnt=heads+1;
+  TrkSecs=sectors;
+  SectorsOnCyl=HeadCnt*TrkSecs;
+  MaxCyl=cyl;
+
+if (sectors==0) {puts0(" error: sectors==0\r\n");return;}
+}
+// write warning
+puts0("WARNING! All data in destination disk will be destroyed!!!\r\n");
+if ((drive==0x80) || (drive==0x81)) puts0("Dest. disk is HDD!!!!1\r\n");
+// are you sure
+puts0("Are You sure?? ");
+c=getch();
+if ((c!='y') && (c!='Y')) {puts0("\r\nInstall aborted\r\n");return;}
+puts0("\r\nInstall started!\r\n");
+// prepare boot sector
+/*                                      0      1     2   3    4   5 ; 4 - sec, 5 - heads+1     */
+boothdd[4] = sectors;
+boothdd[5] = heads+1;
+// write boot sector
+i=writesec0(drive, 1, 0, 0, (char *)boothdd);
+puts0("Disk write. Return code=");
+puthex(i);
+if (i==1) puts0(" no error"); else {puts0("Disk write error!\r\n"); return;}
+// write kernel (ct)
+seg=0x60;
+off=0;
+for (ii=0;ii<127;ii++)
+	{
+		for (jj=0;jj<512;jj++)
+		{
+			buffer512[jj]=peek2(seg,off++);
+			//puthex(off); //puts0(" ");
+		}
+	asec=ii+1;
+	Track=(asec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
+	SecNoOnCyl=(asec%SectorsOnCyl);
+	Head=SecNoOnCyl/TrkSecs;
+	SecOnTrk=SecNoOnCyl%TrkSecs+1;
+	i=writesec0(drive, SecOnTrk, Head, Track, buffer512);
+	puts0("*");
+	if (i!=1) {puts0("Disk write error!\r\n"); return;}
+	}
+
+// reboot
 }
 
 #include "proolskript.c"

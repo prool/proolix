@@ -29,7 +29,7 @@ if (i!=512) {printf("Read error '%s'\r\n", argv[1]); return 3;}
 
 close(fd);
 
-printf("/* Boot sector for boot from HDD. %s %s */\r\n\r\nunsigned short int boothdd [256] = {",__DATE__,__TIME__);
+printf("/* Boot sector for boot from HDD */\r\n\r\nunsigned short int boothdd [256] = {");
 for (i=0;i<256;i++)
 {
 	printf("0x%X", buffer[i]);

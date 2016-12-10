@@ -51,11 +51,11 @@ char bootsector[512];
 
 #if PROOLFOOL
 current_drive=0xFF;
-
-#endif
 set_color(15);
+#endif
 
-putch_color('#', 4);
+putch('/');
+//putch_color('@', 4);
 
 puts0("\r\nProolix-l shell. Compiled ");
 puts0(__DATE__);
@@ -150,6 +150,7 @@ while (1)
 	else if (!strcmp(buf,"skript")) skript();
 	else if (!strcmp(buf,"scr")) screensaver();
 	else if (!strcmp(buf,"time")) time();
+	else if (!strcmp(buf,"install")) install();
 	else
 		{
 		puts0("Unknown command '");
