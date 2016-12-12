@@ -14,13 +14,13 @@ FLASHDIR = /media/prool/6A15-B63F
 
 ASFLAG =
 
-all:	boot ct pskr stage15 ctt
+all:	boot ct pskr stage15
 
 install: all
 	sudo mount $(VMFLOPPY) /mnt/fdd
 	sudo cp boot /mnt/fdd
 	sudo cp ct /mnt/fdd
-	sudo cp ctt /mnt/fdd
+#	sudo cp ctt /mnt/fdd
 	sudo umount /mnt/fdd
 
 installflash: all

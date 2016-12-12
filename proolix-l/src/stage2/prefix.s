@@ -489,6 +489,18 @@ get_rtc:
 	movw	%cx, %ax
 	ret
 
+get_day:
+	movb	$0x04, %ah
+	int $0x1A
+	movw	%dx, %ax
+	ret
+
+get_year:
+	movb	$0x04, %ah
+	int $0x1A
+	movw	%cx, %ax
+	ret
+
 #if 0
 print_reg2: # proc    ; ГЛЮЧИТ! по ret не выходит (скорее всего что-то со стеком)
         pushw %ax

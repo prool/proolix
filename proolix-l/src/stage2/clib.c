@@ -110,11 +110,13 @@ for (i=0;i<79;i++) putch('1');
 putch('2');
 #endif
 
+#if 0
 while (1)
 {
 	i=kbhit();
 	putdec(i);
 }
+#endif
 
 #if 0
 setpos(0,0);
@@ -1465,8 +1467,8 @@ FFFFE PC/XT/AT identification byte\r\n\
 void help(void)
 {
 puts0("Proolix-l shell command:\r\n\r\n\
-test - test\r\n\
 help, ? - this help\r\n\
+ver - version\r\n\
 ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
 off - screensaver (clear screen and wait of press any key\r\n\
