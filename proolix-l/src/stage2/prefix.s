@@ -651,3 +651,7 @@ ohw_l_out: movb     $0xe,%ah
 
         ret
 # ohb1    endp
+
+get_boot_drive:
+	movw	boot_drive,%ax
+	ret

@@ -140,6 +140,7 @@ short int GetDriveParam (char drive);
 short int GetDriveParam_bx (char drive);
 short int GetDriveParam_cx (char drive);
 short int GetDriveParam_dx (char drive);
+short int get_boot_drive(void);
 
 void pause(void);
 
