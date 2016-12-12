@@ -9,11 +9,13 @@ void testchar(char *c)
 *c='c';
 }
 
+#if 0
 void palette(void)
 {int i;
 for (i=0;i<256;i++) {if (i%16==0) puts0("\r\n");set_color(i); puts0("W");}
 set_color(7); puts0("end of palette");
 }
+#endif
 
 #if 1 // ЗАГЛУШКИ
 void ls(void)
@@ -89,11 +91,11 @@ while (1)
 	else if (!strcmp(buf,"ver")) version();
 	else if (!strcmp(buf,"help")) help();
 	else if (!strcmp(buf,"?")) help();
+	else if (!strcmp(buf,"reboot")) reboot();
 	else if (!strcmp(buf,"test")) test();
 	else if (!strcmp(buf,"ascii")) ascii();
 	else if (!strcmp(buf,"cls")) cls();
 	else if (!strcmp(buf,"scroll")) scroll();
-	else if (!strcmp(buf,"palette")) palette();
 	else if (!strcmp(buf,"system")) system();
 	else if (!strcmp(buf,"memd0")) memd0();
 	else if (!strcmp(buf,"memd")) memd();

@@ -1473,7 +1473,6 @@ ascii - write ascii table\r\n\
 cls - clearscreen\r\n\
 off - screensaver (clear screen and wait of press any key\r\n\
 scr - screensaver #2\r\n\
-palette - print color palette\r\n\
 system - print system parameters\r\n\
 memd0 - memory dump for extended processor mode\r\n\
 memd - memory dump for real mode\r\n\

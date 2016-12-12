@@ -70,6 +70,8 @@ short int get_rtc(void);
 short int get_day(void);
 short int get_year(void);
 
+void reboot (void);
+
 char get_row(void);
 char get_col(void);
 void setpos (char row, char col);

@@ -501,6 +501,14 @@ get_year:
 	movw	%cx, %ax
 	ret
 
+reboot:
+        movw    $0x40,%ax
+        movw    %ax,%ds
+        movw    $0x72,%bx
+        movw    $0x1234,(%bx)
+        .byte   0xea            # JMP   F000:FFF0
+        .word   0xfff0,0xf000
+
 #if 0
 print_reg2: # proc    ; ГЛЮЧИТ! по ret не выходит (скорее всего что-то со стеком)
         pushw %ax
