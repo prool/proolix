@@ -1,4 +1,4 @@
-# Proolix-l boot sector for HDD
+# Proolix-l boot sector for FDD
 
 # russian text in UTF-8
 
@@ -35,10 +35,10 @@ start:
 	movb	$Drive,%dl
 	int	$0x13
 
-	call	print_registers
+#	call	print_registers
 
-#        pushw   %CS
-#        popw    %DS
+        pushw   %CS
+        popw    %DS
 #        sayr    OEM+off
 # Значения регистров после загрузки boot-сектора
 # CS:IP = 0:7C00 SS=30 SP=F6 ES=0
@@ -47,10 +47,11 @@ start:
 # Стек: c 30:F6 (0:3F6) растет к 0 (0:200-0:400 - стек)
 # ROM BIOS area 0:400-0:500
 
-#       cli
+       cli
         # Модификация diskette param table (взято из бута MSDOS 6.0)
 	# нужен ли в нижеследующей команде префикс ES: ?
 #	lds  %es:(0x78),%si # DS:si - vector diskette param table
+	lds  (0x78),%si # DS:si - vector diskette param table
 
 /*
 # diskette param table
@@ -67,18 +68,15 @@ start:
 # 9 - head settle time (in ms)
 # a - motor start time (in 1/8 s)
 */
-/*
                 movb    $0xf,9(%si)  # head settle := f 
                 movw    TrkSecs+off,%cx # TrkSecs
                 movb    %cl,6(%si) # Data Transfer Length
-#               sti
+               sti
                 movb    $Drive,%dl
                 xorw    %ax,%ax
                 int     $0x13   # Disk  %dl=drive %ah=func 00
                                 # reset disk, %al=return status
                 jc      l_err
-		proolfool
-*/
 
         pushw   %CS
         popw    %ES
