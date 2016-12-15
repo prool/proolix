@@ -14,9 +14,9 @@ FLASHDIR = /media/prool/6A15-B63F
 
 ASFLAG =
 
-all:	boot ct pskr stage15
+all:	ct
 
-install: all
+install_old: all
 	sudo mount $(VMFLOPPY) /mnt/fdd
 	sudo cp boot /mnt/fdd
 	sudo cp ct /mnt/fdd
@@ -27,10 +27,10 @@ installflash: all
 	sudo cp $(VMFLOPPY) $(FLASHDIR)/ubninit
 	umount $(FLASHDEVICE)
 
-installvm_:	all
+install:	all
 	dd if=ct of=$(VMDISK) seek=1 conv=notrunc
 
-installvmfloppy_:	all
+installvmfloppy:	all
 	dd if=ct of=$(VMFLOPPY) seek=1 conv=notrunc
 
 installflash_:		all

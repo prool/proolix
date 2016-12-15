@@ -2,6 +2,8 @@
 
 #include "headers.h"
 
+extern unsigned short int FCB;
+
 // global variables NOT USED! NOT WORK! BIKOZ .RSS SEGMENT NOT ADRESSED IN BIN FILE!
 
 void testchar(char *c)
@@ -71,6 +73,11 @@ char buf [BUFLEN];
 int i,j;
 char c,cc;
 char bootsector[512];
+
+#if 0
+puts0("FCB=");
+puthex(FCB);
+#endif
 
 //putch('/');
 putch_color('@', 4);

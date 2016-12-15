@@ -253,21 +253,3 @@ struct __attribute__((__packed__)) MBRstru
   unsigned short int Signature; /* 55AA */
   };
 #endif
-
-
-// FCB File Control Block:
-
-// FirstClu (0 if FCB not open)
-// CurrentPosition (in bytes)
-// Length (length of file, in bytes)
-// CurrentCluster
-
-struct FCBstru
-{
-unsigned int Length;
-unsigned int CurPos;
-unsigned short FirstClu;
-unsigned short CurClu;
-};
-
-extern struct FCBstru FCB[MAX_FCB];

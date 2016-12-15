@@ -62,7 +62,7 @@ current_drive:	.byte	0
 boot_drive:	.word	0
 
 FCB:
-		.word	0,0,0,0,0,0
+		.word	0xDEAF,0,0,0,0,0
 		.word	0,0,0,0,0,0
 		.word	0,0,0,0,0,0
 

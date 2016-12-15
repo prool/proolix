@@ -1701,6 +1701,7 @@ switch(i)
 puts0("\r\n");
 }
 
+#if 0
 int mount_disk(unsigned char drive)
 {
 puts0("\r\nmount drive ");
@@ -1750,7 +1751,6 @@ if (sec==0) return -1;
 return 0;
 }
 
-#if 0
 void mount(void)
 {
 char str[MAX_LEN_STR];
@@ -2158,6 +2158,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 #endif // PROOLFOOL
 } // end of diskd()
 
+#if 0
 unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
 {/* Read absolute sectors
 Input:
@@ -2215,6 +2216,7 @@ if ((i=Track &0x0300)!=0)
   }
 return writesec0(drive, SecOnTrk, Head, Track, Buffer);
 }
+#endif
 
 #if 0
 int SecForClu (int CluNo)
