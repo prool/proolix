@@ -6,6 +6,8 @@ extern unsigned short int FCB;
 
 // global variables NOT USED! NOT WORK! BIKOZ .RSS SEGMENT NOT ADRESSED IN BIN FILE!
 
+int test_global;
+
 void testchar(char *c)
 {
 *c='c';
@@ -73,6 +75,8 @@ char buf [BUFLEN];
 int i,j;
 char c,cc;
 char bootsector[512];
+
+//test_global=3;
 
 #if 0
 puts0("FCB=");
