@@ -2,11 +2,9 @@
 
 #include "headers.h"
 
-extern unsigned short int FCB;
+extern unsigned short int FCB; // extern var from asm file prefix.s
 
 // global variables NOT USED! NOT WORK! BIKOZ .RSS SEGMENT NOT ADRESSED IN BIN FILE!
-
-int test_global;
 
 void testchar(char *c)
 {
@@ -76,12 +74,8 @@ int i,j;
 char c,cc;
 char bootsector[512];
 
-//test_global=3;
-
-#if 0
-puts0("FCB=");
+puts0("test global from asm ");
 puthex(FCB);
-#endif
 
 //putch('/');
 putch_color('@', 4);

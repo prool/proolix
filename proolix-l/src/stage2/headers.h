@@ -1,6 +1,5 @@
 // C-headers for c utilities
 
-#define MAX_FCB		3	// see label FCB in prefix.s file
 #define NULL 0
 #define SECTOR_SIZE	512
 
