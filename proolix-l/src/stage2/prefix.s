@@ -5,7 +5,7 @@
 
 	.text
 	.code16gcc
-_start:	
+_start:
 	.globl	_start
 
 	push	%cs
@@ -33,6 +33,7 @@ _start:
 
 # variables
 	.ascii	" CT-Kernel ;-) "
+/*
 SectorsOnCyl:	.word	0
 TrkSecs:	.word	0
 HeadCnt:	.word	0
@@ -59,12 +60,8 @@ reg_es:		.word	0
 errno:		.word	0
 
 current_drive:	.byte	0
+*/
 boot_drive:	.word	0
-
-FCB:
-		.word	0xDEAF,0,0,0,0,0
-		.word	0,0,0,0,0,0
-		.word	0,0,0,0,0,0
 
 basic:
 	int	$0x18
@@ -85,6 +82,7 @@ peek:
 	leave
 	ret
 
+/*
 set_color:
 	pushl	%ebp
 	movl	%esp, %ebp
@@ -98,6 +96,7 @@ get_color:
 	xor	%eax,%eax
 	movb	global_color,%al
 	ret
+*/
 
 putch2:
 # VIDEO - WRITE CHARACTER AND ATTRIBUTE AT CURSOR POSITION
@@ -266,6 +265,7 @@ getpos:
 	ret
 */
 
+/*
 cls_:
 # VIDEO - SCROLL UP WINDOW
 
@@ -291,7 +291,7 @@ scroll:
 	movw	$0x184F,%dx
 	int	$0x10
 	ret
-	
+*/
 readboot:
 	pushl	%ebp
 
@@ -311,7 +311,7 @@ readboot:
 	popl	%ebp
 	ret
 
-readsec0: # unsigned short int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer)
+readsec0: # unsigned short int readsec0(char drive, char sec, char head, char trk (or cyl), char *Buffer)
 	pushl	%ebp
 
 	movl	%esp,%ebp
@@ -322,19 +322,17 @@ readsec0: # unsigned short int readsec0(char drive, char sec, char head, char tr
 	movw	24(%ebp),%bx # Buffer address
 
 	push	%ES
-	
+
 	push	%DS
 	pop	%ES	# ES :=DS
 
 	movw	$0x0201,%ax # ah = 02 (command 'read'), al=1 - number of sectors to read
 	int	$0x13
-	
-	movw	%ax,errno
 
 	pop	%ES
 	popl	%ebp
 	ret
-	
+
 writesec0: # unsigned short int writesec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer)
 	pushl	%ebp
 
@@ -360,7 +358,8 @@ writesec0: # unsigned short int writesec0(char drive, char sec, char head, char 
 	pop	%ES
 	popl	%ebp
 	ret
-	
+#endif
+
 peek2: # peek2 (segment, offset)
 	pushl	%ebp
 	
@@ -393,6 +392,7 @@ poke: # poke (value, segment, offset)
 	ret
 
 /************************************************************************************/
+/*
 GetDriveParam: # GetDriveParam(char drive)
 	pushl	%ebp
 
@@ -418,7 +418,7 @@ GetDriveParam: # GetDriveParam(char drive)
 	pop	%ES
 	popl	%ebp
 	ret
-/************************************************************************************/
+*/
 /************************************************************************************/
 GetDriveParam_bx: # GetDriveParam(char drive)
 	pushl	%ebp
@@ -509,7 +509,7 @@ reboot:
         .byte   0xea            # JMP   F000:FFF0
         .word   0xfff0,0xf000
 
-#if 0
+/*
 print_reg2: # proc    ; ГЛЮЧИТ! по ret не выходит (скорее всего что-то со стеком)
         pushw %ax
 
@@ -595,7 +595,7 @@ next:
 
         popw    %ax
         ret
-#endif
+*/
 
 ohd: # ÷Ù×ÏÄ ÄÌÉÎÎÏÇÏ ÓÌÏ×Á (%eax, ÔÏ ÅÓÔØ 8 ÂÁÊÔ) × hex ×ÉÄÅ
 	# òÅÇÉÓÔÒÙ ÓÏÈÒÁÎÅÎÙ

@@ -9,6 +9,7 @@
 
 // variables
 
+#if 0
 extern unsigned char buffer512[];
 extern unsigned short errno;
 
@@ -38,6 +39,7 @@ extern int reg_si;
 extern int reg_di;
 
 extern int reg_es;
+#endif
 
 typedef unsigned int size_t;
 

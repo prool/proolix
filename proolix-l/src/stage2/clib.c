@@ -51,11 +51,13 @@ cc=dest;
 return cc;
 }
 
+#if 0
 void cls(void)
 {
 cls_();
 setpos(0,0);
 }
+#endif
 
 #if PROOLFOOL
 void putch(char c)
@@ -2719,7 +2721,7 @@ while (1)
 		if (c=='q') break;
 		if (c=='a') avto=1;
 		line=0;
-		cls();
+		//cls();
 		}
 	putch('\r');
 	}
@@ -3098,7 +3100,8 @@ puts0("Disk write. Return code=");
 puthex(i);
 if (i==1) puts0(" no error"); else {puts0("Disk write error!\r\n"); return;}
 // write kernel (ct)
-seg=0x60;
+//seg=0x60;
+seg=0x3050;
 off=0;
 puts0("\r\n");
 for (ii=0;ii<127;ii++)
