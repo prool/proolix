@@ -15,6 +15,7 @@ FLASHDIR = /media/prool/6A15-B63F
 ASFLAG =
 
 all:	ct
+install:	installvmfloppy
 
 install_old: all
 	sudo mount $(VMFLOPPY) /mnt/fdd
@@ -27,8 +28,9 @@ installflash: all
 	sudo cp $(VMFLOPPY) $(FLASHDIR)/ubninit
 	umount $(FLASHDEVICE)
 
-install:	all
+installvmhdd:	all
 	dd if=ct of=$(VMDISK) seek=1 conv=notrunc
+
 
 installvmfloppy:	all
 	dd if=ct of=$(VMFLOPPY) seek=1 conv=notrunc

@@ -1447,12 +1447,11 @@ Memory map for Proolix-l (real mode)\r\n\
 0 - 1FF  Vectors\r\n\
 200 - 3FF free area (stack of boot sector)\r\n\
 400 - 4FF ROM BIOS data: 475: count of HDD\r\n\
-600 (=0060:0000) - kernel ('ct' file if boot from FDD/CD/flash)\r\n\
 end of Kernel (CT) XXXX:");
 puthex(end_of());
 puts0("\r\n07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
 07E00                      Boot sector end\r\n\
-30500 (=3050:0000) stage2 (if boot from HDD then 'ct' file; else 'boot' file)\r\n\
+30500 (=3050:0000) stage2 ('ct' file or kernel)\r\n\
 MemTop (f.e. 9FFFF)\r\n\
 B8000 CGA, EGA, VGA 1st videopage (mode=3, symbol mode)\r\n\
 C8000 Additional ROM modules (2K blocks)\r\n\
