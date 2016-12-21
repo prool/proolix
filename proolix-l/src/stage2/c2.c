@@ -79,6 +79,8 @@ version();
 
 time();
 
+print_boot();
+
 //puts0("cursor coord "); puthex(get_row()); puts0(" "); puthex(get_col()); puts0("\r\n"); 
 
 while (1)
@@ -92,6 +94,10 @@ while (1)
 	else if (!strcmp(buf,"help")) help();
 	else if (!strcmp(buf,"?")) help();
 	else if (!strcmp(buf,"reboot")) reboot();
+	else if (!strcmp(buf,"cold")) cold();
+	else if (!strcmp(buf,"hdd0")) hdd0();
+	else if (!strcmp(buf,"hdd1")) hdd1();
+	else if (!strcmp(buf,"fdd"))  fdd();
 	else if (!strcmp(buf,"test")) test();
 	else if (!strcmp(buf,"ascii")) ascii();
 	else if (!strcmp(buf,"system")) system();

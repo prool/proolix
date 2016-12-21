@@ -70,8 +70,13 @@ short int end_of (void);
 short int get_rtc(void);
 short int get_day(void);
 short int get_year(void);
+void print_boot(void);
 
 void reboot (void);
+void cold (void);
+void hdd0 (void);
+void hdd1 (void);
+void fdd (void);
 
 char get_row(void);
 char get_col(void);

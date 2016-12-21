@@ -509,6 +509,56 @@ reboot:
         .byte   0xea            # JMP   F000:FFF0
         .word   0xfff0,0xf000
 
+cold:
+        movw    $0x40,%ax
+        movw    %ax,%ds
+        movw    $0x72,%bx
+        movw    $0x4321,(%bx)
+        .byte   0xea            # JMP   F000:FFF0
+        .word   0xfff0,0xf000
+
+hdd0:
+        xorw    %ax,%ax
+        movw    %ax,%ES
+
+        # Read MBR
+        movw    $0x0080,%dx  # dl-drive, dh-head
+l_read_bootsec:
+	movw	$0x0001,%cx  # cl - sector, ch - track
+
+	movw	$0x0201,%ax  # al - sectors count, ah - function (read)
+
+        movw     $0x7c00,%bx
+        int     $0x13
+        nop
+        jc      p_reboot
+
+        # jmp    0:7c00
+        .byte      0xea
+        .word      0x7c00
+        .word      0
+
+p_reboot:# jmp  ffff:0	# ffff:0 = ffff0
+        .byte      0xea
+        .word      0
+        .word      0xffff
+    
+hdd1:
+        xorw    %ax,%ax
+        movw    %ax,%ES
+
+        # Read MBR
+        movw    $0x0081,%dx  # dl-drive, dh-head
+	jmp	l_read_bootsec
+    
+fdd:
+        xorw    %ax,%ax
+        movw    %ax,%ES
+
+        # Read boot sector
+        movw    $0x0000,%dx  # dl-drive, dh-head
+	jmp	l_read_bootsec
+
 /*
 print_reg2: # proc    ; ГЛЮЧИТ! по ret не выходит (скорее всего что-то со стеком)
         pushw %ax

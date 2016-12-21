@@ -1422,16 +1422,24 @@ puts("");
 #endif
 }
 
+void print_boot(void)
+{
+	unsigned short i;
+i=get_boot_drive();
+puts0("\r\nboot drive ");puthex(i);
+//puts0("\r\nboot drive ");puthex_l(get_boot_drive());
+if ((i)==0xDDDD) puts0("\r\nBooted from HDD");
+else if ((i)==0xAAAA) puts0("\r\nBooted from diskette");
+else {puts0("Booted from unknown device ");puthex(i);}
+}
+
 void system(void)
 {
 puts0("\r\nsize of int ");putdec(sizeof(int));
 puts0("\r\nsize of long int ");putdec(sizeof(long int));
 puts0("\r\nsize of short int ");putdec(sizeof(short int));
 puts0("\r\nsize of char ");putdec(sizeof(char));
-puts0("\r\nboot drive ");puthex(get_boot_drive());
-//puts0("\r\nboot drive ");puthex_l(get_boot_drive());
-if ((get_boot_drive()&0xFFFF)==0xDDDD) puts0("\r\nBooted from HDD!");
-//puts0("\r\nsize of FCB ");putdec(sizeof(struct FCBstru));
+print_boot();
 }
 
 void memmap(void)
@@ -1471,7 +1479,6 @@ puts0("Proolix-l shell command:\r\n\r\n\
 help, ? - this help\r\n\
 ver - version\r\n\
 ascii - write ascii table\r\n\
-cls - clearscreen\r\n\
 off - screensaver (clear screen and wait of press any key\r\n\
 scr - screensaver #2\r\n\
 system - print system parameters\r\n\
@@ -1485,6 +1492,11 @@ diskd - disk dump #2 (absolute sector)\r\n\
 skript - run prool skript\r\n\
 time - print time\r\n\
 install - install Proolix-l to other disk\r\n\
+reboot - reboot\r\n\
+cold - cold reboot\r\n\
+hdd0 - force boot from HDD0\r\n\
+hdd1 - force boot from HDD1\r\n\
+fdd - force boot from FDD\r\n\
 ");
 }
 
