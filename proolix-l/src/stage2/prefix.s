@@ -61,6 +61,9 @@ errno:		.word	0
 
 current_drive:	.byte	0
 */
+
+/* Global variables */
+
 boot_drive:	.word	0
 
 basic:

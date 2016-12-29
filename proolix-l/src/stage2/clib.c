@@ -2,7 +2,7 @@
 
 //#define DEBUG 1
 
-#define PROOLFOOL 0 // =1 old code; =0 - restricted test code
+#define PROOLFOOL 0 // =1 old code (with bug); =0 - new code
 
 //#include <limits.h>
 
