@@ -2179,7 +2179,12 @@ unsigned short int SectorsOnCyl;
 
 if (drive==0x80) index=2; else if (drive==0x81) index=3; else index=drive;
 
-SectorsOnCyl=gHeads[index]*gCyl[index];
+if (gSec[index]==0) return 2;
+if (gCyl[index]==0) return 2;
+if (gHeads[index]==0) return 2;
+if (AbsSec>=gTotal[index]) return 3;
+
+SectorsOnCyl=gHeads[index]*gSec[index];
 Track=(AbsSec/SectorsOnCyl);
 SecNoOnCyl=(AbsSec%SectorsOnCyl);
 Head=SecNoOnCyl/gSec[index];

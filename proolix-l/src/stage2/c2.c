@@ -108,8 +108,9 @@ for (i=0;i<4;i++)
 	sectors = reg_cx &0x3FU;
 
 	heads = ((reg_dx & 0xFF00U) >> 8)&0xFFU;
+	heads++;
 
-	total_sec=(sectors*(heads+1)*(cyl+1));
+	total_sec=(sectors*heads*(cyl+1));
 
 	gCyl[i]=cyl;
 	gSec[i]=sectors;
