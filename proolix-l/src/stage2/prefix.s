@@ -308,7 +308,7 @@ readboot:
 	# CH = low eight bits of cylinder number
 	# CL = sector number 1-63 (bits 0-5) high two bits of cylinder (bits 6-7, hard disk only)
 	movw	$0x0000,%dx # DH = head number DL = drive number (bit 7 set for hard disk)
-	
+
 	int	$0x13
 
 	popl	%ebp
@@ -331,6 +331,12 @@ readsec0: # unsigned short int readsec0(char drive, char sec, char head, char tr
 
 	movw	$0x0201,%ax # ah = 02 (command 'read'), al=1 - number of sectors to read
 	int	$0x13
+/*
+   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	jnc	1f
+	xorw	%ax,%ax
+1:
+*/
 
 	pop	%ES
 	popl	%ebp

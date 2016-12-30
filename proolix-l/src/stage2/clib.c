@@ -1885,7 +1885,7 @@ print_drive_type(reg_bx & 0xFFU);
 
 cyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
 
-puts0(" cyl = ");
+puts0("cyl = ");
 putdec(cyl);
 
 sectors = reg_cx &0x3FU;
@@ -1901,7 +1901,11 @@ putdec(heads);
 puts0(" number of drives = ");
 putdec(reg_dx & 0xFFU);
 
-puts0(" size = ");
+puts0(" total sectors = ");
+putdec(sectors*(heads+1)*(cyl+1));
+puts0("\r\n");
+
+puts0("size = ");
 putdec(sectors*(heads+1)*(cyl+1)/2);
 puts0("K\r\n");
 
@@ -1942,14 +1946,14 @@ putdec(MaxCyl);
 puts0(" ");
 putdec(Head);
 puts0("/");
-putdec(HeadCnt);
+putdec(heads);
 puts0(" ");
 putdec(SecOnTrk);
 puts0("/");
 putdec(TrkSecs);
 puts0(" ) ");
 
-for(i=0;i<512;i++) buffer512[i]=0;
+for(i=0;i<512;i++) buffer512[i]='~';
 
 //pause();
 //i=secread(drive, asec, buffer512);
