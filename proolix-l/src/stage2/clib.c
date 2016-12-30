@@ -1426,11 +1426,13 @@ void print_boot(void)
 {
 	unsigned short i;
 i=get_boot_drive();
-puts0("\r\nboot drive ");puthex(i);
+puts0("boot drive ");puthex(i);
+puts0(" ");
 //puts0("\r\nboot drive ");puthex_l(get_boot_drive());
-if ((i)==0xDDDD) puts0("\r\nBooted from HDD");
-else if ((i)==0xAAAA) puts0("\r\nBooted from diskette");
+if ((i)==0xDDDD) puts0("Booted from HDD");
+else if ((i)==0xAAAA) puts0("Booted from diskette");
 else {puts0("Booted from unknown device ");puthex(i);}
+puts0("\r\n");
 }
 
 void system(void)
@@ -1850,9 +1852,9 @@ short int i;
 struct MBRstru *MBR;
 int quit;
 int Track, SecNoOnCyl, Head, SecOnTrk;
-short int reg_bx, reg_cx, reg_dx;
-int cyl, sectors, heads;
-unsigned short int HeadCnt, TrkSecs, SectorsOnCyl, MaxCyl;
+unsigned short int reg_bx, reg_cx, reg_dx;
+int sectors, heads;
+unsigned short int SectorsOnCyl, MaxCyl;
 int MaxSectors=0;
 unsigned char buffer512 [512];
 
@@ -1860,18 +1862,10 @@ puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
 drive=htoi(str);
 
-#if 0
-if (mount_disk(drive)==-1)
-	{
-	puts0("No disk\r\n");
-	return;
-	}
-#else
-{
 puts0("\r\ntest drive ");
 puthex_b(drive);
 reg_bx=GetDriveParam_bx(drive);
-if (reg_bx==-1)
+if (reg_bx==0xFFFF)
 	{
 	puts0("\r\n error code = ");
 	puthex(i);
@@ -1883,10 +1877,10 @@ reg_dx=GetDriveParam_dx(drive);
 
 print_drive_type(reg_bx & 0xFFU);
 
-cyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
+MaxCyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
 
 puts0("cyl = ");
-putdec(cyl);
+putdec(MaxCyl);
 
 sectors = reg_cx &0x3FU;
 
@@ -1894,6 +1888,7 @@ puts0(" sec = ");
 putdec(sectors);
 
 heads = ((reg_dx & 0xFF00U) >> 8)&0xFFU;
+heads++;
 
 puts0(" heads = ");
 putdec(heads);
@@ -1902,21 +1897,16 @@ puts0(" number of drives = ");
 putdec(reg_dx & 0xFFU);
 
 puts0(" total sectors = ");
-putdec(sectors*(heads+1)*(cyl+1));
+putdec(sectors*(heads)*(MaxCyl+1));
 puts0("\r\n");
 
 puts0("size = ");
-putdec(sectors*(heads+1)*(cyl+1)/2);
+putdec(sectors*(heads)*(MaxCyl+1)/2);
 puts0("K\r\n");
 
-  HeadCnt=heads+1;
-  TrkSecs=sectors;
-  SectorsOnCyl=HeadCnt*TrkSecs;
-  MaxCyl=cyl;
+  SectorsOnCyl=heads*sectors;
 
 if (sectors==0) {puts0(" error: sectors==0\r\n");return;}
-}
-#endif
 
 puts0("\r\nabs sec (0-..., dec) ? ");
 getsn(str,MAX_LEN_STR);
@@ -1934,10 +1924,10 @@ putdec(asec);
 puts0("/");
 putdec(MaxSectors);
 
-Track=(asec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
+Track=(asec/SectorsOnCyl); /*SectorsOnCyl=heads*sectors,Track==Cyl */
 SecNoOnCyl=(asec%SectorsOnCyl);
-Head=SecNoOnCyl/TrkSecs;
-SecOnTrk=SecNoOnCyl%TrkSecs+1;
+Head=SecNoOnCyl/sectors;
+SecOnTrk=SecNoOnCyl%sectors+1;
 
 puts0(" CHS = ( ");
 putdec(Track);
@@ -1950,14 +1940,13 @@ putdec(heads);
 puts0(" ");
 putdec(SecOnTrk);
 puts0("/");
-putdec(TrkSecs);
+putdec(sectors);
 puts0(" ) ");
 
 for(i=0;i<512;i++) buffer512[i]='~';
 
-//pause();
-//i=secread(drive, asec, buffer512);
-i=readsec0(drive, SecOnTrk, Head, Track /* or cyl */, buffer512);
+i=secread(drive, asec, buffer512);
+//i=readsec0(drive, SecOnTrk, Head, Track, buffer512);
 
 if (i==1) puts0(" OK");
 else {
@@ -2174,6 +2163,44 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 } // while
 #endif // PROOLFOOL
 } // end of diskd()
+
+unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
+{/* Read absolute sectors
+Input:
+drive (for int 13h Fn=2)
+abs sec number
+buffer
+Output: return!=0 if error
+*/
+unsigned short int Track, SecNoOnCyl, i, index;
+char Head, SecOnTrk;
+short int err;
+unsigned short int SectorsOnCyl;
+
+if (drive==0x80) index=2; else if (drive==0x81) index=3; else index=drive;
+
+SectorsOnCyl=gHeads[index]*gCyl[index];
+Track=(AbsSec/SectorsOnCyl);
+SecNoOnCyl=(AbsSec%SectorsOnCyl);
+Head=SecNoOnCyl/gSec[index];
+SecOnTrk=SecNoOnCyl%gSec[index]+1;
+       /*
+       2 bytes are combined to a word similar to INT 13:
+
+        7 6 5 4 3 2 1 0  1st byte  (sector)
+        | | -------------Sector offset within cylinder
+        +-+--------------High order bits of cylinder #
+
+        7 6 5 4 3 2 1 0  2nd byte  (cylinder)
+        -----------------Low order bits of cylinder #
+        */
+if ((i=Track &0x0300)!=0)
+  {
+  SecOnTrk = (SecOnTrk & 0x3F) | (short int)(i>>2);
+  }
+err=readsec0(drive, SecOnTrk, Head, Track, Buffer);
+return err;
+}
 
 #if 0
 unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
@@ -3033,9 +3060,9 @@ short int i;
 struct MBRstru *MBR;
 int quit;
 int Track, SecNoOnCyl, Head, SecOnTrk;
-short int reg_bx, reg_cx, reg_dx;
-int cyl, sectors, heads;
-unsigned short int HeadCnt, TrkSecs, SectorsOnCyl, MaxCyl;
+unsigned short int reg_bx, reg_cx, reg_dx;
+int sectors, heads;
+unsigned short int SectorsOnCyl, MaxCyl;
 int MaxSectors=0;
 unsigned char buffer512 [512];
 unsigned short int seg, off;
@@ -3056,7 +3083,7 @@ drive=htoi(str);
 puts0("\r\ntest drive ");
 puthex_b(drive);
 reg_bx=GetDriveParam_bx(drive);
-if (reg_bx==-1)
+if (reg_bx==0xFFFF)
 	{
 	puts0("\r\n error code = ");
 	puthex(i);
@@ -3068,10 +3095,10 @@ reg_dx=GetDriveParam_dx(drive);
 
 print_drive_type(reg_bx & 0xFFU);
 
-cyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
+MaxCyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
 
 puts0(" cyl = ");
-putdec(cyl);
+putdec(MaxCyl);
 
 sectors = reg_cx &0x3FU;
 
@@ -3079,6 +3106,7 @@ puts0(" sec = ");
 putdec(sectors);
 
 heads = ((reg_dx & 0xFF00U) >> 8)&0xFFU;
+heads++;
 
 puts0(" heads = ");
 putdec(heads);
@@ -3087,13 +3115,10 @@ puts0(" number of drives = ");
 putdec(reg_dx & 0xFFU);
 
 puts0(" size = ");
-putdec(sectors*(heads+1)*(cyl+1)/2);
+putdec(sectors*(heads+1)*(MaxCyl+1)/2);
 puts0("K\r\n");
 
-  HeadCnt=heads+1;
-  TrkSecs=sectors;
-  SectorsOnCyl=HeadCnt*TrkSecs;
-  MaxCyl=cyl;
+  SectorsOnCyl=heads*sectors;
 
 if (sectors==0) {puts0(" error: sectors==0\r\n");return;}
 }
@@ -3106,9 +3131,9 @@ c=getch();
 if ((c!='y') && (c!='Y')) {puts0("\r\nInstall aborted\r\n");return;}
 puts0("\r\nInstall started!\r\n");
 // prepare boot sector
-/*                                      0      1     2   3    4   5 ; 4 - sec, 5 - heads+1     */
+/*                                      0      1     2   3    4   5 ; 4 - sec, 5 - heads     */
 boothdd[4] = sectors;
-boothdd[5] = heads+1;
+boothdd[5] = heads;
 // write boot sector
 i=writesec0(drive, 1, 0, 0, (char *)boothdd);
 puts0("Disk write. Return code=");
@@ -3127,10 +3152,10 @@ for (ii=0;ii<127;ii++)
 			//puthex(off); //puts0(" ");
 		}
 	asec=ii+1;
-	Track=(asec/SectorsOnCyl); /*SectorsOnCyl=HeadCnt*TrkSecs,Track==Cyl */
+	Track=(asec/SectorsOnCyl); /*SectorsOnCyl=heads*sectors,Track==Cyl */
 	SecNoOnCyl=(asec%SectorsOnCyl);
-	Head=SecNoOnCyl/TrkSecs;
-	SecOnTrk=SecNoOnCyl%TrkSecs+1;
+	Head=SecNoOnCyl/sectors;
+	SecOnTrk=SecNoOnCyl%sectors+1;
 	i=writesec0(drive, SecOnTrk, Head, Track, buffer512);
 	puts0("*");
 	if (i!=1) {puts0("Disk write error!\r\n"); return;}

@@ -41,6 +41,11 @@ extern int reg_di;
 extern int reg_es;
 #endif
 
+extern unsigned short int gCyl[4];
+extern unsigned short int gSec[4];
+extern unsigned short int gHeads[4];
+extern unsigned short int gTotal[4];
+
 typedef unsigned int size_t;
 
 void stop(void);

@@ -66,6 +66,11 @@ current_drive:	.byte	0
 
 boot_drive:	.word	0
 
+gCyl: .word	0,0,0,0
+gSec: .word	0,0,0,0
+gHeads: .word	0,0,0,0
+gTotal: .word	0,0,0,0
+
 basic:
 	int	$0x18
 	ret
