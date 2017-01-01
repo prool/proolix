@@ -1845,7 +1845,6 @@ puts0("K\r\n");
 
 void diskd(void)
 {
-#if 1 // PROOLFOOL
 char str[MAX_LEN_STR];
 int drive, asec, ii, c, line;
 short int i;
@@ -1855,8 +1854,8 @@ int Track, SecNoOnCyl, Head, SecOnTrk;
 unsigned short int reg_bx, reg_cx, reg_dx;
 int sectors, heads;
 unsigned short int SectorsOnCyl, MaxCyl;
-int MaxSectors=0;
 unsigned char buffer512 [512];
+unsigned short int total_sectors;
 
 puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
@@ -1897,18 +1896,21 @@ puts0(" number of drives = ");
 putdec(reg_dx & 0xFFU);
 
 puts0(" total sectors = ");
-putdec(sectors*(heads)*(MaxCyl+1));
+total_sectors=(sectors*(heads)*(MaxCyl+1));
+putdec(total_sectors);
 puts0("\r\n");
 
 puts0("size = ");
-putdec(sectors*(heads)*(MaxCyl+1)/2);
+putdec(total_sectors/2);
 puts0("K\r\n");
 
-  SectorsOnCyl=heads*sectors;
+SectorsOnCyl=heads*sectors;
 
 if (sectors==0) {puts0(" error: sectors==0\r\n");return;}
 
-puts0("\r\nabs sec (0-..., dec) ? ");
+puts0("\r\nabs sec (0-");
+putdec(total_sectors);
+puts0(", dec) ? ");
 getsn(str,MAX_LEN_STR);
 asec=atoi(str);
 
@@ -1922,7 +1924,7 @@ puthex_b(drive);
 puts0(" sec = ");
 putdec(asec);
 puts0("/");
-putdec(MaxSectors);
+putdec(total_sectors);
 
 Track=(asec/SectorsOnCyl); /*SectorsOnCyl=heads*sectors,Track==Cyl */
 SecNoOnCyl=(asec%SectorsOnCyl);
@@ -1936,7 +1938,7 @@ putdec(MaxCyl);
 puts0(" ");
 putdec(Head);
 puts0("/");
-putdec(heads);
+putdec(heads-1);
 puts0(" ");
 putdec(SecOnTrk);
 puts0("/");
@@ -1976,98 +1978,6 @@ for (line=0;line<32;line++)
     }
 puts0("Next sector(q-quit,b-back,V-viewMBR,B-viewboot,?-help,otherkey-next)?\r\n");
 char c=getch();
-#if 0
-switch(c)
-    {int delta;
-    case '?':
-puts0("=Diskd help=\r\n\
-q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
-+ - skip sectors, = - go to sector\r\n");
-		break;
-    case '+':	puts0("delta? ");
-		getsn(str,MAX_LEN_STR);
-		delta=atoi(str);
-		sec+=delta;	
-		break;
-    case '=':	puts0("go to sector? ");
-		getsn(str,MAX_LEN_STR);
-		delta=atoi(str);
-		sec=delta;	
-		break;
-    case 'D':	buffer512[0]='Z';
-    case 'W':	i=secwrite(drive, sec, buffer512);
-		puts0("Disk write. Return code=");
-		puthex(i);
-		puts("");
-		break;
-    case 'q': quit=1; break;
-    case 'r': break;
-    case 'b': sec--; break;
-    case 'V': 	// view_mbr begin
-
-		puts0("System    ----Begin----       ----End-----  Prec. sec Total sec\r\n");
-		puts0("          head sec  cyl       head sec cyl\r\n");
-		int ii=446;
-		for (i=0;i<4;i++)
-		{
-		switch(buffer512[ii++])
-		    {
-		    case 0: putch('N'); break; // no active partition
-		    case 0x80: putch('A'); break; // active partititon
-		    default: putch('E'); // error
-		    }
-
-		puts0("         ");
-		putdec(buffer512[ii++]); // head
-		puts0("    ");
-		putdec(buffer512[ii]&0x3FU); // sector
-		puts0("    ");
-		short int cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
-		putdec(cyl); // cyl
-		ii+=2;
-		puts0(" ");
-
-		out_os(buffer512[ii++]); // OS type
-		puts0("     ");
-
-		putdec(buffer512[ii++]); // head
-		puts0(" ");
-		putdec(buffer512[ii]&0x3FU); // sector
-		puts0(" ");
-		cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
-		putdec(cyl); // cyl
-		ii+=2;
-		puts0("  ");
-		
-		// Horner algorythm
-		long l=buffer512[ii+3]&0xFFUL;
-		l=(l<<8) | buffer512[ii+2];
-		l=(l<<8) | buffer512[ii+1];
-		l=(l<<8) | buffer512[ii];
-		putdec(l);
-		puts0("  ");
-		ii+=4;
-
-		// Horner algorythm #2
-		l=buffer512[ii+3]&0xFFUL;
-		l=(l<<8) | buffer512[ii+2];
-		l=(l<<8) | buffer512[ii+1];
-		l=(l<<8) | buffer512[ii];
-		putdec(l);
-		ii+=4;
-		puts0("\r\n");
-		} // end for
-		// view_mbr end
-		break;
-    case 'B':
-		out_boot(buffer512);
-		puts0("press any key");
-		getch();
-		break;
-    default: sec++;
-    }
-#else
-//switch(c)
     {int delta;
     if (c=='?')
 puts0("=Diskd help=\r\n\
@@ -2159,9 +2069,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		}
     else asec++;
     }
-#endif
 } // while
-#endif // PROOLFOOL
 } // end of diskd()
 
 unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
