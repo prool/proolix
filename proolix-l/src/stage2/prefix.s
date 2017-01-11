@@ -534,6 +534,7 @@ cold:
 hdd0:
         xorw    %ax,%ax
         movw    %ax,%ES
+        movw    %ax,%DS
 
         # Read MBR
         movw    $0x0080,%dx  # dl-drive, dh-head
@@ -560,6 +561,7 @@ p_reboot:# jmp  ffff:0	# ffff:0 = ffff0
 hdd1:
         xorw    %ax,%ax
         movw    %ax,%ES
+        movw    %ax,%DS
 
         # Read MBR
         movw    $0x0081,%dx  # dl-drive, dh-head
