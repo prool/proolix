@@ -44,8 +44,9 @@ ctmp.s:590: Error: 8-byte relocation cannot be applied to 4-byte field
 11-Jan-2016
 
 Сейчас загрузочную флешку я делаю при помощи unetbootin из образа загрузочной дискеты.
-Но должно работать и без unetbootin, а именно: boot sector + binary image file 'ct'.
-Не забыть только, что флешка - это диск 0x80
+Но должно работать и без unetbootin, а именно: boot sector + binary image file 'ct'
+Не забыть только, что флешка - это диск 0x80 и вообще инсталлировать на нее надо примерно как
+на HDD, то есть как сделано в команде install
 Проверить!
 
 Пруль
