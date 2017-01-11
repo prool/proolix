@@ -1909,7 +1909,7 @@ SectorsOnCyl=heads*sectors;
 if (sectors==0) {puts0(" error: sectors==0\r\n");return;}
 
 puts0("\r\nabs sec (0-");
-putdec(total_sectors);
+putdec(total_sectors-1);
 puts0(", dec) ? ");
 getsn(str,MAX_LEN_STR);
 asec=atoi(str);

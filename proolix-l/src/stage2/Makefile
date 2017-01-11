@@ -8,7 +8,7 @@ CC = gcc
 #CC = clang
 
 VMDISK=/home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
-VMFLOPPY = /home/prool/Proj/proolix/proolix-l/diskette.img
+VMFLOPPY = ../../diskette.img
 FLASHDEVICE = /dev/sdb1
 FLASHDIR = /media/prool/6A15-B63F
 
@@ -16,6 +16,10 @@ ASFLAG =
 
 all:	ct
 install:	installvmfloppy
+
+iso: # gluchit!
+	cd ../..
+	genisoimage -o proolix.iso -b diskette.img .
 
 install_old: all
 	sudo mount $(VMFLOPPY) /mnt/fdd

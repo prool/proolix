@@ -2,11 +2,7 @@ This is stage2 of Proolix-l
 
 Files:
 
-boot.S (in this directory!) is stage2 source
-boot - binary executable
-cmd1 - example of binary command, compiled under Linux (see Makefile.linux)
-cmd2com - example of binary command, compiled under cygwin (see Makefile.cygwin)
-ct - Proolix-l shell (sources - c2.c)
+ct - Proolix-l stage2 (source - c2.c)
 pscr.c - external Proolskript interpreter for Linux, Windows, etc system
 
 ---
@@ -15,22 +11,13 @@ Install
 
 1. install boot sector (see in boot-sector directory)
 
-2. copy files 'boot' and 'cp' to diskette (file must be FIRST on diskette!)
+2. copy binary image file 'cp' to diskette from 1 sector (see installvmfloppy in Makefile)
 
 3. Boot from this diskette
 
 ---
 
-How to install boot to image of diskette:
-
-sudo mount diskette /mnt/fdd
-cp boot /mnt/fdd
-cp ct /mnt/fdd
-sudo umount /mnt/fdd
-
----
-
-For compile in 64bit Linuxes: sudo apt-get install g++-multilib
+For compile in 64bit Linuxes use additional library: sudo apt-get install g++-multilib
 
 And use 32 bit flags:
 
@@ -41,7 +28,7 @@ main:	main.c
 
 For boot Proolix under real computer use flash drive:
 
-1. install proolix diskette image to flash drive uses Unetbootin (http://unetbootin.sourceforge.net/)
+1. make installflash
 
 2. boot from USB flash stick
 

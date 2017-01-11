@@ -1,4 +1,4 @@
-Built-in Proolix blog
+Built-in Proolix blog. UTF-8 codetable
 
 18-Nov-2016. Proolix-l нормально собирается в Ubuntu 15.10 64bit, gcc 5.2.1
 
@@ -40,5 +40,12 @@ ctmp.s:590: Error: 8-byte relocation cannot be applied to 4-byte field
 30-Dec-2016 Созданы файлы todo.txt and bugs.txt
 
 Ошибка, обнаруженная вчера, оказалась не ошибкой (см. bugs.txt)
+
+11-Jan-2016
+
+Сейчас загрузочную флешку я делаю при помощи unetbootin из образа загрузочной дискеты.
+Но должно работать и без unetbootin, а именно: boot sector + binary image file 'ct'.
+Не забыть только, что флешка - это диск 0x80
+Проверить!
 
 Пруль
