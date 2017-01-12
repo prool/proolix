@@ -364,11 +364,13 @@ writesec0: # unsigned short int writesec0(char drive, char sec, char head, char 
 
 	movw	$0x0301,%ax # ah = 03 (command 'write'), al=1 - number of sectors to write
 	int	$0x13
+/*
 	jc	1f
 	jmp	2f
 1:	movw	$0xDEAD,%ax
 	
 2:
+*/
 	pop	%ES
 	popl	%ebp
 	ret

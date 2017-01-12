@@ -15,11 +15,10 @@ FLASHDIR = /media/prool/6A15-B63F
 ASFLAG =
 
 all:	ct
-install:	installvmfloppy
+install:	installvmfloppy iso
 
-iso: # gluchit!
-	cd ../..
-	genisoimage -o proolix.iso -b diskette.img .
+iso:
+	./makeiso.sh
 
 install_old: all
 	sudo mount $(VMFLOPPY) /mnt/fdd

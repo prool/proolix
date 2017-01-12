@@ -1924,7 +1924,7 @@ puthex_b(drive);
 puts0(" sec = ");
 putdec(asec);
 puts0("/");
-putdec(total_sectors);
+putdec(total_sectors-1);
 
 Track=(asec/SectorsOnCyl); /*SectorsOnCyl=heads*sectors,Track==Cyl */
 SecNoOnCyl=(asec%SectorsOnCyl);
@@ -1987,7 +1987,9 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		getsn(str,MAX_LEN_STR);
 		delta=atoi(str);
 		asec+=delta;}
-    else if (c=='=') {puts0("go to sector? ");
+    else if (c=='=') {puts0("go to sector (0/");
+		putdec(total_sectors-1);
+		puts0(") ? ");
 		getsn(str,MAX_LEN_STR);
 		delta=atoi(str);
 		asec=delta;}
