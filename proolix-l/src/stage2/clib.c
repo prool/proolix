@@ -1477,7 +1477,7 @@ FFFFE PC/XT/AT identification byte\r\n\
 
 void help(void)
 {
-puts0("Proolix-l shell command:\r\n\r\n\
+puts0("Proolix-l command:\r\n\r\n\
 help, ? - this help\r\n\
 ver - version\r\n\
 ascii - write ascii table\r\n\
