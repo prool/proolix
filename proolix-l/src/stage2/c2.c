@@ -62,7 +62,7 @@ puts0(__TIME__);
 puts0("\r\n");
 //pause();
 puts0("? - for help\r\n");
-puts0("End of code "); puthex(end_of()); puts0("\r\n");
+puts0("End of code "); puthex(end_of()); puts0(" = "); putdec(end_of()); puts0("\r\n");
 }
 
 void main(void)

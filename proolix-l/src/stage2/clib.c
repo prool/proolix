@@ -2117,6 +2117,39 @@ err=readsec0(drive, SecOnTrk, Head, Track, Buffer);
 return err;
 }
 
+unsigned short int secwrite (int drive, unsigned AbsSec, char *Buffer)
+{/* Write absolute sectors
+Input:
+drive (for int 13h Fn=2)
+abs sec number
+buffer
+Output: return!=0 if error
+*/
+unsigned short int Track, SecNoOnCyl, i, index;
+char Head, SecOnTrk;
+short int err;
+unsigned short int SectorsOnCyl;
+
+if (drive==0x80) index=2; else if (drive==0x81) index=3; else index=drive;
+
+if (gSec[index]==0) return 2;
+if (gCyl[index]==0) return 2;
+if (gHeads[index]==0) return 2;
+if (AbsSec>=gTotal[index]) return 3;
+
+SectorsOnCyl=gHeads[index]*gSec[index];
+Track=(AbsSec/SectorsOnCyl);
+SecNoOnCyl=(AbsSec%SectorsOnCyl);
+Head=SecNoOnCyl/gSec[index];
+SecOnTrk=SecNoOnCyl%gSec[index]+1;
+if ((i=Track &0x0300)!=0)
+  {
+  SecOnTrk = (SecOnTrk & 0x3F) | (short int)(i>>2);
+  }
+err=writesec0(drive, SecOnTrk, Head, Track, Buffer);
+return err;
+}
+
 #if 0
 unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
 {/* Read absolute sectors
@@ -2968,7 +3001,6 @@ while(1)
 
 void install (void)
 {
-unsigned char Buffer [512];
 char str[MAX_LEN_STR];
 int drive, asec, ii, jj, c, line;
 short int i;
@@ -2979,6 +3011,7 @@ unsigned short int reg_bx, reg_cx, reg_dx;
 int sectors, heads;
 unsigned short int SectorsOnCyl, MaxCyl;
 int MaxSectors=0;
+unsigned short int *superblock;
 unsigned char buffer512 [512];
 unsigned short int seg, off;
 
@@ -3077,6 +3110,31 @@ for (ii=0;ii<127;ii++)
 	}
 
 puts0("\r\n");
+
+// Write superblock
+superblock = (unsigned short int *) buffer512;
+
+for (i=0;i<512;i++) buffer512[i]=0;
+*superblock = 0xBEBE; // magick
+*(superblock+1) = 0; // type of FS
+*(superblock+2) = 130; // startroot
+*(superblock+3) = sectors*(heads+1)*(MaxCyl+1); // end bl
+*(superblock+4) = 130; // end formatted bl
+
+i=secwrite(drive, 129, buffer512);
+if (i!=1) {puts0("Superblock write error!\r\n"); return;}
+
+// Write root dir
+for (i=0;i<512;i++) buffer512[i]=0;
+buffer512[0]=1; // block used
+
+//buffer512[1]=1; // next block=0
+//buffer512[2]=1; // 
+
+buffer512[3]='.'; // link to current dir
+
+i=secwrite(drive, 130, buffer512);
+if (i!=1) {puts0("Root dir write error!\r\n"); return;}
 }
 
 #include "proolskript.c"
