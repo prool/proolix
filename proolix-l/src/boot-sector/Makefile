@@ -6,7 +6,7 @@ AS = as
 CPP = cpp
 
 VMDISK = /home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
-VMFLOPPY = /home/prool/VirtualBox\ VMs/mach1/zeroes-diskette.img
+VMFLOPPY = ../../diskette.img
 FLASHDEVICE = /dev/sdb1
 
 all:	boots patchboot analyzeboot makediskette boothdd bootfdd toc
@@ -70,14 +70,14 @@ boothdd.s: boothdd.S
 	$(CPP) -traditional $< -o $@
 
 # boot sector for FDD with fool filesystem
-bootfdd: bootfdd.o patchboot analyzeboot makediskette
+bootfdd: bootfdd.o
 	$(LD) -Ttext 0x0 -s --oformat binary -o $@ $<
 	chmod a-x bootfdd
 
 bootfdd.o: bootfdd.s
 	$(AS) -a=bootfdd.lst -o $@ $<
 
-bootfdd.s: bootfdd.S
+bootfdd.s: bootfdd.S sayr.S saycsip.S
 	$(CPP) -traditional $< -o $@
 
 #############################################################

@@ -28,6 +28,21 @@ TrkSecs:         .word      18
 HeadCnt:         .word      2
 
 start:
+
+# Нормализация CS:IP
+# Данный код компилируется для случая, когда он загружается в 7c00:0000 и запускается при помощи long jump 0000:7c00
+# (то есть CS=0000, IP=7c00). На одной машине Lenovo загрузка с CD осуществлялась с запуском long jmp 07c0:0000,
+# из-за чего съезжала адресация (см. переменную off и ее использование).
+# Данная нормализация исправляет это и код работает при любых видах запуска, даже, например, при long jmp 0700:0c00 ;-)
+
+        .byte      0xea    # JMP 0000:7c0b
+        .word      0x7c0b,0x0000
+
+# 7c0b address here!
+
+	pushw	%CS
+	popw	%DS
+
 	call	print_registers
 
 # get drive parameters
@@ -37,8 +52,6 @@ start:
 
 #	call	print_registers
 
-        pushw   %CS
-        popw    %DS
 #        sayr    OEM+off
 # Значения регистров после загрузки boot-сектора
 # CS:IP = 0:7C00 SS=30 SP=F6 ES=0
@@ -287,7 +300,6 @@ l_out: movb     $0xe,%ah
 
 #include "sayr.S"
 #include "saycsip.S"
-
 /*
 	. = 446
 	# partition
