@@ -8,6 +8,7 @@ CPP = cpp
 VMDISK = /home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
 VMFLOPPY = ../../diskette.img
 FLASHDEVICE = /dev/sdb1
+FLASHPHYDEVICE = /dev/sdb
 
 all:	boots patchboot analyzeboot makediskette boothdd bootfdd toc
 
@@ -16,8 +17,9 @@ installvm:	all
 
 installvmfloppy:	all
 	dd if=bootfdd of=$(VMFLOPPY) conv=notrunc
-
-installflash:	boot_f32.bin
+installflash__:	bootfdd
+		sudo dd if=bootfdd of=$(FLASHPHYDEVICE)
+installflash_:	boot_f32.bin
 		dd if=S(FLASHDEVICE) of=boot_f32.bin bs=1 skip=3 seek=3 count=87 conv=notrunc
 		dd if=boot_f32.bin of=$(FLASHDEVICE) bs=512 count=1 conv=notrunc
 		rm boot_f32.bin

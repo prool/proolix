@@ -2984,7 +2984,7 @@ while(1)
 {
 	puts0("\r\nProolix screensaver. Time ");
 	puthex(get_rtc());
-	puts0(" Press anykey to quit ");
+	puts0(". PRESS anykey to quit ");
 	//putch_color('*',3);
 	for (i=0;i<24;i++)
 	{

@@ -10,7 +10,8 @@ CC = gcc
 VMDISK=/home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
 VMFLOPPY = ../../diskette.img
 FLASHDEVICE = /dev/sdb1
-FLASHDIR = /media/prool/6A15-B63F
+FLASHPHYDEVICE = /dev/sdb
+FLASHDIR = /media/prool/70C8-6AF9
 
 ASFLAG =
 
@@ -27,7 +28,10 @@ install_old: all
 #	sudo cp ctt /mnt/fdd
 	sudo umount /mnt/fdd
 
-installflash: all
+installflash__: ct
+	sudo dd if=ct of=$(FLASHPHYDEVICE) seek=1
+
+installflash: installvmfloppy all
 	sudo cp $(VMFLOPPY) $(FLASHDIR)/ubninit
 	umount $(FLASHDEVICE)
 
