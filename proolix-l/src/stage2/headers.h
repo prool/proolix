@@ -109,7 +109,6 @@ void memd(void);
 void basic(void);
 void diskd0(void);
 void diskd(void);
-void ls(void);
 void testdisk(void);
 void mount(void);
 void out_os(unsigned char);
@@ -118,6 +117,10 @@ void skript(void);
 void vectors(void);
 void screensaver(void);
 void install(void);
+void view_superblock(void);
+void ls(void);
+void create_file(void);
+void remove_file(void);
 
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);

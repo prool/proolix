@@ -18,10 +18,6 @@ set_color(7); puts0("end of palette");
 #endif
 
 #if 1 // ЗАГЛУШКИ
-void ls(void)
-{
-puts0("no ls!\r\n");
-}
 int open (char *filename, int flag)
 {
 return -1;
@@ -163,6 +159,10 @@ while (1)
 	else if (!strcmp(buf,"scr")) screensaver();
 	else if (!strcmp(buf,"time")) time();
 	else if (!strcmp(buf,"install")) install();
+	else if (!strcmp(buf,"super")) view_superblock();
+	else if (!strcmp(buf,"ls")) ls();
+	else if (!strcmp(buf,"creat")) create_file();
+	else if (!strcmp(buf,"rm")) remove_file();
 	else
 		{
 		puts0("Unknown command '");

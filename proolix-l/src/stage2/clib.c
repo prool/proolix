@@ -2,6 +2,13 @@
 
 //#define DEBUG 1
 
+#define SUPERBLOCK 129
+#define ROOT_DIR 130
+
+#define ROOT_SIZE 16
+#define FILENAME_LEN 16
+#define FLAGS_LEN 15
+
 #define PROOLFOOL 0 // =1 old code (with bug); =0 - new code
 
 //#include <limits.h>
@@ -1441,6 +1448,7 @@ puts0("\r\nsize of int ");putdec(sizeof(int));
 puts0("\r\nsize of long int ");putdec(sizeof(long int));
 puts0("\r\nsize of short int ");putdec(sizeof(short int));
 puts0("\r\nsize of char ");putdec(sizeof(char));
+puts0("\r\n");
 print_boot();
 }
 
@@ -1494,12 +1502,10 @@ diskd - disk dump #2 (absolute sector)\r\n\
 skript - run prool skript\r\n\
 time - print time\r\n\
 install - install Proolix-l to other disk\r\n\
+super - view superblock ls - ls creat - create file rm - remove file\r\n\
 reboot - reboot\r\n\
 cold - cold reboot\r\n\
-hdd0 - force boot from HDD0\r\n\
-hdd1 - force boot from HDD1\r\n\
-fdd - force boot from FDD\r\n\
-");
+hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD");
 }
 
 void memd0(void)
@@ -1752,7 +1758,7 @@ puts0(" number of drives = ");
 putdec(reg_dx & 0xFFU);
 
 puts0(" size = ");
-putdec(sec*(heads+1)*(cyl+1)/2);
+putdec(sec*(heads)*(cyl+1)/2);
 puts0("K\r\n");
 
   HeadCnt=heads+1;
@@ -2984,7 +2990,7 @@ while(1)
 {
 	puts0("\r\nProolix screensaver. Time ");
 	puthex(get_rtc());
-	puts0(". PRESS anykey to quit ");
+	puts0(". PRESS ANYKEY to quit ");
 	//putch_color('*',3);
 	for (i=0;i<24;i++)
 	{
@@ -3016,7 +3022,7 @@ unsigned char buffer512 [512];
 unsigned short int seg, off;
 
 /* Boot sector for boot from HDD */
-/*                                      0      1     2   3    4   5 ; 4 - sec, 5 - heads+1     */
+/*                                      0      1     2   3    4   5 ; 4 - sec, 5 - heads     */
 unsigned short int boothdd [256] = {0xAEB,0x424D,0xD52,0xA,0x11,0x4,0xD3E8,0xB400,0xB208,0xCD80,0xE13,0xE07,0xB81F,0x3050,0xC08E,0xDB31,0x1B8,0xB900,0x50,0x5051,0x80B2,0xE850,0x3B,0x2072,0x5858,0x8140,0xC3,0x5902,0xECE2,0x50B8,0x8E30,0x8ED8,0xFAC0,0xD08E,0xFEBC,0xFBFF,0xDDB8,0xEADD,0x0,0x3050,0xB450,0xB00E,0xCD65,0x5810,0xB450,0xB00E,0xCD72,0x5810,0x3EE8,0x3000,0xCDE4,0xCD16,0x5319,0x5251,0x5756,0xDE89,0xD789,0xA150,0x7C0A,0xE8B,0x7C08,0xE1F7,0xC389,0x3158,0xF7D2,0x89F3,0x89C3,0x31D0,0xF7D2,0x42F1,0xD188,0xDD88,0xF389,0xFA89,0xC688,0x1B8,0xCD02,0x5F13,0x5A5E,0x5B59,0x50C3,0xE088,0x5E8,0x5800,0x1E8,0xC300,0x5150,0x8852,0xB1C2,0xD204,0xE8E8,0xB,0xD088,0xF24,0x4E8,0x5A00,0x5859,0x50C3,0x93C,0x477,0x3004,0x2EB,0x3704,0xEB4,0x10CD,0xC358,0xAC50,0xC008,0x674,0xEB4,0x10CD,0xF5EB,0xC358,0x5650,0xA7BE,0xE87D,0xFFEA,0xE85E,0xFFB3,0xBE56,0x7D8E,0xDFE8,0x5EFF,0x580E,0xA6E8,0x56FF,0xC9BE,0xE87D,0xFFD2,0xE85E,0x0,0xE858,0xFF97,0xBE56,0x7D93,0xC3E8,0x5EFF,0xD08C,0x8AE8,0x56FF,0x98BE,0xE87D,0xFFB6,0x895E,0xE8E0,0xFF7D,0xBE56,0x7DBA,0xA9E8,0x5EFF,0xE889,0x70E8,0x56FF,0x9DBE,0xE87D,0xFF9C,0x8C5E,0xE8D8,0xFF63,0xBE56,0x7DA2,0x8FE8,0x5EFF,0xC08C,0x56E8,0x56FF,0xABBE,0xE87D,0xFF82,0x895E,0xE8D8,0xFF49,0xBE56,0x7DB0,0x75E8,0x5EFF,0xC889,0x3CE8,0x56FF,0xB5BE,0xE87D,0xFF68,0x895E,0xE8D0,0xFF2F,0xBE56,0x7DBF,0x5BE8,0x5EFF,0xF089,0x22E8,0x56FF,0xC4BE,0xE87D,0xFF4E,0x895E,0xE8F8,0xFF15,0xC358,0x4320,0x3D53,0x2000,0x5353,0x3D,0x5320,0x3D50,0x2000,0x5344,0x3D,0x4520,0x3D53,0x4100,0x3D58,0x2000,0x5842,0x3D,0x4320,0x3D58,0x2000,0x5844,0x3D,0x4220,0x3D50,0x2000,0x4953,0x3D,0x4420,0x3D49,0x2000,0x5049,0x3D,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xAA55};
 
 puts0("Proolix-l installator\r\n");
@@ -3063,7 +3069,7 @@ puts0(" number of drives = ");
 putdec(reg_dx & 0xFFU);
 
 puts0(" size = ");
-putdec(sectors*(heads+1)*(MaxCyl+1)/2);
+putdec(sectors*(heads)*(MaxCyl+1)/2);
 puts0("K\r\n");
 
   SectorsOnCyl=heads*sectors;
@@ -3117,11 +3123,11 @@ superblock = (unsigned short int *) buffer512;
 for (i=0;i<512;i++) buffer512[i]=0;
 *superblock = 0xBEBE; // magick
 *(superblock+1) = 0; // type of FS
-*(superblock+2) = 130; // startroot
-*(superblock+3) = sectors*(heads+1)*(MaxCyl+1); // end bl
-*(superblock+4) = 130; // end formatted bl
+*(superblock+2) = ROOT_DIR; // startroot
+*(superblock+3) = sectors*(heads)*(MaxCyl+1) -1 ; // end bl
+*(superblock+4) = ROOT_DIR; // end formatted bl
 
-i=secwrite(drive, 129, buffer512);
+i=secwrite(drive, SUPERBLOCK, buffer512);
 if (i!=1) {puts0("Superblock write error!\r\n"); return;}
 
 // Write root dir
@@ -3133,8 +3139,174 @@ buffer512[0]=1; // block used
 
 buffer512[3]='.'; // link to current dir
 
-i=secwrite(drive, 130, buffer512);
+i=secwrite(drive, ROOT_DIR, buffer512);
 if (i!=1) {puts0("Root dir write error!\r\n"); return;}
+}
+
+void ls(void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned char filename[FILENAME_LEN+1];
+
+i=get_boot_drive();
+if (i==0xAAAA) device=0; else device=0x80;
+
+i=secread(device, ROOT_DIR, buffer512);
+if (i!=1) {puts0("Root dir read error!\r\n"); return;}
+
+puts0("descr ");puthex_b(buffer512[0]);
+puts0(" next block ");
+puthex_b(buffer512[2]);
+puthex_b(buffer512[1]);
+puts0("\r\n");
+
+for (i=0;i<ROOT_SIZE;i++)
+	{
+	putdec2(i+1,2,1);
+	puts0(" ");
+	for (j=0;j<FILENAME_LEN;j++) filename[j]=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j];
+	filename[FILENAME_LEN]=0;
+	if (filename[0]) puts0(filename);
+	else puts0("<unused>");
+	puts0("\r\n");
+	}
+}
+
+void create_file (void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+
+// ввод имени файла
+puts0("filename ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+if (filename[0]==0) {return;}
+
+i=get_boot_drive();
+if (i==0xAAAA) device=0; else device=0x80;
+
+i=secread(device, ROOT_DIR, buffer512);
+if (i!=1) {puts0("Root dir read error!\r\n"); return;}
+
+// ищем такое же имя
+for (i=0;i<ROOT_SIZE;i++)
+	{
+	if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
+		{// not empty dir record
+		equal=1;
+		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
+		if (equal)	{
+				puts0("file exists!\r\n");
+				return;
+				}
+		}
+	}
+
+for (i=0;i<ROOT_SIZE;i++)
+	{
+	if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
+		{// empty dir record
+		puts0("create dir rec #");putdec(i+1);puts0("\r\n");
+		for (j=0;j<FILENAME_LEN;j++) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
+		i=secwrite(device, ROOT_DIR, buffer512);
+		if (i!=1) {puts0("Root dir read error!\r\n"); return;}
+		return;
+		}
+	}
+puts0("No space in root dir\r\n");
+}
+
+void remove_file (void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+
+// ввод имени файла
+puts0("filename ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+if (filename[0]==0) {return;}
+
+i=get_boot_drive();
+if (i==0xAAAA) device=0; else device=0x80;
+
+i=secread(device, ROOT_DIR, buffer512);
+if (i!=1) {puts0("Root dir read error!\r\n"); return;}
+
+// ищем такое же имя
+for (i=0;i<ROOT_SIZE;i++)
+	{
+	if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
+		{// not empty dir record
+		equal=1;
+		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
+		if (equal)	{// puts0("file exists!\r\n");
+				buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]=0;
+				i=secwrite(device, ROOT_DIR, buffer512);
+				if (i!=1) {puts0("Root dir read error!\r\n"); return;}
+				return;
+				}
+		}
+	}
+
+// file not found
+puts0("file not found!\r\n");
+}
+
+void view_superblock(void)
+{
+unsigned short int i;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned short int *superblock;
+
+i=get_boot_drive();
+if (i==0xAAAA) device=0; else device=0x80;
+
+i=secread(device, SUPERBLOCK, buffer512);
+if (i!=1) {puts0("Superblock read error!\r\n"); return;}
+superblock = (unsigned short int *) buffer512;
+
+puts0("superblock #");
+puthex(SUPERBLOCK);
+puts0("\r\nsuperblock magick = ");
+puthex(*superblock);
+if (*superblock==0xBEBE) puts0(" OK"); else puts0(" NOT OK");
+puts0("\r\nFS type ");
+putdec(*(superblock+1));
+puts0("\r\nroot dir ");
+putdec(*(superblock+2));
+puts0("\r\nend block ");
+putdec(*(superblock+3));
+puts0("\r\nend formatted block ");
+putdec(*(superblock+4));
+puts0("\r\n");
 }
 
 #include "proolskript.c"
