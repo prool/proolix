@@ -3150,6 +3150,10 @@ unsigned short int j;
 unsigned char device;
 unsigned char buffer512 [512];
 unsigned char filename[FILENAME_LEN+1];
+unsigned char c1;
+unsigned short int c2;
+unsigned int c3;
+unsigned int c4;
 
 i=get_boot_drive();
 if (i==0xAAAA) device=0; else device=0x80;
@@ -3157,8 +3161,8 @@ if (i==0xAAAA) device=0; else device=0x80;
 i=secread(device, ROOT_DIR, buffer512);
 if (i!=1) {puts0("Root dir read error!\r\n"); return;}
 
-puts0("descr ");puthex_b(buffer512[0]);
-puts0(" next block ");
+puts0("Descr ");puthex_b(buffer512[0]);
+puts0(" Next Block ");
 puthex_b(buffer512[2]);
 puthex_b(buffer512[1]);
 puts0("\r\n");
@@ -3167,10 +3171,20 @@ for (i=0;i<ROOT_SIZE;i++)
 	{
 	putdec2(i+1,2,1);
 	puts0(" ");
-	for (j=0;j<FILENAME_LEN;j++) filename[j]=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j];
+	for (j=0;j<FILENAME_LEN;j++) (filename[j]=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]);
 	filename[FILENAME_LEN]=0;
-	if (filename[0]) puts0(filename);
-	else puts0("<unused>");
+	if (filename[0]==0) puts0("<unused>        ");
+	else for (j=0;j<FILENAME_LEN;j++) putch(filename[j]);
+	puts0(" ");
+	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j];
+	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+1];
+	puthex((c2<<8) & c1);
+	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+2];
+	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+3];
+	c3=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+4];
+	c4=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+5];
+	puts0(" ");
+	puthex_l ((((((c4<<8)&c3)<<8)&c2)>>8)&c1);
 	puts0("\r\n");
 	}
 }
@@ -3293,8 +3307,8 @@ i=secread(device, SUPERBLOCK, buffer512);
 if (i!=1) {puts0("Superblock read error!\r\n"); return;}
 superblock = (unsigned short int *) buffer512;
 
-puts0("superblock #");
-puthex(SUPERBLOCK);
+puts0("superblock # ");
+putdec(SUPERBLOCK);
 puts0("\r\nsuperblock magick = ");
 puthex(*superblock);
 if (*superblock==0xBEBE) puts0(" OK"); else puts0(" NOT OK");
