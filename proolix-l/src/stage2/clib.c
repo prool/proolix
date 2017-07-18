@@ -2988,10 +2988,10 @@ void screensaver(void)
 {long i,j;
 while(1)
 {
-	puts0("\r\nProolix screensaver. Time ");
+	puts0("\r\nProolix Screensaver. Time ");
 	puthex(get_rtc());
 	puts0(". PRESS ANYKEY to quit ");
-	//putch_color('*',3);
+	putch_color('!',3);
 	for (i=0;i<24;i++)
 	{
 		for (j=0;j<i;j++) puts0(" ");
