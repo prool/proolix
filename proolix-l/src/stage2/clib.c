@@ -3189,6 +3189,34 @@ for (i=0;i<ROOT_SIZE;i++)
 	}
 }
 
+void create_file2(void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+
+// ввод имени файла
+puts0("filename ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+if (filename[0]==0) {return;}
+
+i=open_(filename,O_WRITE);
+if (i==1) puts0("open_ OK\r\n");
+else puts0("open not ok\r\n");
+
+}
+
 void create_file (void)
 {
 unsigned short int i;
@@ -3283,7 +3311,7 @@ for (i=0;i<ROOT_SIZE;i++)
 		if (equal)	{// puts0("file exists!\r\n");
 				buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]=0;
 				i=secwrite(device, ROOT_DIR, buffer512);
-				if (i!=1) {puts0("Root dir read error!\r\n"); return;}
+				if (i!=1) {puts0("Root dir write error!\r\n"); return;}
 				return;
 				}
 		}
@@ -3321,6 +3349,68 @@ putdec(*(superblock+3));
 puts0("\r\nend formatted block ");
 putdec(*(superblock+4));
 puts0("\r\n");
+}
+
+int open_ (char *filename, int flag)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+unsigned char buffer512 [512];
+//unsigned char str[MAX_LEN_STR];
+
+if (filename==0) {puts0("open_: err 1\r\n"); return -1;}
+if (*filename==0) {puts0("open_: err 2\r\n"); return -1;}
+
+// ищем свободный FCB handle
+if (FCB[0]!=0) {puts0("open_: FCB busy\r\n"); return -1;}
+
+if (flag==O_WRITE)
+	{// пишем
+	// проверяем, есть ли такой файл
+	i=get_boot_drive();
+	if (i==0xAAAA) device=0; else device=0x80;
+
+	i=secread(device, ROOT_DIR, buffer512);
+	if (i!=1) {puts0("open_: root dir read error "); puthex(i);
+		if ((i&0xFF00)==0x0900) puts0(" (data boundary error, only for FDD)");puts0("\r\n"); return -1;}
+
+	// ищем такое же имя
+	for (i=0;i<ROOT_SIZE;i++)
+		{
+		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
+			{// not empty dir record
+		equal=1;
+		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
+		if (equal)	{// пока писать в уже существующий файл нельзя
+				puts0("open_: file exists!\r\n");
+				return -1;
+				}
+			}
+		}
+	// файла нет
+
+	for (i=0;i<ROOT_SIZE;i++)
+		{
+		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
+			{// empty dir record
+			puts0("create dir rec #");putdec(i+1);puts0("\r\n");
+			for (j=0;j<FILENAME_LEN;j++) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
+			i=secwrite(device, ROOT_DIR, buffer512);
+			if (i!=1) {puts0("open_: Root dir write error!\r\n"); return -1;}
+			FCB[0]=ROOT_DIR;
+			FCB[1]=i;
+			return 1;
+			}
+		}
+	puts0("open_: no space in root dir\r\n");
+	}
+else
+	{
+	puts0("open_: unknown flag\r\n");
+	return -1; // другие флаги пока не реализованы
+	}
 }
 
 #include "proolskript.c"

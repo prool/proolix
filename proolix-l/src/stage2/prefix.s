@@ -32,6 +32,8 @@ _start:
 	jmp	main
 
 # variables
+# human readable magick string
+
 	.ascii	" CT-Kernel ;-) "
 /*
 SectorsOnCyl:	.word	0
@@ -70,6 +72,16 @@ gCyl: .word	0,0,0,0
 gSec: .word	0,0,0,0
 gHeads: .word	0,0,0,0
 gTotal: .word	0,0,0,0
+
+/* FCB - file control block */
+/* .word = unsigned short int
+   .word twice = unsigned int */
+
+FCB:
+	.word	0	/* directory block with file */
+	.word	0	/* number file record in directory block */
+	.word	0	/* current file block */
+	.word	0,0	/* offset */
 
 basic:
 	int	$0x18

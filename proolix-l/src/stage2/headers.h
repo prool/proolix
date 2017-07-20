@@ -7,6 +7,10 @@
 #define SEEK_CUR 1
 #define SEEK_END 2
 
+#define O_READ 0
+#define O_WRITE 1
+#define O_CREAT 2
+
 // variables
 
 #if 0
@@ -45,6 +49,14 @@ extern unsigned short int gCyl[4];
 extern unsigned short int gSec[4];
 extern unsigned short int gHeads[4];
 extern unsigned short int gTotal[4];
+
+extern unsigned short int FCB [4];
+/*
+	.word	0	directory block with file
+	.word	0	number file record in directory block
+	.word	0	current file block
+	.word	0,0	offset
+*/
 
 typedef unsigned int size_t;
 
@@ -120,7 +132,9 @@ void install(void);
 void view_superblock(void);
 void ls(void);
 void create_file(void);
+void create_file2(void);
 void remove_file(void);
+int open_ (char *filename, int flag);
 
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);

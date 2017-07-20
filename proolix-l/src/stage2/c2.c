@@ -162,6 +162,7 @@ while (1)
 	else if (!strcmp(buf,"super")) view_superblock();
 	else if (!strcmp(buf,"ls")) ls();
 	else if (!strcmp(buf,"creat")) create_file();
+	else if (!strcmp(buf,"creat2")) create_file2();
 	else if (!strcmp(buf,"rm")) remove_file();
 	else
 		{
