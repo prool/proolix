@@ -1457,19 +1457,19 @@ void memmap(void)
 600 =0060:0000 - load kernel address (see src/stage2/boot.S, KernelSeg constant)\r\n\
 A0000 EGA (in graph modes)\r\n\
 B0000 MDA, Hercules 1st videopage\r\n\
-
 */
 
 puts0("\
 Memory map for Proolix-l (real mode)\r\n\
 0 - 1FF  Vectors\r\n\
 200 - 3FF free area (stack of boot sector)\r\n\
-400 - 4FF ROM BIOS data: 475: count of HDD\r\n\
-end of Kernel (CT) XXXX:");
-puthex(end_of());
-puts0("\r\n07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
+400 - 4FF ROM BIOS data: 475: count of HDD\r\n");
+puts0("07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
 07E00                      Boot sector end\r\n\
-30500 (=3050:0000) stage2 ('ct' file or kernel)\r\n\
+30000 or 30500 stage2 ('ct' file or kernel)\r\n");
+puts0("end of Kernel (CT) XXXX:");
+puthex(end_of());
+puts0("\r\n\
 MemTop (f.e. 9FFFF)\r\n\
 B8000 CGA, EGA, VGA 1st videopage (mode=3, symbol mode)\r\n\
 C8000 Additional ROM modules (2K blocks)\r\n\
@@ -1479,7 +1479,7 @@ F6000 ROM Basic\r\n\
 FE000 ROM BIOS, POST\r\n\
 FFFF0 JMP - COLD REBOOT\r\n\
 FFFF5 BIOS version/date (ASCII)\r\n\
-FFFFE PC/XT/AT identification byte\r\n\
+FFFFE PC/XT/AT identification byte\
 ");
 }
 
@@ -3095,7 +3095,7 @@ puthex(i);
 if (i==1) puts0(" no error"); else {puts0("Disk write error!\r\n"); return;}
 // write kernel (ct)
 //seg=0x60;
-seg=0x3050;
+seg=0x3000;
 off=0;
 puts0("\r\n");
 for (ii=0;ii<127;ii++)
