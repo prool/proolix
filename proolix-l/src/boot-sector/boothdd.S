@@ -78,7 +78,7 @@ start:
 	xorw	%bx,%bx
 
 	movw	$1, %ax
-	movw	$80, %cx		# number of blocks: 23 - boot, 80 - ct
+	movw	$127, %cx		# number of blocks: читаем с запасом
 
 loop1:  # Загрузка stage2 посекторно
         # имени ядра
