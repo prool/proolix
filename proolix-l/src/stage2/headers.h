@@ -52,10 +52,10 @@ extern unsigned short int gTotal[4];
 
 extern unsigned short int FCB [4];
 /*
-	.word	0	directory block with file
-	.word	0	number file record in directory block
-	.word	0	current file block
-	.word	0,0	offset
+	FCB[0]	directory block with file
+	FCB[1]	number file record in directory block
+	FCB[2]	current file block
+	FCB[3], FCB[4]	offset
 */
 
 typedef unsigned int size_t;

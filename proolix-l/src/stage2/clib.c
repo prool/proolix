@@ -1290,77 +1290,6 @@ struct BootStru *b;
 }
 #endif
 
-#if 0
-void ls (void)
-{
-char buf[512];
-unsigned char *pp;
-int i,j,k, kk, sec, total;
-struct dirent16 *d;
-char path[MAXLEN];
-
-puts0("RootBeg=");putdec(RootBeg);
-puts0("\r\nFilename    Flags    Date                Size 1stClu 1stSector\r\n");
-
-total=0;
-
-for(i=RootBeg;i<RootEnd;i++)
-    {
-    for (k=0;k<512;k++) buf[k]=0;
-    if (secread(current_drive,i,buf)!=1) puts0("Disk read error #1 ");
-    pp=buf;
-    for (j=0;j<16;j++)
-	{
-	d=(void *)pp;
-	if ((*pp==0x0E5)||(*pp==0)||(d->AttrByte&8)) {pp+=32; continue;}
-	//for (k=0;k<11;k++) putch(d->d_name[k]);
-	puts0(DirToPath(d->d_name, path));
-	kk=12-strlen(path);
-	for(k=0;k<kk;k++) putch(' ');
-#if 1
-	if (d->AttrByte&128)	putch('*'); else putch('.');
-	if (d->AttrByte& 64)	putch('*'); else putch('.');
-	if (d->AttrByte& 32)	putch('A'); else putch('.');
-	if (d->AttrByte& 16)	putch('D'); else putch('.');
-	if (d->AttrByte&  8)	putch('L'); else putch('.');
-	if (d->AttrByte&  4)	putch('S'); else putch('.');
-	if (d->AttrByte&  2)	putch('H'); else putch('.');
-	if (d->AttrByte&  1)	putch('R'); else putch('.');
-#endif
-
-// time 0000 0000 0000 0000
-//      hhhh hmmm mmms ssss
-// date 0000 0000 0000 0000
-//      yyyy yyym mmmd dddd
-
-	putch(' ');
-	putdec2((d->FileDate&0x0001FU),2,0); // day
-	putch('-');
-	putdec2((d->FileDate&0x001E0U)>>5,2,0); // month
-	putch('-');
-	putdec2(((d->FileDate&0x0FE00U)>>9)+1980,4,0); // year
-
-	putch(' ');
-	putdec2((d->FileTime&0x0F800U) >> 11,2,0); // heur
-	putch(':');
-	putdec2((d->FileTime&0x007E0U) >> 5,2,0); // min
-	putch(':');
-	putdec2((d->FileTime&0x0001FU) * 2,2,0); // sec
-	putch(' ');
-	putdec2(d->Size,7,1); // filesize
-	total+=d->Size;
-	putch(' ');
-	putdec2(sec=((d->d_fileno)&0xFFFFU),4,1); // 1st cluster
-	putch(' ');
-	putdec(SecForClu(sec)); // 1st sector
-	puts0("\r\n");
-	pp+=32;
-	}
-    }
-puts0("Total size "); putdec(total); puts("");
-}
-#endif
-
 void out_boot(void *buf)
 {int i;
 unsigned long DiskSize;
@@ -2399,263 +2328,7 @@ switch(c)
   }
 }
 
-// io - input output
-
-// FCB File Control Block:
-
-// FirstClu (0 if FCB not open)
-// CurrentPosition (in bytes)
-// Length (length of file, in bytes)
-// CurrentCluster
-
 #if 0
-int open (char *path, int flags)
-{
-char buf[512];
-unsigned char *pp;
-int i,j,k, sec;
-struct dirent16 *d;
-char dir_name[11];
-
-// searching file
-for(i=RootBeg;i<RootEnd;i++)
-    {
-    for (k=0;k<512;k++) buf[k]=0;
-    if (secread(current_drive,i,buf)!=1) {puts0("Disk read error. errno="); puthex(errno); puts("");}
-    pp=buf;
-    for (j=0;j<16;j++)
-	{
-	d=(void *)pp;
-	if ((*pp==0x0E5)||(*pp==0)||(d->AttrByte&8)) {pp+=32; continue;}
-	PathToDir(path,dir_name);
-	if (!memcmp(d->d_name,dir_name,11))
-	    {// found!
-	    for (i=0; i<MAX_FCB;i++)
-		{
-		if (FCB[i].FirstClu==0)
-		    {// i - free FCB block
-		    FCB[i].FirstClu=d->d_fileno;
-		    FCB[i].CurPos=0;
-		    FCB[i].Length=d->Size;
-		    FCB[i].CurClu=d->d_fileno;
-		    return i+3; // bikoz descriptors 0-2 is reserved (STDIN, STDOUT, STDERR)
-		    }
-		}
-	    puts0("Not free FCB\n");
-	    return -1; // not free FCB
-	    }
-	pp+=32;
-	}
-     }
-puts0("\r\nFile not found\r\n");
-return -1; // file not found
-}
-
-int reads(int fd, char *buf, int count) // read string from file
-{
-int i, j; char c;
-
-for (i=0;i<(count-1);i++)
-	{
-	j=read(fd,&c,1);
-	if ((j==0)||(c=='\r')||(c=='\n')) {*buf=0; return 1;}
-	*buf++=c;
-	}
-*buf=0;
-return 0;
-}
-
-#include "readw.c"
-
-#if 0
-int readw(int fd, char *buf, int count) // read word from file (skrypt-style)
-{
-int i, j; char c;
-
-for (i=0;i<(count-1);i++)
-	{
-	j=read(fd,&c,1);
-	if ((j==0)||(c=='\r')||(c=='\n')||(c==' ')) {*buf=0; return 1;}
-	if (c=='#')
-		{
-		while(1)
-			{
-			j=read(fd,&c,1);
-			if (j==0) {*buf=0; return 1;}
-			if ((c=='\r')||(c=='\n')) break;
-			}
-		continue;
-		}
-	if (c=='!')
-		{
-		*buf++=c;
-		for (i=1;i<(count-1);i++)
-			{
-			j=read(fd,&c,1);
-			if ((j==0)||(c=='\r')||(c=='\n')) {*buf=0; return 1;}
-			*buf++=c;
-			}
-		*buf=0;
-		return 0;
-		}
-	*buf++=c;
-	}
-*buf=0;
-return 0;
-}
-#endif
-
-int read (int fd, char *buf, int count)
-{int i,s;
-
-if (count==0) {puts("read(): err1"); return 0;}
-if (((fd-3)>MAX_FCB)||(fd<3)) {puts("read(): err1"); return 0;}
-if (FCB[fd-3].FirstClu==0) {puts0("read(): msg2\r\n"); return 0;} // FCB not open, descriptor error
-if (buf==0) {puts0("read(): msg3\r\n"); return 0;} 
-if (count>512) {puts0("read(): count>512. not implemented yet\n"); return 0;}
-if ((FCB[fd-3].CurPos+count)>FCB[fd-3].Length) count=FCB[fd-3].Length-FCB[fd-3].CurPos;
-if (count==0){/*puts("read():count==0");*/return 0;}
-
-if (count!=1) {puts0("read(): count!=1. not implemented yet\n"); return 0;}
-
-// read
-int rest=512-FCB[fd-3].CurPos % 512;
-int sector_into_cluster = (FCB[fd-3].CurPos % CluSizeBytes)/512;
-
-if (!((rest==512) && (FCB[fd-3].CurPos!=0)))
-    {// read current sector
-    s=SecForClu(FCB[fd-3].CurClu);
-    if (secread(current_drive,s,buffer512)!=1) puts0("Disk read error 3 ");
-    memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
-    FCB[fd-3].CurPos+=count;
-    return 1;
-    }
-else
-    {// read next sector
-    if (++sector_into_cluster>=CluSize)
-	{// read next cluster
-	i=NextClu(FCB[fd-3].CurClu);
-	if (i<2) {puts("read(): No next cluster"); return 0;}
-	FCB[fd-3].CurClu=i;
-    	s=SecForClu(i);
-    	if (secread(current_drive,s,buffer512)!=1) puts0("Disk read error 4 ");
-    	memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
-    	FCB[fd-3].CurPos+=count;
-    	return 1;
-	}
-    else // read next sector
-	{
-	//puts("read(): read next sector");
-    	s=SecForClu(FCB[fd-3].CurClu);
-	s+=sector_into_cluster;
-    	if (secread(current_drive,s,buffer512)!=1) puts0("Disk read error 5 ");
-    	memcpy(buf,buffer512+FCB[fd-3].CurPos%512,1);
-    	FCB[fd-3].CurPos+=count;
-    	return 1;
-	}
-    puts("read(): LOGIC BUG!!!"); return 0;
-    }
-}
-
-int lseek(int fd, int offset, int whence)
-{int i; char buf;
-if (((fd-3)>MAX_FCB)||(fd<3)) {puts("lseek(): err1"); return -1;}
-if (FCB[fd-3].FirstClu==0) {puts("lseek(): err2"); return 0;} // FCB not open, descriptor error
-switch(whence)
-	{
-	case SEEK_SET: // ot nachala
-		if (offset<0) {puts("lseek: offset<0 SEEK_SET"); return -1;}
-		if (offset==0)
-			{/* REWIND FILE */
-			FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
-			FCB[fd-3].CurPos=0;
-			return 0;
-			}
-		else	{
-			// rewind
-			FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
-			FCB[fd-3].CurPos=0;
-			// seek_set
-			for (i=0;i<offset;i++) if (read(fd,&buf,1)==0) return -1;
-			return FCB[fd-3].CurPos;
-			}
-		break;
-	case SEEK_CUR:	// ot tekushch. pos.
-			if (offset==0) return FCB[fd-3].CurPos;
-			if (offset>0)
-				{
-				for (i=0;i<offset;i++) if (read(fd,&buf,1)==0) return -1;
-				return FCB[fd-3].CurPos;
-				}
-			else // offset <0
-				{int newoffset;
-				newoffset=FCB[fd-3].CurPos+offset;
-				if (newoffset<0) return -1;
-				// rewind
-				FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
-				FCB[fd-3].CurPos=0;
-				// seek_set
-				for (i=0;i<newoffset;i++) if (read(fd,&buf,1)==0) return -1;
-				return FCB[fd-3].CurPos;
-				}
-		break;
-	case SEEK_END: // ot konca
-		if (offset>0) return -1;
-		if (offset==0)
-			{// peremotka v konec
-				// rewind
-				FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
-				FCB[fd-3].CurPos=0;
-				// seek_set
-				for (i=0;i<FCB[fd-3].Length;i++) if (read(fd,&buf,1)==0) return -1;
-				return FCB[fd-3].CurPos;
-			}
-		else // offset<0 ot konca
-			{
-				// rewind
-				FCB[fd-3].CurClu=FCB[fd-3].FirstClu;
-				FCB[fd-3].CurPos=0;
-				// seek_set
-				for (i=0;i<FCB[fd-3].Length-offset;i++)
-					if (read(fd,&buf,1)==0) return -1;
-				return FCB[fd-3].CurPos;
-			}
-		break;
-	default: puts0("lseek: whence error. whence= "); putdec(whence); puts(""); return -1;
-	}
-}
-
-void gluck(void)
-{
-char buf[MAXLEN];
-int i,j;
-char *pp;
-
-puts0("gluck(): Filename? ");
-for (i=0;i<MAXLEN;i++) buf[i]=0;
-getsn(buf,MAXLEN);
-pp=buf;
-gluck2("readme.txt");
-//gluck2(pp);
-}
-
-void gluck2(char *filename)
-{
-char buf[MAXLEN];
-int i,j;
-
-if ((i=open(filename,0))==-1) {puts0("\nFile not found\n"); return;}
-puts0("\nFile found. descr=");putdec(i);puts0("\n");
-
-while (1)
-    {
-    j=read(i,buf,1);
-    if (j==0) break;
-    putch(buf[0]); if (buf[0]=='\n') putch('\r');
-    }
-close(i);
-}
-
 void catw(void)
 {
 char buf[MAXLEN];
@@ -2807,152 +2480,6 @@ puts0(ret);
 #endif
 return ret;
 }
-
-/* NextClu() - next cluster number compute */
-unsigned long NextClu (unsigned long CluNo) /* -1 for eof or error */
-{
-unsigned long j;
-unsigned long nsect;
-unsigned short int offset;
-unsigned short i;
-
-unsigned char buff[512];
-
-#define FAT12	0
-#define FAT16	1
-#define FAT32	2
-#define FAT32LBA	3
-
-char FATMode=FAT12;
-
-//puts("NextClu()");
-
-if ((CluNo>MaxClusters)||(CluNo==0))
-  return -1;
-
-switch (FATMode)
-{
-case FAT12:
-  { /* FAT 12 */
-  /* byte number in table FAT-12 */
-  j=(CluNo*3)/2;
-  /* sector number of FAT */
-  nsect=(unsigned short int)(j/SECTOR_SIZE);
-  #ifdef DEBUG
-  printf("nsect=%i ",nsect);
-  #endif
-  /* nsect-relative sector number in FAT. 0 - first sec of FAT */
-  if (nsect>=FatSize) {puts("NextClu: Invalid FAT's computing"); return -1;}
-  if ( secread(current_drive, ResSecs+nsect, buff)!=1 )
-    {puts("\nNextClu: FAT read error 1"); return -1;}
-
-  offset=(unsigned short int)(j%SECTOR_SIZE);
-  #ifdef DEBUG
-  printf("offset=%i ",offset);
-  #endif
-  if (offset==(SECTOR_SIZE-1))
-    {unsigned char c;
-    //puts("NextClu: bayt na granitse");
-    c=buff[SECTOR_SIZE-1];
-    if ( secread(current_drive, ResSecs+nsect+1, buff) != 1 )
-      {puts("\nNextClu: FAT read error 2"); return -1;}
-    #ifdef DEBUG
-    printf("c=%04X ",c);
-    #endif
-    i=((unsigned short int)c)|
-    (((unsigned short int)(buff[0]))<<8);
-    }
-  else
-    i=(unsigned short)buff[offset] | (((unsigned short)buff[offset+1])<<8);
-  #ifdef DEBUG
-  printf("word=%04X ",i);
-  #endif
-  if (CluNo & 1)
-    {
-    #ifdef DEBUG
-    putch('n');
-    #endif
-    i>>=4;
-    }
-  else
-    {
-    #ifdef DEBUG
-    putch('c');
-    #endif
-    i&=0xfff;
-    }
-  if (i>0xff0) return -1;
-  }
-break;
-#if 0 // FAT16, 32 not implemented yet
-case FAT16:
-  { /* FAT 16 */
-  j=((long)CluNo)*2;
-  nsect=(unsigned int)(j/SECTOR_SIZE);
-  if (nsect>=FatSize) {puts("NextClu: Invalid FAT's computing"); return -1;}
-  if ( (b=LoadCache(ResSecs+nsect)) == -1U )
-    {puts("\nNextClu: FAT read error"); return -1;}
-
-  offset=(unsigned int)(j%SECTOR_SIZE);
-  i=*(int *)((*(Cache+b)).M+offset);
-  if (i>0xfff0) return -1;
-  }
-break;
-case FAT32:
-case FAT32LBA:
-  {
-  j=CluNo*4;
-  nsect=j/SECTOR_SIZE;
-  if (nsect>=FatSize) {puts("NextClu: Invalid FAT's computing"); return -1;}
-  if ( (b=LoadCache(ResSecs+nsect)) == -1U )
-    {puts("\nNextClu: FAT read error"); return -1;}
-
-  offset=(unsigned int)(j%SECTOR_SIZE);
-  i=*(long *)((*(Cache+b)).M+offset);
-  if (i>0xfffffff0L) return -1;
-  i=i&0x3FFFFFFFL;
-  }
-break;
-#endif
-default: ;
-}
-
-#if 0
-printf("%i->%i ",CluNo,i);
-#endif
-
-return i;
-}
-
-int close (int fd)
-{
-if ((fd-3)>MAX_FCB) {puts("close(): err1"); return -1;}
-FCB[fd-3].FirstClu=0;
-return 0;
-}
-
-void out_fat(void)
-{int i,j,col,line,buzy,free;
-col=0; line=0; buzy=0; free=0;
-puts("FAT:");
-for (i=2;i<MaxClusters;i++)
-    {
-    j=(NextClu(i));
-    if (j==0) {putch('.');free++;}
-    else if (j==-1) {putch('2'); buzy++;}
-    else {putch('1');buzy++;}
-    if (col==79) {puts(""); col=0; if (line==22) {puts0("press any key ");getch();line=0;puts("");} else line++;}
-    else col++;
-    }
-puts0("\r\nBuzy clusters "); putdec(buzy);
-puts0("\r\nFree clusters "); putdec(free);
-puts0("\r\nSumma         "); putdec(buzy+free);
-puts0("\r\nMax clusters  "); putdec(MaxClusters); puts0(" = Summa+2");
-puts0("\r\nFree space    "); putdec(free/2); puts0(" K");
-puts0("\r\n");
-
-}
-
 #endif
 
 void vectors(void)
@@ -3411,6 +2938,98 @@ else
 	puts0("open_: unknown flag\r\n");
 	return -1; // другие флаги пока не реализованы
 	}
+}
+
+int writec(int h, char *c)
+{
+unsigned int offset;
+unsigned short int i,device,newbl;
+unsigned char buffer512 [512];
+
+i=get_boot_drive();
+if (i==0xAAAA) device=0; else device=0x80;
+
+// проверяем, открыт ли хандлер
+if (FCB[0])
+	{// хандлер открыт
+	// проверяем, надо ли добавлять следующий блок в цепочку
+	offset=(FCB[4]<<16)|FCB[3];
+	if (offset%499==0)
+		{// надо добавлять блок
+		// ищем свободный блок на диске (до первой ошибки, которая наверное конец диска)
+		newbl=ROOT_DIR+1;
+		while(1)
+			{
+			i=secread(device, newbl, buffer512);
+			if (i!=1) {puts0("Free block seek err\r\n"); return -1;}
+			if (buffer512[0])
+				{// блок занят. ищем дальше
+				puts0("busy block "); putdec(newbl); puts0("\r\n");
+				newbl++;
+				}
+			else
+				{// нашли своб. блок
+				puts0("found free block "); putdec(newbl); puts0("\r\n");
+				break;
+				}
+			}
+		// мы добавляем первый блок файла?
+		if (FCB[2]) // FCB[2] - номер текущего блока
+			{// добавляем не первый блок
+			// пишем ссылку на новый блок в текущем блоке
+			i=secread(device, FCB[2], buffer512);
+			if (i!=1) {puts0("Sec read error!\r\n"); return -1;}
+			buffer512[1]=newbl;
+			buffer512[2]=newbl>>8;
+			i=secwrite(device, FCB[2], buffer512);
+			if (i!=1) {puts0("Sec write error!\r\n"); return -1;}
+			// пишем на диск новый блок с первым записанным в него байтом
+			for (i=0;i<512;i++)buffer512[i]=0;
+			buffer512[0]=1;
+			buffer512[3]=*c;
+			offset++;
+			i=secwrite(device, newbl, buffer512);
+			if (i!=1) {puts0("Sec write error!\r\n"); return -1;}
+			}
+		else
+			{// добавляем первый блок
+			// пишем ссылку на 1 блок файла в каталог
+			i=secread(device, ROOT_DIR, buffer512);
+			if (i!=1) {puts0("Sec read error!\r\n"); return -1;}
+			buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN]=newbl;
+			buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1]=newbl>>8;
+			i=secwrite(device, ROOT_DIR, buffer512);
+			if (i!=1) {puts0("Sec read error!\r\n"); return -1;}
+			// пишем на диск новый блок с первым записанным в него байтом
+			for (i=0;i<512;i++)buffer512[i]=0;
+			buffer512[0]=1;
+			buffer512[3]=*c;
+			offset++;
+			i=secwrite(device, newbl, buffer512);
+			if (i!=1) {puts0("Sec write error!\r\n"); return -1;}
+			}
+		}
+	else
+		{// не надо добавлять блок
+		// читаем текущий блок
+		i=secread(device, FCB[2], buffer512);
+		if (i!=1) {puts0("Sec read error!\r\n"); return -1;}
+		// пишем в него
+		offset++;
+		buffer512[offset%499+3]=*c;
+		FCB[3]=offset;
+		FCB[4]=offset>>16;
+		// пишем блок не диск
+		i=secwrite(device, FCB[2], buffer512);
+		if (i!=1) {puts0("Sec write error!\r\n"); return -1;}
+		}
+	}
+
+return -1;
+}
+
+int readc (int h, char *c)
+{
 }
 
 #include "proolskript.c"
