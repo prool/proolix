@@ -2862,7 +2862,7 @@ i=secread(device, SUPERBLOCK, buffer512);
 if (i!=1) {puts0("Superblock read error!\r\n"); return;}
 superblock = (unsigned short int *) buffer512;
 
-puts0("superblock # ");
+puts0("\r\nsuperblock # ");
 putdec(SUPERBLOCK);
 puts0("\r\nSuperblock magick = ");
 puthex(*superblock);
@@ -2958,6 +2958,8 @@ if (FCB[0])
 	if (offset%499==0)
 		{// надо добавлять блок
 		// ищем свободный блок на диске (до первой ошибки, которая наверное конец диска)
+
+			// где-то тут надо не забыть вставить код поиска блока в уже использованной области блоков или за ее пределами (где блоки могут содержать мусор!)
 		newbl=ROOT_DIR+1;
 		while(1)
 			{
