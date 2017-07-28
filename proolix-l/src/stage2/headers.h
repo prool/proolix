@@ -177,6 +177,7 @@ short int get_boot_drive(void);
 int writec(int h, char c);
 int readc (int h, char *c);
 void tofile(void);
+void tofile2(void);
 
 void pause(void);
 

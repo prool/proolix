@@ -163,6 +163,7 @@ while (1)
 	else if (!strcmp(buf,"ls")) ls();
 	else if (!strcmp(buf,"creat")) create_file2();
 	else if (!strcmp(buf,"tofile")) tofile();
+	else if (!strcmp(buf,"tofile2")) tofile2();
 	else if (!strcmp(buf,"rm")) remove_file();
 	else
 		{

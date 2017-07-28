@@ -3126,4 +3126,32 @@ for (i=0;i<MAX_LEN_STR;i++)
 	if (str[i]) {writec(0,str[i]); putch(str[i]); }
 }
 
+void tofile2(void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+
+// ввод имени файла
+puts0("file ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+i=open_(filename,O_WRITE);
+if (i==1) puts0("open OK\r\n");
+else puts0("open not ok\r\n");
+
+for (i=0;i<512;i++)
+	{writec(0,'@'); putch('@'); }
+}
+
 #include "proolskript.c"
