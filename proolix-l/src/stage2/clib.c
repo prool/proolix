@@ -2652,7 +2652,7 @@ for (i=0;i<512;i++) buffer512[i]=0;
 *(superblock+1) = 0; // type of FS
 *(superblock+2) = ROOT_DIR; // startroot
 *(superblock+3) = sectors*(heads)*(MaxCyl+1) -1 ; // end bl
-*(superblock+4) = ROOT_DIR; // end formatted bl
+*(superblock+4) = 0; // end formatted bl
 
 i=secwrite(drive, SUPERBLOCK, buffer512);
 if (i!=1) {puts0("Superblock write error!\r\n"); return;}
@@ -2944,11 +2944,12 @@ else
 int writec(int h, char *c)
 {
 unsigned int offset;
-unsigned short int i,device,newbl;
+unsigned short int i,device,newbl, end_formatted_bl;
 unsigned char buffer512 [512];
 
 i=get_boot_drive();
 if (i==0xAAAA) device=0; else device=0x80;
+newbl=0;
 
 // проверяем, открыт ли хандлер
 if (FCB[0])
@@ -2958,24 +2959,60 @@ if (FCB[0])
 	if (offset%499==0)
 		{// надо добавлять блок
 		// ищем свободный блок на диске (до первой ошибки, которая наверное конец диска)
-
-			// где-то тут надо не забыть вставить код поиска блока в уже использованной области блоков или за ее пределами (где блоки могут содержать мусор!)
-		newbl=ROOT_DIR+1;
-		while(1)
-			{
-			i=secread(device, newbl, buffer512);
-			if (i!=1) {puts0("Free block seek err\r\n"); return -1;}
-			if (buffer512[0])
-				{// блок занят. ищем дальше
-				puts0("busy block "); putdec(newbl); puts0("\r\n");
-				newbl++;
+		// еще ни один свободный блок не выдан?
+			// читаем superblock
+			i=secread(device, SUPERBLOCK, buffer512);
+			if (i!=1) {puts0("Superblock read err\r\n"); return -1;}
+			if ((buffer512[0]!=0xBE) || (buffer512[1])!=0xBE) // проверяем magick
+				{// это не суперблок, а хрень какая-то
+				printf("ERROR!!!111 Superblock corrupted!\r\n");
+				return -1;
+				}
+			end_formatted_bl=buffer512[6] & (unsigned int)buffer512[7]<<8;
+			if (end_formatted_bl==0)
+				{// не было форматирования, берем первый блок за корневым каталогом
+				newbl=ROOT_DIR+1;
+				end_formatted_bl=newbl;
+				// пишем суперблок назад
+				buffer512[6]=end_formatted_bl;
+				buffer512[5]=end_formatted_bl>>8;
+				i=secwrite(device, SUPERBLOCK, buffer512);
+				if (i!=1) {puts0("Superblock write err\r\n"); return -1;}
 				}
 			else
-				{// нашли своб. блок
-				puts0("found free block "); putdec(newbl); puts0("\r\n");
-				break;
+				{// а теперь ищем своб. блок сначала по форматированной области (по дескриптору)
+				// или потом сразу берем след. блок из неформатированной области
+				newbl=0;
+				for (j=ROOT_DIR+1; j<=end_bormatted_bl;j++)
+					{
+					i=secread(device, j, buffer512);
+					if (i!=1) {puts0("Free block read err\r\n"); return -1;}
+					if (buffer512[0])
+						{// блок занят. ищем дальше
+						puts0("busy block "); putdec(j); puts0("\r\n");
+					}
+					else
+						{// нашли своб. блок
+						newbl=j;
+						puts0("found free block "); putdec(j); puts0("\r\n");
+						break;
+						}
+					}
+				if (newbl==0)
+					{// не нашли своб. блок в отформатированной области
+					// берем след блок после отформарированной области
+					newbl=++end_formatted_bl;
+					// и пишем всё это в суперблок
+					i=secread(device, SUPERBLOCK, buffer512);
+					if (i!=1) {puts0("Superblock read err\r\n"); return -1;}
+					buffer512[6]=end_formatted_bl;
+					buffer512[5]=end_formatted_bl>>8;
+					i=secwrite(device, SUPERBLOCK, buffer512);
+					if (i!=1) {puts0("Superblock write err\r\n"); return -1;}
+					}
 				}
-			}
+
+
 		// мы добавляем первый блок файла?
 		if (FCB[2]) // FCB[2] - номер текущего блока
 			{// добавляем не первый блок
