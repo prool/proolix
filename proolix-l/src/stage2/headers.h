@@ -174,6 +174,10 @@ short int GetDriveParam_cx (char drive);
 short int GetDriveParam_dx (char drive);
 short int get_boot_drive(void);
 
+int writec(int h, char c);
+int readc (int h, char *c);
+void tofile(void);
+
 void pause(void);
 
 struct __attribute__((__packed__)) BootStru /* structure of boot sector of FAT12 and FAT16*/

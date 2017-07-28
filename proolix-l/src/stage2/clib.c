@@ -1431,7 +1431,7 @@ diskd - disk dump #2 (absolute sector)\r\n\
 skript - run prool skript\r\n\
 time - print time\r\n\
 install - install Proolix-l to other disk\r\n\
-super - view superblock ls - ls creat - create file rm - remove file\r\n\
+super - view superblock ls - ls creat - create file rm - remove file tofile - string to file\r\n\
 reboot - reboot\r\n\
 cold - cold reboot\r\n\
 hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD");
@@ -2547,6 +2547,7 @@ int MaxSectors=0;
 unsigned short int *superblock;
 unsigned char buffer512 [512];
 unsigned short int seg, off;
+int j;
 
 /* Boot sector for boot from HDD */
 /*                                      0      1     2   3    4   5 ; 4 - sec, 5 - heads     */
@@ -2642,7 +2643,6 @@ for (ii=0;ii<127;ii++)
 	if (i!=1) {puts0("Disk write error!\r\n"); return;}
 	}
 
-puts0("\r\n");
 
 // Write superblock
 superblock = (unsigned short int *) buffer512;
@@ -2668,6 +2668,17 @@ buffer512[3]='.'; // link to current dir
 
 i=secwrite(drive, ROOT_DIR, buffer512);
 if (i!=1) {puts0("Root dir write error!\r\n"); return;}
+
+#if 1 // для отладки очищаем N блоков после корневого каталога, а вообще это не нужно
+for (j=0;j<512;j++) buffer512[j]=0;
+for (j=0;j<2;j++)
+	{
+	i=secwrite(drive, ROOT_DIR+1+j, buffer512);
+	if (i!=1) {puts0("Clean sectors write error!\r\n"); return;}
+	putch('.');
+	}
+#endif
+puts0("\r\n");
 }
 
 void ls(void)
@@ -2703,15 +2714,15 @@ for (i=0;i<ROOT_SIZE;i++)
 	if (filename[0]==0) puts0("<unused>        ");
 	else for (j=0;j<FILENAME_LEN;j++) putch(filename[j]);
 	puts0(" ");
-	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j];
-	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+1];
-	puthex((c2<<8) & c1);
-	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+2];
-	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+3];
-	c3=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+4];
-	c4=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j+5];
+	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
+	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
+	putdec((c2<<8) | c1);
+	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2];
+	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3];
+	c3=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4];
+	c4=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5];
 	puts0(" ");
-	puthex_l ((((((c4<<8)&c3)<<8)&c2)>>8)&c1);
+	putdec ((((((c4<<8)|c3)<<8)|c2)>>8)|c1);
 	puts0("\r\n");
 	}
 }
@@ -2744,6 +2755,7 @@ else puts0("open not ok\r\n");
 
 }
 
+#if 0
 void create_file (void)
 {
 unsigned short int i;
@@ -2799,6 +2811,7 @@ for (i=0;i<ROOT_SIZE;i++)
 	}
 puts0("No space in root dir\r\n");
 }
+#endif
 
 void remove_file (void)
 {
@@ -2880,7 +2893,7 @@ puts0("\r\n");
 
 int open_ (char *filename, int flag)
 {
-unsigned short int i;
+unsigned short int i, ii;
 unsigned short int j;
 unsigned short int equal;
 unsigned char device;
@@ -2924,8 +2937,8 @@ if (flag==O_WRITE)
 			{// empty dir record
 			puts0("create dir rec #");putdec(i+1);puts0("\r\n");
 			for (j=0;j<FILENAME_LEN;j++) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
-			i=secwrite(device, ROOT_DIR, buffer512);
-			if (i!=1) {puts0("open_: Root dir write error!\r\n"); return -1;}
+			ii=secwrite(device, ROOT_DIR, buffer512);
+			if (ii!=1) {puts0("open_: Root dir write error!\r\n"); return -1;}
 			FCB[0]=ROOT_DIR;
 			FCB[1]=i;
 			return 1;
@@ -2940,11 +2953,10 @@ else
 	}
 }
 
-#if 1
-int writec(int h, char *c)
+int writec(int h, char c)
 {
 unsigned int offset;
-unsigned short int i,device,newbl, end_formatted_bl;
+unsigned short int i,j, device,newbl, end_formatted_bl;
 unsigned char buffer512 [512];
 
 i=get_boot_drive();
@@ -2956,6 +2968,7 @@ if (FCB[0])
 	{// хандлер открыт
 	// проверяем, надо ли добавлять следующий блок в цепочку
 	offset=(FCB[4]<<16)|FCB[3];
+	//puts0("offset=");putdec(offset);puts0("\r\n");
 	if (offset%499==0)
 		{// надо добавлять блок
 		// ищем свободный блок на диске (до первой ошибки, которая наверное конец диска)
@@ -2965,17 +2978,17 @@ if (FCB[0])
 			if (i!=1) {puts0("Superblock read err\r\n"); return -1;}
 			if ((buffer512[0]!=0xBE) || (buffer512[1])!=0xBE) // проверяем magick
 				{// это не суперблок, а хрень какая-то
-				printf("ERROR!!!111 Superblock corrupted!\r\n");
+				puts0("ERROR!!!111 Superblock corrupted!\r\n");
 				return -1;
 				}
-			end_formatted_bl=buffer512[6] & (unsigned int)buffer512[7]<<8;
+			end_formatted_bl=buffer512[8] | (unsigned int)buffer512[9]<<8;
 			if (end_formatted_bl==0)
 				{// не было форматирования, берем первый блок за корневым каталогом
 				newbl=ROOT_DIR+1;
 				end_formatted_bl=newbl;
 				// пишем суперблок назад
-				buffer512[6]=end_formatted_bl;
-				buffer512[5]=end_formatted_bl>>8;
+				buffer512[8]=end_formatted_bl;
+				buffer512[9]=end_formatted_bl>>8;
 				i=secwrite(device, SUPERBLOCK, buffer512);
 				if (i!=1) {puts0("Superblock write err\r\n"); return -1;}
 				}
@@ -2983,7 +2996,7 @@ if (FCB[0])
 				{// а теперь ищем своб. блок сначала по форматированной области (по дескриптору)
 				// или потом сразу берем след. блок из неформатированной области
 				newbl=0;
-				for (j=ROOT_DIR+1; j<=end_bormatted_bl;j++)
+				for (j=ROOT_DIR+1; j<=end_formatted_bl;j++)
 					{
 					i=secread(device, j, buffer512);
 					if (i!=1) {puts0("Free block read err\r\n"); return -1;}
@@ -3000,13 +3013,13 @@ if (FCB[0])
 					}
 				if (newbl==0)
 					{// не нашли своб. блок в отформатированной области
-					// берем след блок после отформарированной области
+					// берем след блок после отформатированной области
 					newbl=++end_formatted_bl;
 					// и пишем всё это в суперблок
 					i=secread(device, SUPERBLOCK, buffer512);
 					if (i!=1) {puts0("Superblock read err\r\n"); return -1;}
-					buffer512[6]=end_formatted_bl;
-					buffer512[5]=end_formatted_bl>>8;
+					buffer512[8]=end_formatted_bl;
+					buffer512[9]=end_formatted_bl>>8;
 					i=secwrite(device, SUPERBLOCK, buffer512);
 					if (i!=1) {puts0("Superblock write err\r\n"); return -1;}
 					}
@@ -3026,27 +3039,33 @@ if (FCB[0])
 			// пишем на диск новый блок с первым записанным в него байтом
 			for (i=0;i<512;i++)buffer512[i]=0;
 			buffer512[0]=1;
-			buffer512[3]=*c;
+			buffer512[3]=c;
 			offset++;
+			FCB[3]=offset;
+			FCB[4]=offset>>16;
 			i=secwrite(device, newbl, buffer512);
 			if (i!=1) {puts0("Sec write error!\r\n"); return -1;}
+			FCB[2]=newbl;
 			}
 		else
 			{// добавляем первый блок
 			// пишем ссылку на 1 блок файла в каталог
 			i=secread(device, ROOT_DIR, buffer512);
 			if (i!=1) {puts0("Sec read error!\r\n"); return -1;}
-			buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN]=newbl;
-			buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1]=newbl>>8;
+			buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN]=newbl;
+			buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1]=newbl>>8;
 			i=secwrite(device, ROOT_DIR, buffer512);
 			if (i!=1) {puts0("Sec read error!\r\n"); return -1;}
 			// пишем на диск новый блок с первым записанным в него байтом
 			for (i=0;i<512;i++)buffer512[i]=0;
 			buffer512[0]=1;
-			buffer512[3]=*c;
+			buffer512[3]=c;
 			offset++;
+			FCB[3]=offset;
+			FCB[4]=offset>>16;
 			i=secwrite(device, newbl, buffer512);
 			if (i!=1) {puts0("Sec write error!\r\n"); return -1;}
+			FCB[2]=newbl;
 			}
 		}
 	else
@@ -3055,8 +3074,8 @@ if (FCB[0])
 		i=secread(device, FCB[2], buffer512);
 		if (i!=1) {puts0("Sec read error!\r\n"); return -1;}
 		// пишем в него
+		buffer512[offset%499+3]=c;
 		offset++;
-		buffer512[offset%499+3]=*c;
 		FCB[3]=offset;
 		FCB[4]=offset>>16;
 		// пишем блок не диск
@@ -3071,6 +3090,40 @@ return -1;
 int readc (int h, char *c)
 {
 }
-#endif
+
+void tofile(void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+
+// ввод имени файла
+puts0("file ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+// ввод строки
+puts0("data to file ? ");
+for (i=0;i<MAX_LEN_STR;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+puts0("\r\n'"); puts0(str); puts0("'\r\n");
+
+i=open_(filename,O_WRITE);
+if (i==1) puts0("open OK\r\n");
+else puts0("open not ok\r\n");
+
+for (i=0;i<MAX_LEN_STR;i++)
+	if (str[i]) {writec(0,str[i]); putch(str[i]); }
+}
 
 #include "proolskript.c"
