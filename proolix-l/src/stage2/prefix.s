@@ -82,6 +82,7 @@ FCB:
 	.word	0	/* number file record in directory block */
 	.word	0	/* current file block */
 	.word	0,0	/* offset */
+	.word	0	/* file open mode O_CREAT, O_READ, O_APPEND */
 
 basic:
 	int	$0x18

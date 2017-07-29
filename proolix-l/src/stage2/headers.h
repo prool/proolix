@@ -10,6 +10,7 @@
 #define O_READ 0
 #define O_WRITE 1
 #define O_CREAT 2
+#define O_APPEND 3
 
 // variables
 
@@ -50,12 +51,14 @@ extern unsigned short int gSec[4];
 extern unsigned short int gHeads[4];
 extern unsigned short int gTotal[4];
 
-extern unsigned short int FCB [4];
+extern unsigned short int FCB [6];
 /*
 	FCB[0]	directory block with file
 	FCB[1]	number file record in directory block
 	FCB[2]	current file block
-	FCB[3], FCB[4]	offset
+	FCB[3],
+	FCB[4]	offset
+	FCB[5]  file mode (O_APPEND, O_READ, O_CREATE)
 */
 
 typedef unsigned int size_t;
@@ -135,6 +138,9 @@ void create_file(void);
 void create_file2(void);
 void remove_file(void);
 int open_ (char *filename, int flag);
+int close_(int h);
+int writec(int h, char c);
+int readc (int h, char *c);
 
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);
@@ -174,8 +180,6 @@ short int GetDriveParam_cx (char drive);
 short int GetDriveParam_dx (char drive);
 short int get_boot_drive(void);
 
-int writec(int h, char c);
-int readc (int h, char *c);
 void tofile(void);
 void tofile2(void);
 
