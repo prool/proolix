@@ -2907,6 +2907,12 @@ unsigned char device;
 unsigned char buffer512 [512];
 //unsigned char str[MAX_LEN_STR];
 unsigned short int rc;
+unsigned short int file_exist;
+unsigned char c1;
+unsigned short int c2;
+unsigned int c3;
+unsigned int c4;
+unsigned int file_len;
 
 if (filename==0) {puts0("open_: err 1\r\n"); return -1;}
 if (*filename==0) {puts0("open_: err 2\r\n"); return -1;}
@@ -2919,8 +2925,8 @@ FCB[2]=0;
 FCB[3]=0;
 FCB[4]=0;
 
-if (flag==O_CREAT)
-	{// пишем
+file_exist=0;
+
 	// проверяем, есть ли такой файл
 	i=get_boot_drive();
 	if (i==0xAAAA) device=0; else device=0x80;
@@ -2936,14 +2942,34 @@ if (flag==O_CREAT)
 			{// not empty dir record
 		equal=1;
 		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
-		if (equal)	{// пока писать в уже существующий файл нельзя
-				puts0("open_: file exists!\r\n");
-				return -1;
+		if (equal)	{// файл есть
+				file_exist=1;
+				FCB[0]=ROOT_DIR;
+				FCB[1]=i;
+				// first file block
+				c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
+				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
+				FCB[2]=(c2<<8) | c1;
+				// file length
+				c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2];
+				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3];
+				c3=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4];
+				c4=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5];
+				file_len=((((((c4<<8)|c3)<<8)|c2)>>8)|c1); // file len
+				FCB[6]=file_len;
+				FCB[7]=file_len>>16;
+				break;
 				}
 			}
 		}
-	// файла нет
 
+if (flag==O_CREAT)
+	{// пишем
+		if (file_exist)	{// пока писать в уже существующий файл в режиме O_CREAT нельзя
+				puts0("open_: file exists!\r\n");
+				return -1;
+				}
+	// файла нет
 	for (i=0;i<ROOT_SIZE;i++)
 		{
 		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
@@ -2958,6 +2984,14 @@ if (flag==O_CREAT)
 			}
 		}
 	puts0("open_: no space in root dir\r\n");
+	}
+else
+if (flag==O_READ)
+	{
+	if (file_exist==0) return -1;
+	// offset:=0
+	FCB[3]=0;
+	FCB[4]=0;
 	}
 else
 	{
@@ -3103,7 +3137,60 @@ return -1;
 
 int readc (int h, char *c)
 {
+unsigned short int i,j, device,newbl, end_formatted_bl;
+unsigned char buffer512 [512];
 unsigned short int rc;
+unsigned int offset, file_len, next_bl;
+
+i=get_boot_drive();
+if (i==0xAAAA) device=0; else device=0x80;
+
+// проверяем, открыт ли хандлер
+if (FCB[0])
+	{
+	// если номер блока=0 то выход
+	if (FCB[2]==0) return -1;
+	// если offset >= file_len то выход
+	offset=(FCB[4]<<16)|FCB[3];
+	file_len=(FCB[7]<<16)|FCB[6];
+	if (offset>=file_len) return -1;
+	// offset == 0 читаем текущий блок
+	// offset == [1..497] тек бл
+	if ((offset%499) || (offset==0))
+		{// читаем из тек.бл
+		// читаем текущий блок
+		rc=secread(device, FCB[2], buffer512);
+		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
+		// копируем байт из него
+		*c = buffer512[offset%499+3];
+		// инкрементируем оффсет
+		offset++;
+		FCB[3]=offset;
+		FCB[4]=offset>>16;
+		}
+	else
+		{// ищем след. бл и читаем там первый байт
+		// читаем текущий блок
+		rc=secread(device, FCB[2], buffer512);
+		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
+		next_bl=buffer512[2];
+		next_bl=next_bl<<8 | buffer512[1];
+		if (next_bl==0) // следующего блока нет
+			return -1;
+		FCB[2]=next_bl;
+		rc=secread(device, FCB[2], buffer512);
+		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
+		// копируем байт из него
+		*c = buffer512[offset%499+3];
+		// инкрементируем оффсет
+		offset++;
+		FCB[3]=offset;
+		FCB[4]=offset>>16;
+		}
+	return 0;
+	}
+else
+	return -1;
 }
 
 int close_(int h)

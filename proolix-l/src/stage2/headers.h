@@ -56,9 +56,11 @@ extern unsigned short int FCB [6];
 	FCB[0]	directory block with file
 	FCB[1]	number file record in directory block
 	FCB[2]	current file block
-	FCB[3],
-	FCB[4]	offset
+	FCB[3]  |
+	FCB[4]	| offset
 	FCB[5]  file mode (O_APPEND, O_READ, O_CREATE)
+	FCB[6]  |
+	FCB[7]  | file length (исп. в реж. O_READ и возможно в будущих O_WRITE, O_RDWR)
 */
 
 typedef unsigned int size_t;

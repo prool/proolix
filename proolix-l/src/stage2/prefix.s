@@ -83,6 +83,7 @@ FCB:
 	.word	0	/* current file block */
 	.word	0,0	/* offset */
 	.word	0	/* file open mode O_CREAT, O_READ, O_APPEND */
+	.word	0,0	/* file length */
 
 basic:
 	int	$0x18
