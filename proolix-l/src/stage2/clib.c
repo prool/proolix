@@ -2724,7 +2724,7 @@ for (i=0;i<ROOT_SIZE;i++)
 	c3=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4];
 	c4=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5];
 	puts0(" ");
-	putdec ((((((c4<<8)|c3)<<8)|c2)>>8)|c1);
+	putdec ((((((c4<<8)|c3)<<8)|c2)<<8)|c1);
 	puts0("\r\n");
 	}
 }
@@ -2956,7 +2956,7 @@ file_exist=0;
 				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3];
 				c3=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4];
 				c4=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5];
-				file_len=((((((c4<<8)|c3)<<8)|c2)>>8)|c1); // file len
+				file_len=((((((c4<<8)|c3)<<8)|c2)<<8)|c1); // file len
 				FCB[6]=file_len;
 				FCB[7]=file_len>>16;
 				goto l_1;
@@ -3271,6 +3271,7 @@ void tofile2(void)
 {
 unsigned short int i;
 unsigned short int j;
+unsigned short int n;
 unsigned short int equal;
 unsigned char device;
 unsigned char buffer512 [512];
@@ -3291,7 +3292,14 @@ i=open_(filename,O_CREAT);
 if (i==1) puts0("open OK\r\n");
 else puts0("open not ok\r\n");
 
-for (i=0;i<512;i++)
+puts0("count ? ");
+getsn(str,MAX_LEN_STR);
+
+n=atoi(str);
+
+puts0("n=");putdec(n);puts0("\r\n");
+
+for (i=0;i<n;i++)
 	{writec(0,'@'); putch('@'); }
 puts0("close rc=");putdec(close_(0));puts0("\r\n");
 }
