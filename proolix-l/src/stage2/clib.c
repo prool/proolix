@@ -2938,6 +2938,7 @@ file_exist=0;
 	// ищем такое же имя
 	for (i=0;i<ROOT_SIZE;i++)
 		{
+		putch('R');
 		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
 			{// not empty dir record
 		equal=1;
@@ -2958,11 +2959,11 @@ file_exist=0;
 				file_len=((((((c4<<8)|c3)<<8)|c2)>>8)|c1); // file len
 				FCB[6]=file_len;
 				FCB[7]=file_len>>16;
-				break;
+				goto l_1;
 				}
 			}
 		}
-
+l_1:
 if (flag==O_CREAT)
 	{// пишем
 		if (file_exist)	{// пока писать в уже существующий файл в режиме O_CREAT нельзя
@@ -2992,6 +2993,7 @@ if (flag==O_READ)
 	// offset:=0
 	FCB[3]=0;
 	FCB[4]=0;
+	return 1;
 	}
 else
 	{
@@ -3015,7 +3017,8 @@ newbl=0;
 if (FCB[0])
 	{// хандлер открыт
 	// проверяем, надо ли добавлять следующий блок в цепочку
-	offset=(FCB[4]<<16)|FCB[3];
+	offset=FCB[4];
+	offset=(offset<<16)|FCB[3];
 	//puts0("offset=");putdec(offset);puts0("\r\n");
 	if (offset%499==0)
 		{// надо добавлять блок
@@ -3126,13 +3129,14 @@ if (FCB[0])
 		offset++;
 		FCB[3]=offset;
 		FCB[4]=offset>>16;
-		// пишем блок не диск
+		// пишем блок на диск
 		rc=secwrite(device, FCB[2], buffer512);
 		if (rc!=1) {puts0("Sec write error!\r\n"); return -1;}
 		}
 	}
+else	return -1;
 
-return -1;
+return 0;
 }
 
 int readc (int h, char *c)
@@ -3289,6 +3293,37 @@ else puts0("open not ok\r\n");
 
 for (i=0;i<512;i++)
 	{writec(0,'@'); putch('@'); }
+puts0("close rc=");putdec(close_(0));puts0("\r\n");
+}
+
+void cat(void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+char c;
+int rc;
+
+// ввод имени файла
+puts0("file ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+rc=open_(filename,O_READ);
+puthex(rc);
+if (rc!=-1) puts0("open OK\r\n");
+else {puts0("open not ok\r\n");}
+
+while(readc(0,&c)==0)
+	putch(c);
+
 puts0("close rc=");putdec(close_(0));puts0("\r\n");
 }
 
