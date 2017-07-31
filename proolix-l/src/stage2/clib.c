@@ -2882,8 +2882,9 @@ rc=secread(device, SUPERBLOCK, buffer512);
 if (rc!=1) {puts0("Superblock read error!\r\n"); return;}
 superblock = (unsigned short int *) buffer512;
 
-puts0("\r\nsuperblock # ");
+puts0("superblock # ");
 putdec(SUPERBLOCK);
+
 puts0("\r\nSuperblock magick = ");
 puthex(*superblock);
 if (*superblock==0xBEBE) puts0(" OK"); else puts0(" NOT OK");
@@ -2896,6 +2897,7 @@ putdec(*(superblock+3));
 puts0("\r\nend formatted block ");
 putdec(*(superblock+4));
 puts0("\r\n");
+
 }
 
 int open_ (char *filename, int flag)

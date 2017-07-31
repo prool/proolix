@@ -4,11 +4,6 @@
 
 // global variables NOT USED! NOT WORK! BIKOZ .RSS SEGMENT NOT ADRESSED IN BIN FILE!
 
-void testchar(char *c)
-{
-*c='c';
-}
-
 #if 0
 void palette(void)
 {int i;
