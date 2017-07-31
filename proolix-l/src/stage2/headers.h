@@ -143,6 +143,7 @@ int open_ (char *filename, int flag);
 int close_(int h);
 int writec(int h, char c);
 int readc (int h, char *c);
+void dd(void);
 
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);

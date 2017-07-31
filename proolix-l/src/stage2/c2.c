@@ -161,6 +161,7 @@ while (1)
 	else if (!strcmp(buf,"tofile2")) tofile2();
 	else if (!strcmp(buf,"rm")) remove_file();
 	else if (!strcmp(buf,"cat")) cat();
+	else if (!strcmp(buf,"dd")) dd();
 	else
 		{
 		puts0("Unknown command '");

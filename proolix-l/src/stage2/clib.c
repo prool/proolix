@@ -1431,7 +1431,8 @@ diskd - disk dump #2 (absolute sector)\r\n\
 skript - run prool skript\r\n\
 time - print time\r\n\
 install - install Proolix-l to other disk\r\n\
-super - view superblock ls - ls creat - create file rm - remove file tofile - string to file\r\n\
+super - view superblock ls - ls creat - create file rm - remove file\r\n\
+tofile - string to file dd - dd\r\n\
 reboot - reboot\r\n\
 cold - cold reboot\r\n\
 hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD");
@@ -1780,8 +1781,8 @@ puts0("K\r\n");
 
 void diskd(void)
 {
-char str[MAX_LEN_STR];
-int drive, asec, ii, c, line;
+char str[MAX_LEN_STR], c;
+int drive, asec, ii, line;
 short int i;
 struct MBRstru *MBR;
 int quit;
@@ -1791,6 +1792,9 @@ int sectors, heads;
 unsigned short int SectorsOnCyl, MaxCyl;
 unsigned char buffer512 [512];
 unsigned short int total_sectors;
+unsigned short int loop;
+
+loop=0;
 
 puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
@@ -1889,13 +1893,14 @@ if (i==1) puts0(" OK");
 else {
 puts0(" err code = ");
 puthex(i);
+if (loop) return;
 }
 puts0("\r\n");
 
 ii=0;
 for (line=0;line<32;line++)
     {
-    if (line==15) {puts0(" press any key "); getch();putch('\r');}
+    if (line==15) {puts0(" press any key "); if (loop==0) getch(); putch('\r');}
     for (i=0;i<MEMD_STEP;i++)
 	{
 	c=buffer512[ii++];
@@ -1912,12 +1917,13 @@ for (line=0;line<32;line++)
     puts0("\r\n");
     }
 puts0("Next sector(q-quit,b-back,V-viewMBR,B-viewboot,?-help,otherkey-next)?\r\n");
-char c=getch();
+if (loop) c=' ';
+else c=getch();
     {int delta;
     if (c=='?')
 puts0("=Diskd help=\r\n\
 q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
-+ - skip sectors, = - go to sector, W - write\r\n");
++ - skip sectors, = - go to sector, W - write, L-loop\r\n");
     else if (c=='+') {puts0("delta? ");
 		getsn(str,MAX_LEN_STR);
 		delta=atoi(str);
@@ -1943,6 +1949,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
     else if (c=='q') quit=1;
     else if (c=='r') {delta++; delta--;} // NOP
     else if (c=='b') asec--;
+    else if (c=='L') {loop=1;}
     else if (c=='V') { // view_mbr begin
 
 		puts0("         ----Begin---------            ----End-----  Prec. sec   Total sec\r\n");
@@ -2530,6 +2537,60 @@ while(1)
 		puts0("\r\n");
 	}
 } // end while
+}
+
+void dd (void)
+{
+char str[MAX_LEN_STR];
+unsigned short int drive1, drive2, sec1, sec2, count, i;
+short int rc;
+unsigned char buffer512 [512];
+char c;
+
+puts0("drive from (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
+getsn(str,MAX_LEN_STR);
+drive1=htoi(str);
+
+puts0("\r\nsec from (dec) ? ");
+getsn(str,MAX_LEN_STR);
+sec1=atoi(str);
+
+puts0("\r\ndrive to (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
+getsn(str,MAX_LEN_STR);
+drive2=htoi(str);
+
+puts0("\r\nsec to (dec) ? ");
+getsn(str,MAX_LEN_STR);
+sec2=atoi(str);
+
+puts0("\r\ncount ? ");
+getsn(str,MAX_LEN_STR);
+count=atoi(str);
+
+puts0("\r\nfrom ");puthex(drive1);puts0("/");putdec(sec1);
+
+puts0(" to ");
+
+puthex(drive2);puts0("/");putdec(sec2);
+
+puts0(" count ");putdec(count);puts0(" blocks\r\n");
+
+puts0("WARNING! All data in all disks will be destroyed!!!\r\n");
+if ((drive2==0x80) || (drive2==0x81)) puts0("Dest. disk is HDD!!!!1\r\n");
+// are you sure
+puts0("Are You sure?? ");
+c=getch();
+if ((c!='y') && (c!='Y')) {puts0("\r\ndd aborted\r\n");return;}
+
+
+for(i=0;i<count;i++)
+	{
+	rc=secread(drive1, sec1++, buffer512);
+	if (rc!=1) {puts0("dd read error!\r\n"); return;}
+	rc=secwrite(drive2, sec2++, buffer512);
+	if (rc!=1) {puts0("dd write error!\r\n"); return;}
+	puts0("*");
+	}
 }
 
 void install (void)
