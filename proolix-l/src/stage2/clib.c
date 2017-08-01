@@ -1793,8 +1793,10 @@ unsigned short int SectorsOnCyl, MaxCyl;
 unsigned char buffer512 [512];
 unsigned short int total_sectors;
 unsigned short int loop;
+unsigned short int search_zeroes;
 
 loop=0;
+search_zeroes=0; // 0 - no search; 1 - search zero sector; 2 - search non zero sector
 
 puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
@@ -1887,7 +1889,6 @@ puts0(" ) ");
 for(i=0;i<512;i++) buffer512[i]='~';
 
 i=secread(drive, asec, buffer512);
-//i=readsec0(drive, SecOnTrk, Head, Track, buffer512);
 
 if (i==1) puts0(" OK");
 else {
@@ -1916,14 +1917,27 @@ for (line=0;line<32;line++)
 	}
     puts0("\r\n");
     }
-puts0("Next sector(q-quit,b-back,V-viewMBR,B-viewboot,?-help,otherkey-next)?\r\n");
-if (loop) c=' ';
+if (loop==0) puts0("Next sector(q-quit,b-back,V-viewMBR,B-viewboot,?-help,otherkey-next)?\r\n");
+if (loop)
+	{
+	c=' ';
+	if (search_zeroes==1)
+		{int summa;
+		summa=0;
+		for (i=0;i<512;i++) summa+=buffer512[i];
+		if (summa==0) {loop=0;search_zeroes=0;c='r';}
+		}
+	else if (search_zeroes==2)
+		{
+		for (i=0;i<512;i++) if (buffer512[i]) {loop=0;search_zeroes=0;c='r';break;}
+		}
+	}
 else c=getch();
     {int delta;
     if (c=='?')
-puts0("=Diskd help=\r\n\
+    puts0("=Diskd help=\r\n\
 q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
-+ - skip sectors, = - go to sector, W - write, L-loop\r\n");
++ - skip sectors, = - go to sector, W - write, L-loop,\r\nz - search zero, Z - search nonzero\r\n");
     else if (c=='+') {puts0("delta? ");
 		getsn(str,MAX_LEN_STR);
 		delta=atoi(str);
@@ -1950,6 +1964,8 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
     else if (c=='r') {delta++; delta--;} // NOP
     else if (c=='b') asec--;
     else if (c=='L') {loop=1;}
+    else if (c=='z') {loop=1; search_zeroes=1;}
+    else if (c=='Z') {loop=1; search_zeroes=2;}
     else if (c=='V') { // view_mbr begin
 
 		puts0("         ----Begin---------            ----End-----  Prec. sec   Total sec\r\n");

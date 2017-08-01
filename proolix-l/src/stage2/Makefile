@@ -11,7 +11,7 @@ VMDISK=/home/prool/VirtualBox\ VMs/proolix1/proolix1.vhd
 VMFLOPPY = ../../diskette.img
 FLASHDEVICE = /dev/sdb1
 FLASHPHYDEVICE = /dev/sdb
-FLASHDIR = /media/prool/EFA5-80C7
+FLASHDIR = /media/prool/202B-A342
 
 ASFLAG =
 
