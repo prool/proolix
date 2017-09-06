@@ -38,9 +38,9 @@ while(1)
 	}
 
 if (buf[0]==0) {console=1; puts("quit for quit");}
-else if ((file=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
+else if ((file=open_(buf,O_READ))==-1) {puts0("\r\nFile not found: '"); puts0(buf); puts0("'"); return;}
 
-puts0("\r\nProol Skript Interpterer v.2.1\r\n");
+puts0("\r\nProol Skript Interpterer v.2.1.1\r\n");
 puts0("MAXFAJL = "); putdec(MAXFAJL); puts("\r\n");
 
 l_begin: ;
@@ -52,6 +52,7 @@ faylp=0;
 while(1)
 	{
 	j=readw(file,buf1,MAXLEN1);
+	puts0("debug: readw '"); puts0(buf1); puts0("'\r\n");
 	if (buf1[0])
 		{
 		if (buf1[0]=='#') continue;
@@ -60,7 +61,7 @@ while(1)
 		}
 	else if (j==0) break;
 	}
-close(file);
+close_(file);
 }
 else	{
 #ifdef PROOLSKRIPT_IN_LINUX

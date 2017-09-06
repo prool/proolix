@@ -513,6 +513,10 @@ end_of: # short int end_of (void)
 	lea	EndOfCT,%ax
 	ret
 
+get_sp: # short int get_ip(void)
+	movw	%sp,%ax
+	ret
+
 get_rtc:
 	movb	$0x02, %ah
 	int $0x1A

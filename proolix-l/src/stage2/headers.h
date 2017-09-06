@@ -89,6 +89,7 @@ int peek (int addr);
 short int peek2(short int seg, short int offset);
 void poke(char value, short int seg, short int offset);
 unsigned short int end_of (void);
+unsigned short int get_sp (void);
 short int get_rtc(void);
 short int get_day(void);
 short int get_year(void);

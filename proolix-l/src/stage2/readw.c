@@ -5,13 +5,13 @@ int i, j; char c;
 
 for (i=0;i<(count-1);i++)
 	{
-	j=read(fd,&c,1);
+	j=readc(fd,&c);
 	if ((j==0)||(c=='\r')||(c=='\n')||(c==' ')) {*buf=0; return j;}
 	if (c=='#')
 		{
 		while(1)
 			{
-			j=read(fd,&c,1);
+			j=readc(fd,&c);
 			if (j==0) {*buf=0; return j;}
 			if ((c=='\r')||(c=='\n')) break;
 			}
@@ -22,7 +22,7 @@ for (i=0;i<(count-1);i++)
 		*buf++=c;
 		for (i=1;i<(count-1);i++)
 			{
-			j=read(fd,&c,1);
+			j=readc(fd,&c);
 			if ((j==0)||(c=='\r')||(c=='\n')) {*buf=0; return j;}
 			*buf++=c;
 			}

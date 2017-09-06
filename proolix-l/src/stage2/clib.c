@@ -1377,6 +1377,7 @@ puts0("\r\nsize of int ");putdec(sizeof(int));
 puts0("\r\nsize of long int ");putdec(sizeof(long int));
 puts0("\r\nsize of short int ");putdec(sizeof(short int));
 puts0("\r\nsize of char ");putdec(sizeof(char));
+puts0("\r\n\r\nSP=");puthex(get_sp());
 puts0("\r\n");
 print_boot();
 }
@@ -1432,9 +1433,9 @@ skript - run prool skript\r\n\
 time - print time\r\n\
 install - install Proolix-l to other disk\r\n\
 super - view superblock ls - ls creat - create file rm - remove file\r\n\
-tofile - string to file dd - dd\r\n\
-reboot - reboot\r\n\
-cold - cold reboot\r\n\
+tofile - string to file tofile2 - debuggin command dd - dd\r\n\
+cat - cat file\r\n\
+reboot - reboot cold - cold reboot\r\n\
 hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD");
 }
 
@@ -2996,6 +2997,9 @@ unsigned int file_len;
 if (filename==0) {puts0("open_: err 1\r\n"); return -1;}
 if (*filename==0) {puts0("open_: err 2\r\n"); return -1;}
 
+puts0("debug open_ '"); puts0(filename); puts0("'\r\n");
+puts0("debug open_ SP="); puthex(get_sp()); puts0("\r\n");
+
 // ищем свободный FCB handle
 if (FCB[0]!=0) {puts0("open_: FCB busy\r\n"); return -1;}
 
@@ -3008,7 +3012,7 @@ file_exist=0;
 
 	// проверяем, есть ли такой файл
 	i=get_boot_drive();
-	if (i==0xAAAA) device=0; else device=0x80;
+	if (i==0xAAAA) device=0; else {device=0x80;puts0("debug open_ device=80\r\n");}
 
 	rc=secread(device, ROOT_DIR, buffer512);
 	if (rc!=1) {puts0("open_: root dir read error "); puthex(rc);
@@ -3017,13 +3021,14 @@ file_exist=0;
 	// ищем такое же имя
 	for (i=0;i<ROOT_SIZE;i++)
 		{
-		putch('R');
+		putch('R'); /* debug */
 		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
 			{// not empty dir record
 		equal=1;
 		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
 		if (equal)	{// файл есть
 				file_exist=1;
+				puts0("debug: open_: file exists\r\n");
 				FCB[0]=ROOT_DIR;
 				FCB[1]=i;
 				// first file block
@@ -3054,7 +3059,7 @@ if (flag==O_CREAT)
 		{
 		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
 			{// empty dir record
-			puts0("create dir rec #");putdec(i+1);puts0("\r\n");
+			/*puts0("create dir rec #");putdec(i+1);puts0("\r\n");*/
 			for (j=0;j<FILENAME_LEN;j++) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
 			rc=secwrite(device, ROOT_DIR, buffer512);
 			if (rc!=1) {puts0("open_: Root dir write error!\r\n"); return -1;}
@@ -3132,12 +3137,12 @@ if (FCB[0])
 					if (rc!=1) {puts0("Free block read err\r\n"); return -1;}
 					if (buffer512[0])
 						{// блок занят. ищем дальше
-						puts0("busy block "); putdec(j); puts0("\r\n");
+						/*puts0("busy block "); putdec(j); puts0("\r\n");*/
 					}
 					else
 						{// нашли своб. блок
 						newbl=j;
-						puts0("found free block "); putdec(j); puts0("\r\n");
+						/*puts0("found free block "); putdec(j); puts0("\r\n");*/
 						break;
 						}
 					}
@@ -3337,13 +3342,13 @@ getsn(str,MAX_LEN_STR);
 puts0("\r\n'"); puts0(str); puts0("'\r\n");
 
 i=open_(filename,O_CREAT);
-if (i==1) puts0("open OK\r\n");
+if (i==1) {/*puts0("open OK\r\n");*/}
 else puts0("open not ok\r\n");
 
 for (i=0;i<MAX_LEN_STR;i++)
 	if (str[i]) {writec(0,str[i]); putch(str[i]); }
 
-puts0("close rc=");putdec(close_(0));puts0("\r\n");
+close_(0);
 }
 
 void tofile2(void)
@@ -3404,14 +3409,15 @@ filename[FILENAME_LEN]=0;
 puts0("\r\n'"); puts0(filename); puts0("'\r\n");
 
 rc=open_(filename,O_READ);
-puthex(rc);
-if (rc!=-1) puts0("open OK\r\n");
-else {puts0("open not ok\r\n");}
+//puthex(rc);
+if (rc!=-1) {/*puts0("open OK\r\n");*/}
+else {puts0("can't open file\r\n"); return;}
 
 while(readc(0,&c)==0)
 	putch(c);
 
-puts0("close rc=");putdec(close_(0));puts0("\r\n");
+close_(0);
 }
 
+#include "readw.c"
 #include "proolskript.c"

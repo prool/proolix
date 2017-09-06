@@ -12,7 +12,7 @@ set_color(7); puts0("end of palette");
 }
 #endif
 
-#if 1 // ЗАГЛУШКИ
+#if 0 // ЗАГЛУШКИ
 int open (char *filename, int flag)
 {
 return -1;
