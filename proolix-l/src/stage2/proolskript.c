@@ -40,7 +40,7 @@ while(1)
 if (buf[0]==0) {console=1; puts("quit for quit");}
 else if ((file=open_(buf,O_READ))==-1) {puts0("\r\nFile not found: '"); puts0(buf); puts0("'"); return;}
 
-puts0("\r\nProol Skript Interpterer v.2.1.1\r\n");
+puts0("\r\nProol Skript Interpterer v.2.2\r\n");
 puts0("MAXFAJL = "); putdec(MAXFAJL); puts("\r\n");
 
 l_begin: ;
@@ -124,6 +124,11 @@ while(1/*fayl[faylp]*/)
 		if ((buf[0]!='#')&&(buf[0]!=0)) 
 			{
 			if(buf[0]=='!') puts0(buf+1);
+			else if (buf[0]=='\'')
+				{
+				for (i=0;i<MAXSTACK-1;i++) stack[i]=stack[i+1];
+				stack[MAXSTACK-1]=buf[1];
+				}
 			else if (isdigit(buf[0]))
 				{
 				for (i=0;i<MAXSTACK-1;i++) stack[i]=stack[i+1];
