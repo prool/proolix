@@ -52,7 +52,7 @@ faylp=0;
 while(1)
 	{
 	j=readw(file,buf1,MAXLEN1);
-	puts0("debug: readw '"); puts0(buf1); puts0("'\r\n");
+	//puts0("debug: readw '"); puts0(buf1); puts0("'\r\n");
 	if (buf1[0])
 		{
 		if (buf1[0]=='#') continue;

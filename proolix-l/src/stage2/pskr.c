@@ -2,6 +2,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #define MAXLEN 256
 #define puts0(STR) printf("%s",STR)
@@ -12,6 +16,18 @@
 #define peek(ADR) 0
 #define peek2(SEG,OFFSET) 0
 #define putch(a) putchar(a)
+
+#define open_ open
+#define close_ close
+
+#define O_READ 0
+
+int readc (int h, char *c)
+{int i;
+i=read(h,c,1);
+if (i==1) return 0;
+else return -1;
+}
 
 #include "readw.c"
 

@@ -6,13 +6,13 @@ int i, j; char c;
 for (i=0;i<(count-1);i++)
 	{
 	j=readc(fd,&c);
-	if ((j==0)||(c=='\r')||(c=='\n')||(c==' ')) {*buf=0; return j;}
+	if ((j==-1)||(c=='\r')||(c=='\n')||(c==' ')) {*buf=0; return 0;}
 	if (c=='#')
 		{
 		while(1)
 			{
 			j=readc(fd,&c);
-			if (j==0) {*buf=0; return j;}
+			if (j==-1) {*buf=0; return 0;}
 			if ((c=='\r')||(c=='\n')) break;
 			}
 		continue;
@@ -23,7 +23,7 @@ for (i=0;i<(count-1);i++)
 		for (i=1;i<(count-1);i++)
 			{
 			j=readc(fd,&c);
-			if ((j==0)||(c=='\r')||(c=='\n')) {*buf=0; return j;}
+			if ((j==-1)||(c=='\r')||(c=='\n')) {*buf=0; return 0;}
 			*buf++=c;
 			}
 		*buf=0;

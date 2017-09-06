@@ -2997,8 +2997,8 @@ unsigned int file_len;
 if (filename==0) {puts0("open_: err 1\r\n"); return -1;}
 if (*filename==0) {puts0("open_: err 2\r\n"); return -1;}
 
-puts0("debug open_ '"); puts0(filename); puts0("'\r\n");
-puts0("debug open_ SP="); puthex(get_sp()); puts0("\r\n");
+//puts0("debug open_ '"); puts0(filename); puts0("'\r\n");
+//puts0("debug open_ SP="); puthex(get_sp()); puts0("\r\n");
 
 // ищем свободный FCB handle
 if (FCB[0]!=0) {puts0("open_: FCB busy\r\n"); return -1;}
@@ -3012,23 +3012,26 @@ file_exist=0;
 
 	// проверяем, есть ли такой файл
 	i=get_boot_drive();
-	if (i==0xAAAA) device=0; else {device=0x80;puts0("debug open_ device=80\r\n");}
+	if (i==0xAAAA) device=0; else {device=0x80;/*puts0("debug open_ device=80\r\n");*/}
 
 	rc=secread(device, ROOT_DIR, buffer512);
 	if (rc!=1) {puts0("open_: root dir read error "); puthex(rc);
 		if ((rc&0xFF00)==0x0900) puts0(" (data boundary error, only for FDD)");puts0("\r\n"); return -1;}
 
+	//for (i=0;i<512; i++) putch(buffer512[i]); // debug 
+
 	// ищем такое же имя
 	for (i=0;i<ROOT_SIZE;i++)
 		{
-		putch('R'); /* debug */
+		//putch('R'); /* debug */
 		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
 			{// not empty dir record
 		equal=1;
 		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
+						else if (filename[j]==0) break; // prool: bugfix!
 		if (equal)	{// файл есть
 				file_exist=1;
-				puts0("debug: open_: file exists\r\n");
+				//puts0("debug: open_: file exists\r\n");
 				FCB[0]=ROOT_DIR;
 				FCB[1]=i;
 				// first file block
