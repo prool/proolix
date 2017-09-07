@@ -154,6 +154,7 @@ while (1)
 	else if (!strcmp(buf,"scr")) screensaver();
 	else if (!strcmp(buf,"time")) time();
 	else if (!strcmp(buf,"install")) install();
+	else if (!strcmp(buf,"format")) format();
 	else if (!strcmp(buf,"super")) view_superblock();
 	else if (!strcmp(buf,"ls")) ls();
 	else if (!strcmp(buf,"creat")) create_file2();

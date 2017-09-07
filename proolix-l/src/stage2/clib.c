@@ -1431,7 +1431,7 @@ diskd0 - disk dump #1 (sector/head/track)\r\n\
 diskd - disk dump #2 (absolute sector)\r\n\
 skript - run prool skript\r\n\
 time - print time\r\n\
-install - install Proolix-l to other disk\r\n\
+install - install Proolix-l to other disk format - format filesystem\r\n\
 super - view superblock ls - ls creat - create file rm - remove file\r\n\
 tofile - string to file tofile2 - debuggin command dd - dd\r\n\
 cat - cat file\r\n\
@@ -2635,7 +2635,8 @@ unsigned short int boothdd [256] = {0xAEB,0x424D,0xD52,0xA,0x11,0x4,0xD3E8,0xB40
 puts0("Proolix-l installator\r\n");
 
 // ask drive number
-puts0("drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
+puts0("Proolix kernel installator. (Temporarily work only with 0x80 drive!)\r\n\
+drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
 getsn(str,MAX_LEN_STR);
 drive=htoi(str);
 
@@ -2736,6 +2737,7 @@ for (i=0;i<512;i++) buffer512[i]=0;
 rc=secwrite(drive, SUPERBLOCK, buffer512);
 if (rc!=1) {puts0("Superblock write error!\r\n"); return;}
 
+#if 0
 // Write root dir
 for (i=0;i<512;i++) buffer512[i]=0;
 buffer512[0]=1; // block used
@@ -2748,7 +2750,7 @@ buffer512[3]='.'; // link to current dir
 rc=secwrite(drive, ROOT_DIR, buffer512);
 if (rc!=1) {puts0("Root dir write error!\r\n"); return;}
 
-#if 1 // для отладки очищаем N блоков после корневого каталога, а вообще это не нужно
+#if 0 // для отладки очищаем N блоков после корневого каталога, а вообще это не нужно
 for (j=0;j<512;j++) buffer512[j]=0;
 for (j=0;j<2;j++)
 	{
@@ -2758,6 +2760,122 @@ for (j=0;j<2;j++)
 	}
 #endif
 puts0("\r\n");
+#endif
+}
+
+void format (void)
+{
+char str[MAX_LEN_STR];
+int drive, asec, ii, jj, c, line;
+short int i;
+struct MBRstru *MBR;
+int quit;
+int Track, SecNoOnCyl, Head, SecOnTrk;
+unsigned short int reg_bx, reg_cx, reg_dx;
+int sectors, heads;
+unsigned short int SectorsOnCyl, MaxCyl;
+int MaxSectors=0;
+unsigned short int *superblock;
+unsigned char buffer512 [512];
+unsigned short int seg, off;
+int j;
+unsigned short int rc;
+
+// ask drive number
+puts0("format drive (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
+getsn(str,MAX_LEN_STR);
+drive=htoi(str);
+
+// get drive parameters
+{
+puts0("\r\ntest drive ");
+puthex_b(drive);
+reg_bx=GetDriveParam_bx(drive);
+if (reg_bx==0xFFFF)
+	{
+	puts0("\r\n error code = ");
+	puthex(i);
+	puts0("\r\n");
+	return;
+	}
+reg_cx=GetDriveParam_cx(drive);
+reg_dx=GetDriveParam_dx(drive);
+
+print_drive_type(reg_bx & 0xFFU);
+
+MaxCyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
+
+puts0(" cyl = ");
+putdec(MaxCyl);
+
+sectors = reg_cx &0x3FU;
+
+puts0(" sec = ");
+putdec(sectors);
+
+heads = ((reg_dx & 0xFF00U) >> 8)&0xFFU;
+heads++;
+
+puts0(" heads = ");
+putdec(heads);
+
+puts0(" number of drives = ");
+putdec(reg_dx & 0xFFU);
+
+puts0(" size = ");
+putdec(sectors*(heads)*(MaxCyl+1)/2);
+puts0("K\r\n");
+
+  SectorsOnCyl=heads*sectors;
+
+if (sectors==0) {puts0(" error: sectors==0\r\n");return;}
+}
+// write warning
+puts0("WARNING! All files in destination disk will be destroyed!!!\r\n");
+if ((drive==0x80) || (drive==0x81)) puts0("Dest. disk is HDD!!!!1\r\n");
+// are you sure
+puts0("Are You sure?? ");
+c=getch();
+if ((c!='y') && (c!='Y')) {puts0("\r\nformat aborted\r\n");return;}
+puts0("\r\nformat started!\r\n");
+
+// Write superblock
+superblock = (unsigned short int *) buffer512;
+
+for (i=0;i<512;i++) buffer512[i]=0;
+*superblock = 0xBEBE; // magick
+*(superblock+1) = 0; // type of FS
+*(superblock+2) = ROOT_DIR; // startroot
+*(superblock+3) = sectors*(heads)*(MaxCyl+1) -1 ; // end bl
+*(superblock+4) = 0; // end formatted bl
+
+rc=secwrite(drive, SUPERBLOCK, buffer512);
+if (rc!=1) {puts0("Superblock write error!\r\n"); return;}
+
+#if 1
+// Write root dir
+for (i=0;i<512;i++) buffer512[i]=0;
+buffer512[0]=1; // block used
+
+//buffer512[1]=1; // next block=0
+//buffer512[2]=1; // 
+
+buffer512[3]='.'; // link to current dir
+
+rc=secwrite(drive, ROOT_DIR, buffer512);
+if (rc!=1) {puts0("Root dir write error!\r\n"); return;}
+
+#if 0 // для отладки очищаем N блоков после корневого каталога, а вообще это не нужно
+for (j=0;j<512;j++) buffer512[j]=0;
+for (j=0;j<2;j++)
+	{
+	rc=secwrite(drive, ROOT_DIR+1+j, buffer512);
+	if (rc!=1) {puts0("Clean sectors write error!\r\n"); return;}
+	putch('.');
+	}
+#endif
+puts0("\r\n");
+#endif
 }
 
 void ls(void)
@@ -3252,6 +3370,7 @@ if (FCB[0])
 		// читаем текущий блок
 		rc=secread(device, FCB[2], buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
+			//int i0; puts0("debug: readc(): [");for (i0=1;i0<256;i0++) putch(buffer512[i0]);puts0(" ] ");
 		// копируем байт из него
 		*c = buffer512[offset%499+3];
 		// инкрементируем оффсет
@@ -3286,7 +3405,7 @@ else
 
 int close_(int h)
 {
-unsigned int i, offset;
+unsigned short int i, offset;
 unsigned char buffer512[512], device;
 unsigned short int rc;
 
@@ -3294,7 +3413,7 @@ unsigned short int rc;
 if (FCB[0]==0) return -1;
 
 i=get_boot_drive();
-if (i==0xAAAA) device=0; else device=0x80;
+if (i==0xAAAA) {/*puts0("debug close_ device 0\r\n"); */device=0;} else {/*puts0("debug close_ device 80\r\n");*/ device=0x80;}
 
 // сохраняем в каталожную запись длину файла (текущий оффсет)
 if ((FCB[5]==O_CREAT) || (FCB[5]==O_APPEND) || (FCB[5]==O_WRITE))
@@ -3304,6 +3423,7 @@ if ((FCB[5]==O_CREAT) || (FCB[5]==O_APPEND) || (FCB[5]==O_WRITE))
 		if (rc!=1) {puts0("Dir read error!\r\n"); return -1;}
 	// пишем туда длину (оффсет)
 		offset=(FCB[4]<<16)|FCB[3];
+		//puts0("debug close_() offset=");putdec(offset);puts0("\r\n");
 		buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2]=offset;
 		buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3]=offset>>8;
 		buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4]=offset>>16;

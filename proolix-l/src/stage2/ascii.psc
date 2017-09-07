@@ -1,0 +1,9 @@
+256 1 label
+32
+.c
+dup
+256
+swap
+-
+.c
+1 loop

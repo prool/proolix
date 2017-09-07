@@ -135,6 +135,7 @@ void skript(void);
 void vectors(void);
 void screensaver(void);
 void install(void);
+void format(void);
 void view_superblock(void);
 void ls(void);
 void create_file(void);
