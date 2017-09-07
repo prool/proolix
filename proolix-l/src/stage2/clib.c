@@ -3074,7 +3074,7 @@ unsigned char device;
 unsigned char buffer512 [512];
 unsigned char filename[FILENAME_LEN+2];
 unsigned char str[MAX_LEN_STR];
-unsigned short int rc;
+unsigned short int rc, c1, c2, current_block, next_block;
 
 // ввод имени файла
 puts0("filename ? ");
@@ -3105,6 +3105,31 @@ for (i=0;i<ROOT_SIZE;i++)
 				buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]=0;
 				rc=secwrite(device, ROOT_DIR, buffer512);
 				if (rc!=1) {puts0("Root dir write error!\r\n"); return;}
+				// находим первый блок файла
+				c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
+				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
+				current_block=(c2<<8) | c1;
+
+				while (1)
+				{
+				puts0("debug rm 1st block "); putdec(current_block); puts0("\r\n");
+				// находим следующий блок
+				rc=secread(device, current_block, buffer512);
+				if (rc!=1) {puts0("block read error!\r\n"); return;}
+				c1=buffer512[1];
+				c2=buffer512[2];
+				next_block=(c2<<8) | c1;
+				// чистим блок файла
+				buffer512[0]=0;
+				//buffer512[1]=0;
+				//buffer512[2]=0;
+				rc=secwrite(device, current_block, buffer512);
+				if (rc!=1) {puts0("block write error!\r\n"); return;}
+				if (next_block==0) break;
+				else current_block=next_block;
+				// повторить
+				} // end while (1)
+
 				return;
 				}
 		}
