@@ -3110,7 +3110,7 @@ for (i=0;i<ROOT_SIZE;i++)
 				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
 				current_block=(c2<<8) | c1;
 
-				while (1)
+				if (current_block) while (1)
 				{
 				puts0("debug rm 1st block "); putdec(current_block); puts0("\r\n");
 				// находим следующий блок
