@@ -2925,6 +2925,56 @@ for (i=0;i<ROOT_SIZE;i++)
 	}
 }
 
+void create_file3(void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+int first_line;
+
+// ввод имени файла
+puts0("file ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+i=open_(filename,O_CREAT);
+if (i==1) {/*puts0("open OK\r\n");*/}
+else {puts0("open not ok\r\n"); return;}
+
+first_line=1;
+
+while (1)
+{
+// ввод строки
+puts0("data to file (] - end of text) ? ");
+for (i=0;i<MAX_LEN_STR;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+puts0("\r\n'"); puts0(str); puts0("'\r\n");
+
+if (str[0]==']') break;
+
+if (first_line==0) writec(0,'\n');
+else first_line=0;
+
+for (i=0;i<MAX_LEN_STR;i++)
+	if (str[i]) {writec(0,str[i]); putch(str[i]); }
+	else break;
+} // end while (1)
+
+close_(0);
+}
+
+#if 0
 void create_file2(void)
 {
 unsigned short int i;
@@ -2955,6 +3005,7 @@ else puts0("open not ok\r\n");
 puts0("close rc=");putdec(close_(0));puts0("\r\n");
 
 }
+#endif
 
 #if 0
 void create_file (void)
@@ -3537,7 +3588,7 @@ if (rc!=-1) {/*puts0("open OK\r\n");*/}
 else {puts0("can't open file\r\n"); return;}
 
 while(readc(0,&c)==0)
-	putch(c);
+	if (c=='\n') puts0("\r\n"); else putch(c);
 
 close_(0);
 }

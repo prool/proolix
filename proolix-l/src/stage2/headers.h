@@ -140,6 +140,7 @@ void view_superblock(void);
 void ls(void);
 void create_file(void);
 void create_file2(void);
+void create_file3(void);
 void remove_file(void);
 int open_ (char *filename, int flag);
 int close_(int h);
