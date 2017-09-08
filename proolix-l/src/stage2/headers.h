@@ -75,6 +75,7 @@ int puts(char *s);
 void putch_color(char c, char attrib);
 void puthex(int c);
 void puthex_l(int c);
+void puthex_b(char c);
 void putdec(int);
 void putdec2(int, int, int);
 int getch(void);
