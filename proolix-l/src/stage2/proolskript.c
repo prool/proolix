@@ -166,6 +166,11 @@ while(1/*fayl[faylp]*/)
 				stack[MAXSTACK-1]=peek2(stack[MAXSTACK-2],stack[MAXSTACK-1]);
 				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
 				}
+			else if (!strcmp(buf,"poke")) // Usage: segment offset value POKE
+				{
+				poke(/*value, segment, offset */ stack[MAXSTACK-1], stack[MAXSTACK-3], stack[MAXSTACK-2]);
+				for (i=MAXSTACK-1;i>2;i--) stack[i]=stack[i-3];
+				}
 			else if (!strcmp(buf,"putchcolor"))
 				{
 				putch_color(stack[MAXSTACK-1],stack[MAXSTACK-2]);
