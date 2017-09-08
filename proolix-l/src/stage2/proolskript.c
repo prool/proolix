@@ -40,7 +40,7 @@ while(1)
 if (buf[0]==0) {console=1; puts("quit for quit");}
 else if ((file=open_(buf,O_READ))==-1) {puts0("\r\nFile not found: '"); puts0(buf); puts0("'"); return;}
 
-puts0("\r\nProol Skript Interpterer v.2.2\r\n");
+puts0("\r\nProolSkript Interpterer v.2.2.1\r\n");
 puts0("MAXFAJL = "); putdec(MAXFAJL); puts("\r\n");
 
 l_begin: ;
@@ -135,7 +135,7 @@ while(1/*fayl[faylp]*/)
 				if (mode==DEC) stack[MAXSTACK-1]=atoi(buf);
 				else stack[MAXSTACK-1]=htoi(buf);
 				}
-			else if (!strcmp(buf,"test")) puts("TEST OK");
+			//else if (!strcmp(buf,"test")) puts("TEST OK");
 			else if (!strcmp(buf,"newline")) puts("");
 			else if (!strcmp(buf,"inputstring")) getsn(buf1,MAXLEN1);
 			else if (!strcmp(buf,"outputstring")) puts0(buf1);
@@ -165,6 +165,11 @@ while(1/*fayl[faylp]*/)
 				{
 				stack[MAXSTACK-1]=peek2(stack[MAXSTACK-2],stack[MAXSTACK-1]);
 				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
+				}
+			else if (!strcmp(buf,"putchcolor"))
+				{
+				putch_color(stack[MAXSTACK-1],stack[MAXSTACK-2]);
+				for (i=MAXSTACK-1;i>1;i--) stack[i]=stack[i-2];
 				}
 			else if (!strcmp(buf,"+"))
 				{
