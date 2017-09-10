@@ -12,19 +12,20 @@ set_color(7); puts0("end of palette");
 }
 #endif
 
-#if 0 // ЗАГЛУШКИ
-int open (char *filename, int flag)
-{
-return -1;
-}
-int close(int descriptor)
-{
-return 0;
-}
-int readw(int fd, char *buf, int count)
-{
-return 0;
-}
+#ifdef PEMU // code for Proolix emulator under Linux
+#include <stdio.h>
+#include <string.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include "liblinux.c"
+#include "libemu.c"
+
+int disk_a;
+
 #endif
 
 void time(void)
@@ -56,7 +57,11 @@ puts0("? - for help\r\n");
 puts0("End of code "); puthex(end_of()); puts0(" = "); putdec(end_of()); puts0("\r\n");
 }
 
+#ifndef PEMU
 void main(void)
+#else
+int main (int argc, char **argv)
+#endif
 {
 char buf [BUFLEN];
 int i,j;
@@ -67,6 +72,18 @@ unsigned short int cyl, sectors, heads, total_sec;
 
 //putch('/');
 putch_color('@', 4);
+
+#ifdef PEMU
+puts0("\nProolix emulator. quit for quit\n");
+
+if (argc!=2) {puts0("Usage: pemu fddimage\n"); return 1;}
+
+printf("disk A = '%s'\n", argv[1]);
+
+disk_a=open(argv[1],O_RDWR);
+
+if (disk_a==-1) {printf("Diskette image '%s' not opened\n",argv[1]); return 2;}
+#endif
 
 version();
 
@@ -81,18 +98,17 @@ for (i=0;i<4;i++)
 	if (i==2) drive=0x80; else if (i==3) drive=0x81; else drive=i;
 	// drive = 0, 1, 0x80, 0x81
 	reg_bx=GetDriveParam_bx(drive);
-	//puts0("*");
+	//puts0("debug GetDriveParam bx  cx  dx "); puthex(reg_bx);
 	if (reg_bx==0xFFFF) {
 		gCyl[i]=0;
 		gSec[i]=0;
 		gHeads[i]=0;
 		gTotal[i]=0;
-		//puts0("z");
 		continue;}
 
 	reg_cx=GetDriveParam_cx(drive);
 	reg_dx=GetDriveParam_dx(drive);
-
+	//puts0(" "); puthex(reg_cx); puts0(" "); puthex(reg_dx); puts0("\r\n"); // debug
 
 	cyl = (((reg_cx & 0xFF00U)>>8)&0xFFU) | ((reg_cx & 0xC0U)<<2);
 
@@ -163,6 +179,10 @@ while (1)
 	else if (!strcmp(buf,"rm")) remove_file();
 	else if (!strcmp(buf,"cat")) cat();
 	else if (!strcmp(buf,"dd")) dd();
+#ifdef PEMU
+	else if (!strcmp(buf,"fromhost")) from_host();
+	else if (!strcmp(buf,"quit")) return 0;
+#endif
 	else
 		{
 		puts0("Unknown command '");
@@ -170,9 +190,6 @@ while (1)
 		puts0("'\r\n");
 		}
 	}
-
-puts0("QUIT\r\n");
-stop();
 }
 
 #include "clib.c"

@@ -97,7 +97,7 @@ lib2.s:		lib2.c
 #boot.s: boot.S macros.S
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ *.lst *.o ct ctmp.s ctmp2.s
+	rm boot boot_ *.lst *.o ct ctmp.s ctmp2.s pskr pemu
 
 saycsip.s: saycsip.S macros.S
 	$(CPP) -traditional $< -o $@
@@ -166,6 +166,10 @@ ctt:	ctmp2.s
 	$(LD) $(LDFLAGS) -M -Ttext 0x0 -s --oformat binary -o ctt ctmp2.o > map.lst
 	chmod a-x ctt
 	ls -l ctt
+
+# proolix emulator (under Linux)
+pemu:	c2.c clib.c proolskript.c readw.c libemu.c
+	gcc c2.c -o pemu -DPEMU
 
 vexe:	vexe.c
 	$(CC) $(CFLAGS) vexe.c -o vexe.exe

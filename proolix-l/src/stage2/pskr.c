@@ -8,48 +8,26 @@
 #include <sys/stat.h>
 
 #define MAXLEN 256
+
+#define putch(a) putchar(a)
 #define puts0(STR) printf("%s",STR)
 #define putdec(DIGIT) printf("%i", DIGIT)
 #define puthex(DIGIT) printf("%04X", DIGIT)
 #define puthex_l(DIGIT) printf("%08X", DIGIT)
 #define puthex_b(DIGIT) printf("%02X", DIGIT)
-#define peek(ADR) 0
-#define peek2(SEG,OFFSET) 0
-#define putch(a) putchar(a)
-
 #define open_ open
 #define close_ close
 
 #define O_READ 0
 
-int readc (int h, char *c)
-{int i;
-i=read(h,c,1);
-if (i==1) return 0;
-else return -1;
-}
-
 #include "readw.c"
+#include "liblinux.c"
 
 char *getsn(char *buf, int len)
 {char *c;
 fgets(buf, len, stdin);
 c=strchr(buf,'\n');
 if (c) *c=0;
-}
-
-int reads(int fd, char *buf, int count) // read string from file
-{
-int i, j; char c;
-
-for (i=0;i<(count-1);i++)
-	{
-	j=read(fd,&c,1);
-	if ((j==0)||(c=='\r')||(c=='\n')) {*buf=0; return 1;}
-	*buf++=c;
-	}
-*buf=0;
-return 0;
 }
 
 int htoi(const char  *s)
@@ -65,6 +43,13 @@ while (*s)
   else return 0;
   }
 return i;
+}
+
+int readc (int h, char *c)
+{int i;
+i=read(h,c,1);
+if (i==1) return 0;
+else return -1;
 }
 
 void ls(void)

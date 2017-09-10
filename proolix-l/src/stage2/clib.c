@@ -100,11 +100,13 @@ void puts0(char *s)
 //	putch(*s++);
 }
 
+#ifndef PEMU
 int puts(char *s)
 {
 puts0(s);
 puts0("\r\n");
 }
+#endif
 
 void test (void)
 {int i,j;
@@ -162,6 +164,9 @@ while(1)
 	{
 	c=getch(); putch(c);
 	if (c==0x0DU) {*str=0; break;}
+#ifdef PEMU
+	if (c==0x0AU) {*str=0; break;}
+#endif
 	if (c==8) {if (i>0) {i--;str--;}}
 	else 
 		{*str=c;
@@ -292,11 +297,14 @@ __asm__ volatile("int $0x10");
 
 }
 
+#if 0
 void stop(void)
 {
 __asm__ volatile("int $0x20");
 }
+#endif
 
+#ifndef PEMU
 int getch(void)
 {
 /*
@@ -310,6 +318,12 @@ __asm__ volatile("xor %ah,%ah");
 __asm__ volatile("int $0x16");
 __asm__ volatile("xor %ah,%ah");
 }
+#else
+int getch(void)
+{
+return getchar();
+}
+#endif
 
 int strcmp (const char  *s1, const char  *s2)
 {char c1,c2;
@@ -2050,6 +2064,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 } // while
 } // end of diskd()
 
+#ifndef PEMU
 unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
 {/* Read absolute sectors
 Input:
@@ -2125,6 +2140,26 @@ if ((i=Track &0x0300)!=0)
 err=writesec0(drive, SecOnTrk, Head, Track, Buffer);
 return err;
 }
+#else
+unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
+{int i;
+i=lseek(disk_a,AbsSec * 512,SEEK_SET);
+if (i==-1) {printf("Can't seek disk image. Error #1\n"); return 10;}
+i=read(disk_a,Buffer,512);
+if (i==-1) {printf("Can't read disk image\n"); return 11;}
+return 1;
+}
+
+unsigned short int secwrite (int drive, unsigned AbsSec, char *Buffer)
+{int i;
+i=lseek(disk_a,AbsSec * 512,SEEK_SET);
+if (i==-1) {printf("Can't seek disk image. Error #2\n"); return 20;}
+i=write(disk_a,Buffer,512);
+if (i==-1) {printf("Can't write disk image\n"); return 21;}
+return 1;
+}
+
+#endif
 
 #if 0
 unsigned short int secread (int drive, unsigned AbsSec, char *Buffer)
@@ -2537,6 +2572,7 @@ for (i=0;i<128+10;i++)
 	}
 }
 
+#ifndef PEMU
 void pause(void)
 {int c;
 	puts0(" Pause. Press any key ");
@@ -2551,6 +2587,7 @@ void pause(void)
 	}
 #endif
 }
+#endif // PEMU
 
 void screensaver(void)
 {long i,j;
@@ -2927,7 +2964,7 @@ for (i=0;i<ROOT_SIZE;i++)
 	for (j=0;j<FILENAME_LEN;j++) (filename[j]=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]);
 	filename[FILENAME_LEN]=0;
 	if (filename[0]==0) puts0("<unused>        ");
-	else for (j=0;j<FILENAME_LEN;j++) putch(filename[j]);
+	else for (j=0;j<FILENAME_LEN;j++) if (filename[j]) putch(filename[j]); else putch(' ');
 	puts0(" ");
 	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
 	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
@@ -3274,7 +3311,10 @@ if (flag==O_CREAT)
 		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
 			{// empty dir record
 			/*puts0("create dir rec #");putdec(i+1);puts0("\r\n");*/
-			for (j=0;j<FILENAME_LEN;j++) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
+			for (j=0;j<FILENAME_LEN;j++) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=0;
+			for (j=0;j<FILENAME_LEN;j++)
+				if (filename[j]) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
+				else break;
 			rc=secwrite(device, ROOT_DIR, buffer512);
 			if (rc!=1) {puts0("open_: Root dir write error!\r\n"); return -1;}
 			FCB[0]=ROOT_DIR;

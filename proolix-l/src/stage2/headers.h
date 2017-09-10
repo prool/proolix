@@ -46,12 +46,20 @@ extern int reg_di;
 extern int reg_es;
 #endif
 
+
+#ifdef PEMU
+unsigned short int FCB [6];
+unsigned short int gCyl[4];
+unsigned short int gSec[4];
+unsigned short int gHeads[4];
+unsigned short int gTotal[4];
+#else
+extern unsigned short int FCB [6];
 extern unsigned short int gCyl[4];
 extern unsigned short int gSec[4];
 extern unsigned short int gHeads[4];
 extern unsigned short int gTotal[4];
-
-extern unsigned short int FCB [6];
+#endif
 /*
 	FCB[0]	directory block with file
 	FCB[1]	number file record in directory block
@@ -63,7 +71,9 @@ extern unsigned short int FCB [6];
 	FCB[7]  | file length (исп. в реж. O_READ и возможно в будущих O_WRITE, O_RDWR)
 */
 
+#ifndef PEMU
 typedef unsigned int size_t;
+#endif
 
 void stop(void);
 void putch(char c);
@@ -71,7 +81,6 @@ void putch_tty(char c);
 void putch2(char c);
 void putch3(char c);
 void puts0(char *s);
-int puts(char *s);
 void putch_color(char c, char attrib);
 void puthex(int c);
 void puthex_l(int c);
@@ -81,10 +90,13 @@ void putdec2(int, int, int);
 int getch(void);
 int kbhit(void);
 char *getsn(char *str, int len);
+#ifndef PEMU
+int puts(char *s);
 size_t strlen (const char *s);
 char *strchr (const char *str, int c);
 char  * strncpy (char  * dest, const char  * src, size_t maxlen);
 int strcmp (const char  *s1, const char  *s2);
+#endif
 
 int peek (int addr);
 short int peek2(short int seg, short int offset);
@@ -149,14 +161,15 @@ int writec(int h, char c);
 int readc (int h, char *c);
 void dd(void);
 
+#ifndef PEMU
 int open(char *path, int flags);
 int read (int fd, char *buf, int count);
+int lseek(int fd, int offset, int whence);
+void pause(void);
+#endif
+
 int reads (int fd, char *buf, int count);
 int readw(int fd, char *buf, int count); // read word from file (skrypt-style)
-int lseek(int fd, int offset, int whence);
-int PathToDir(char *path, char DirName[11]);
-char *DirToPath(char filename[11], char *path);
-unsigned long NextClu(unsigned long Clu);
 
 char  *itoa (int w, char  *str, int radix);
 int tolower (int ch);
@@ -189,8 +202,6 @@ short int get_boot_drive(void);
 
 void tofile(void);
 void tofile2(void);
-
-void pause(void);
 
 struct __attribute__((__packed__)) BootStru /* structure of boot sector of FAT12 and FAT16*/
 {
