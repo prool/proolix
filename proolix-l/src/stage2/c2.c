@@ -20,6 +20,7 @@ set_color(7); puts0("end of palette");
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "liblinux.c"
 #include "libemu.c"
@@ -28,9 +29,21 @@ int disk_a;
 
 #endif
 
-void time(void)
+void print_time(void)
 {
-	short int ii=get_rtc();
+short int ii, hours;
+
+ii=get_rtc();
+
+if (mytimezone)
+	{
+	hours=((ii&0xF000)>>12)*10 + ((ii&0x0F00)>>8);
+	//puts0("debug hours=");putdec(hours);puts0("\r\n");
+	hours+=mytimezone;
+	if (hours>=24) hours-=24;
+	ii=(ii&0xFF) | ((hours/10)<<12) | ((hours%10)<<8);
+	}
+
 	puts0("time ");
 	puthex(ii);
 
@@ -74,7 +87,10 @@ unsigned short int cyl, sectors, heads, total_sec;
 putch_color('@', 4);
 
 #ifdef PEMU
-puts0("\nProolix emulator. quit for quit\n");
+
+puts0("\nProolix emulator. q for quit\n");
+
+mytimezone=0;
 
 if (argc!=2) {puts0("Usage: pemu fddimage\n"); return 1;}
 
@@ -87,7 +103,7 @@ if (disk_a==-1) {printf("Diskette image '%s' not opened\n",argv[1]); return 2;}
 
 version();
 
-time();
+print_time();
 
 print_boot();
 
@@ -168,7 +184,7 @@ while (1)
 	else if (!strcmp(buf,"vec")) vectors();
 	else if (!strcmp(buf,"skript")) skript();
 	else if (!strcmp(buf,"scr")) screensaver();
-	else if (!strcmp(buf,"time")) time();
+	else if (!strcmp(buf,"time")) print_time();
 	else if (!strcmp(buf,"install")) install();
 	else if (!strcmp(buf,"format")) format();
 	else if (!strcmp(buf,"super")) view_superblock();
@@ -179,9 +195,11 @@ while (1)
 	else if (!strcmp(buf,"rm")) remove_file();
 	else if (!strcmp(buf,"cat")) cat();
 	else if (!strcmp(buf,"dd")) dd();
+	else if (!strcmp(buf,"settimezone")) settimezone();
 #ifdef PEMU
 	else if (!strcmp(buf,"fromhost")) from_host();
 	else if (!strcmp(buf,"quit")) return 0;
+	else if (!strcmp(buf,"q")) return 0;
 #endif
 	else
 		{

@@ -35,38 +35,11 @@ _start:
 # human readable magick string
 
 	.ascii	" CT-Kernel ;-) "
-/*
-SectorsOnCyl:	.word	0
-TrkSecs:	.word	0
-HeadCnt:	.word	0
-RootBeg:	.word	0
-DataStart:	.word	0
-MaxSectors:	.word	0,0
-ResSecs:	.word	0,0
-CluSize:	.word	0
-CluSizeBytes:	.word	0
-FatSize:	.word	0
-RootEnd:	.word	0
-MaxClusters:	.word	0
-MaxCyl:		.word	0
-
-global_color:	.word	0
-
-reg_ax:		.word	0
-reg_bx:		.word	0
-reg_cx:		.word	0
-reg_dx:		.word	0
-reg_si:		.word	0
-reg_di:		.word	0
-reg_es:		.word	0
-errno:		.word	0
-
-current_drive:	.byte	0
-*/
 
 /* Global variables */
 
 boot_drive:	.word	0
+mytimezone:	.word	0
 
 gCyl: .word	0,0,0,0
 gSec: .word	0,0,0,0

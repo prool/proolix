@@ -1409,6 +1409,7 @@ puts0("\r\nsize of long int ");putdec(sizeof(long int));
 puts0("\r\nsize of short int ");putdec(sizeof(short int));
 puts0("\r\nsize of char ");putdec(sizeof(char));
 puts0("\r\n\r\nSP=");puthex(get_sp());
+puts0("\r\ntimezone=");puthex(mytimezone);
 puts0("\r\n");
 print_boot();
 }
@@ -1467,7 +1468,8 @@ super - view superblock ls - ls creat - create file rm - remove file\r\n\
 tofile - string to file tofile2 - debuggin command dd - dd\r\n\
 cat - cat file\r\n\
 reboot - reboot cold - cold reboot\r\n\
-hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD");
+hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD\r\n\
+settimezone - set tz");
 }
 
 void memd0(void)
@@ -2593,9 +2595,9 @@ void screensaver(void)
 {long i,j;
 while(1)
 {
-	puts0("\r\nProolix Screensaver. Time ");
-	puthex(get_rtc());
-	puts0(". PRESS ANYKEY to quit ");
+	puts0("\r\nProolix Screensaver. ");
+	print_time();
+	puts0("PRESS ANYKEY to quit ");
 	putch_color('!',3);
 	for (i=0;i<24;i++)
 	{
@@ -3673,6 +3675,24 @@ while(readc(0,&c)==0)
 	if (c=='\n') puts0("\r\n"); else putch(c);
 
 close_(0);
+}
+
+void settimezone(void)
+{
+char str[MAX_LEN_STR];
+unsigned short int tz;
+
+puts0("timezone ? ");
+getsn(str,MAX_LEN_STR);
+
+tz=htoi(str);
+
+mytimezone=tz;
+
+puts0("tz = ");
+puthex(mytimezone);
+puts0("\r\n");
+
 }
 
 #include "readw.c"

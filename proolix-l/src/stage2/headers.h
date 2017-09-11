@@ -46,19 +46,20 @@ extern int reg_di;
 extern int reg_es;
 #endif
 
-
 #ifdef PEMU
 unsigned short int FCB [6];
 unsigned short int gCyl[4];
 unsigned short int gSec[4];
 unsigned short int gHeads[4];
 unsigned short int gTotal[4];
+unsigned short int mytimezone;
 #else
 extern unsigned short int FCB [6];
 extern unsigned short int gCyl[4];
 extern unsigned short int gSec[4];
 extern unsigned short int gHeads[4];
 extern unsigned short int gTotal[4];
+extern unsigned short int mytimezone;
 #endif
 /*
 	FCB[0]	directory block with file
@@ -75,7 +76,7 @@ extern unsigned short int gTotal[4];
 typedef unsigned int size_t;
 #endif
 
-void stop(void);
+void settimezone(void);
 void putch(char c);
 void putch_tty(char c);
 void putch2(char c);
