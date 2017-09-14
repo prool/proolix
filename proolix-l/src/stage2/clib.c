@@ -3305,6 +3305,7 @@ if (flag==O_CREAT)
 	{// пишем
 		if (file_exist)	{// пока писать в уже существующий файл в режиме O_CREAT нельзя
 				puts0("open_: file exists!\r\n");
+				FCB[0]=0;
 				return -1;
 				}
 	// файла нет
@@ -3655,6 +3656,7 @@ unsigned char filename[FILENAME_LEN+2];
 unsigned char str[MAX_LEN_STR];
 char c;
 int rc;
+int line=0;
 
 // ввод имени файла
 puts0("file ? ");
@@ -3664,7 +3666,7 @@ getsn(str,MAX_LEN_STR);
 for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
 filename[FILENAME_LEN]=0;
 
-puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+//puts0("\r\n'"); puts0(filename); puts0("'\r\n");
 
 rc=open_(filename,O_READ);
 //puthex(rc);
@@ -3672,7 +3674,16 @@ if (rc!=-1) {/*puts0("open OK\r\n");*/}
 else {puts0("can't open file\r\n"); return;}
 
 while(readc(0,&c)==0)
-	if (c=='\n') puts0("\r\n"); else putch(c);
+	if (c=='\n')
+		{
+		puts0("\r\n");
+		if (++line>23)
+			{puts0(" MORE ");puts0(filename);
+			c=getch();
+			if (c=='q') {close_(rc); return;}
+			line=0;putch('\r');for (i=0;i<70;i++)putch(' ');putch('\r');}
+		}
+	else putch(c);
 
 close_(0);
 }

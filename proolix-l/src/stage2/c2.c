@@ -82,23 +82,42 @@ char c,cc;
 char bootsector[512];
 unsigned short int drive, reg_bx, reg_cx, reg_dx;
 unsigned short int cyl, sectors, heads, total_sec;
+#ifdef PEMU
+FILE *cfg;
+char *pp;
+#endif
 
 //putch('/');
 putch_color('@', 4);
 
 #ifdef PEMU
 
-puts0("\nProolix emulator. q for quit\n");
-
 mytimezone=0;
 
-if (argc!=2) {puts0("Usage: pemu fddimage\n"); return 1;}
+cfg=fopen("pemu.cfg","r");
 
-printf("disk A = '%s'\n", argv[1]);
+if (cfg==NULL) printf("pemu.cfg not found\n");
+else printf("pemu.cfg found\n");
 
-disk_a=open(argv[1],O_RDWR);
+if (cfg)
+	{
+	buf[0]=0;
+	fgets(buf,BUFLEN,cfg);
+	pp=strchr(buf,0x0A);
+	if (pp) *pp=0;
+	disk_a=open(buf,O_RDWR);
+	printf("disk A = '%s'\n", buf);
+	}
+else
+	{
+	if (argc!=2) {puts0("Usage: pemu fddimage\n"); return 1;}
+	disk_a=open(argv[1],O_RDWR);
+	printf("disk A = '%s'\n", argv[1]);
+	}
 
-if (disk_a==-1) {printf("Diskette image '%s' not opened\n",argv[1]); return 2;}
+if (disk_a==-1) {printf("Diskette image file not opened\n"); return 2;}
+
+puts0("\nProolix emulator. q for quit\n");
 #endif
 
 version();
