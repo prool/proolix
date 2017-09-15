@@ -40,7 +40,7 @@ while(1)
 if (buf[0]==0) {console=1; puts("quit for quit");}
 else if ((file=open_(buf,O_READ))==-1) {puts0("\r\nFile not found: '"); puts0(buf); puts0("'"); return;}
 
-puts0("\r\nProolSkript Interpterer v.2.2.1\r\n");
+puts0("\r\nProolSkript Interpterer v.2.3\r\n");
 puts0("MAXFAJL = "); putdec(MAXFAJL); puts("\r\n");
 
 l_begin: ;

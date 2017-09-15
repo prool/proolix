@@ -1,0 +1,16 @@
+#proolskript
+# memory dump
+!Address?
+inputstring
+push
+#
+hex
+dup .w
+20 .c
+10 1 label
+swap dup peek .b
+1 +
+swap
+# 0 peek .b
+20 .c
+1 loop

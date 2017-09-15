@@ -168,7 +168,7 @@ ctt:	ctmp2.s
 	ls -l ctt
 
 # proolix emulator (under Linux)
-pemu:	c2.c clib.c proolskript.c readw.c libemu.c
+pemu:	c2.c clib.c proolskript.c readw.c libemu.c liblinux.c headers.h
 	gcc c2.c -o pemu -DPEMU
 
 vexe:	vexe.c

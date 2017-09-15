@@ -1,5 +1,30 @@
-#define peek(ADR) 0
-#define peek2(SEG,OFFSET) 0
+short int peek2(short int seg, short int offset)
+{
+int ram;
+int i;
+
+ram=open("/dev/mem", O_RDONLY);
+if (ram==-1) {printf("Can't open RAM. Use root privileges!\n"); return 0;}
+if (lseek(ram, offset, SEEK_SET)==-1) {printf("Can'r seek RAM\n"); return 0;}
+i=0;
+if (read(ram, &i, 2)!=2) {printf("Can't read RAM\n"); return 0;}
+close(ram);
+return i;
+}
+
+int peek (int addr)
+{
+int ram;
+int i;
+
+ram=open("/dev/mem", O_RDONLY);
+if (ram==-1) {printf("Can't open RAM. Use root privileges!\n"); return 0;}
+if (lseek(ram, addr, SEEK_SET)==-1) {printf("Can'r seek RAM\n"); return 0;}
+i=0;
+if (read(ram, &i, 2)!=2) {printf("Can't read RAM\n"); return 0;}
+close(ram);
+return i;
+}
 
 void poke(char value, short int seg, short int offset)
 {
