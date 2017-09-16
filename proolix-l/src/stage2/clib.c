@@ -96,8 +96,11 @@ putch_tty(c);
 void puts0(char *s)
 {
     while (*s)
+#ifdef PEMU
+	if (*s!='\r') putch(*s++); else s++;
+#else
 	putch(*s++);
-//	putch(*s++);
+#endif
 }
 
 #ifndef PEMU
@@ -1486,6 +1489,8 @@ puts0("\r\n");
 
 #define MEMD_STEP 16
 
+while (1)
+{
 for (line=0;line<23;line++)
     {
     puthex_l(a); putch(' ');
@@ -1503,7 +1508,13 @@ for (line=0;line<23;line++)
 	}
     a+=MEMD_STEP;
     puts0("\r\n");
-    }	
+    } // end for
+puts0("more?");
+if (getch()=='q') return;
+#ifndef PEMU
+putch('\r');
+#endif
+} // end while
 }
 
 void memd(void)
