@@ -1503,7 +1503,11 @@ for (line=0;line<23;line++)
     for (i=0;i<MEMD_STEP;i++)
 	{
 	c=(peek(a+i))&0xFFU;
+#ifdef PEMU
+	if ((c<' ')||(c>0x7F)) putch('.');
+#else
 	if (c<' ') putch('.');
+#endif
 	else putch(c);
 	}
     a+=MEMD_STEP;
