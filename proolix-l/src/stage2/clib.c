@@ -1472,11 +1472,23 @@ tofile - string to file tofile2 - debuggin command dd - dd\r\n\
 cat - cat file\r\n\
 reboot - reboot cold - cold reboot\r\n\
 hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD\r\n\
-settimezone - set tz");
+settimezone - set tz videomod - set video mode");
+}
+
+void videomod_(void)
+{
+char str[MAX_LEN_STR];
+int ax;
+
+puts0("ax? ");
+getsn(str,MAX_LEN_STR);
+ax=(htoi(str));
+videomod(ax);
 }
 
 void memd0(void)
-{char str[MAX_LEN_STR];
+{
+char str[MAX_LEN_STR];
 int a,i,line,c;
 
 puts0("adr? ");

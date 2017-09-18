@@ -90,6 +90,8 @@ void putdec(int);
 void putdec2(int, int, int);
 int getch(void);
 int kbhit(void);
+void videomod(unsigned short int);
+void videomod_(void);
 char *getsn(char *str, int len);
 #ifndef PEMU
 int puts(char *s);

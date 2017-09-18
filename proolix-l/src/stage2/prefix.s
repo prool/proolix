@@ -394,6 +394,17 @@ poke: # poke (value, segment, offset)
 	popl	%ebp
 	ret
 
+videomod:
+	pushl	%ebp
+
+	movl	%esp, %ebp
+	movw	8(%ebp),%ax 
+
+	int	$0x10
+
+	popl	%ebp
+	ret
+
 /************************************************************************************/
 /*
 GetDriveParam: # GetDriveParam(char drive)
