@@ -1,5 +1,10 @@
 #define MAXLEN 256
 
+void videomod(unsigned short int ax)
+{
+	return;
+}
+
 short int get_boot_drive(void) {return 0xAAAA;}
 
 short int GetDriveParam_bx (char drive) {if (drive==0) return 4; else return 0xFFFF;}
