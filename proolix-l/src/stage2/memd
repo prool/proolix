@@ -3,8 +3,10 @@
 !Address?
 inputstring
 push
-#
 hex
+10 2 label
+swap
+#
 dup .w
 20 .c
 10 1 label
@@ -14,3 +16,6 @@ swap
 # 0 peek .b
 20 .c
 1 loop
+newline
+swap
+2 loop
