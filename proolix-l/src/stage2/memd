@@ -16,6 +16,16 @@ swap
 # 0 peek .b
 20 .c
 1 loop
+'$ .c
+dup 10 -
+#
+10 3 label
+swap dup peek .c
+1 +
+swap
+3 loop
+drop
+#
 newline
 swap
 2 loop
