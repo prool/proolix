@@ -72,7 +72,7 @@ void hdd1 (void) {return;}
 void fdd (void) {return;}
 void basic(void) {return;}
 
-void putch_tty(char c) {putchar(c);}
+void putch_tty(char c) {if (c&0x80) putchar(' '); else putchar(c);}
 
 unsigned short int readsec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer) {return 0;}
 unsigned short int writesec0(char drive, char sec, char head, char trk /* or cyl */, char *Buffer) {return 0;}
