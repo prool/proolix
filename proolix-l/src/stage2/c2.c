@@ -61,7 +61,7 @@ if (mytimezone)
 void version (void)
 {
 #ifdef PEMU
-	printf("Proolix emulator\n");
+	printf("Proolix emulator. q for quit\n");
 #endif
 puts0("\r\nProolix-l shell. Compiled ");
 puts0(__DATE__);
@@ -120,7 +120,9 @@ else
 
 if (disk_a==-1) {printf("Diskette image file not opened\n"); return 2;}
 
-puts0("\nProolix emulator. q for quit\n");
+puts("");
+
+//puts0("\nProolix emulator. q for quit\n");
 #endif
 
 version();
