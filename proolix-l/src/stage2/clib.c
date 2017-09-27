@@ -1407,6 +1407,9 @@ puts0("\r\n");
 
 void system(void)
 {
+#ifdef PEMU
+	printf("Proolix emulator\n");
+#endif
 puts0("\r\nsize of int ");putdec(sizeof(int));
 puts0("\r\nsize of long int ");putdec(sizeof(long int));
 puts0("\r\nsize of short int ");putdec(sizeof(short int));
@@ -1450,6 +1453,9 @@ FFFFE PC/XT/AT identification byte\
 
 void help(void)
 {
+#ifdef PEMU
+	printf("Proolix emulator\n\n");
+#endif
 puts0("Proolix-l command:\r\n\r\n\
 help, ? - this help\r\n\
 ver - version\r\n\
@@ -2620,6 +2626,7 @@ void pause(void)
 
 void screensaver(void)
 {long i,j;
+#ifndef PEMU
 while(1)
 {
 	puts0("\r\nProolix Screensaver. ");
@@ -2637,6 +2644,9 @@ while(1)
 		puts0("\r\n");
 	}
 } // end while
+#else
+printf("no screensaver in emulator\n");
+#endif
 }
 
 void dd (void)

@@ -60,6 +60,9 @@ if (mytimezone)
 
 void version (void)
 {
+#ifdef PEMU
+	printf("Proolix emulator\n");
+#endif
 puts0("\r\nProolix-l shell. Compiled ");
 puts0(__DATE__);
 puts0(" ");
