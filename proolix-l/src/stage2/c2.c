@@ -206,7 +206,7 @@ while (1)
 	else if (!strcmp(buf,"diskd")) diskd();
 	else if (!strcmp(buf,"off")) off();
 	else if (!strcmp(buf,"vec")) vectors();
-	else if (!strcmp(buf,"skript")) skript();
+	else if (!strcmp(buf,"sk")) skript();
 	else if (!strcmp(buf,"scr")) screensaver();
 	else if (!strcmp(buf,"time")) print_time();
 	else if (!strcmp(buf,"install")) install();

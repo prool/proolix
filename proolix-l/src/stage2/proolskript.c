@@ -37,7 +37,7 @@ while(1)
 	else	break;
 	}
 
-if (buf[0]==0) {console=1; puts("\r\nquit for quit");}
+if (buf[0]==0) {console=1; puts("\r\nq for quit");}
 else if ((file=open_(buf,O_READ))==-1) {puts0("\r\nFile not found: '"); puts0(buf); puts0("'"); return;}
 
 puts0("\r\nProolSkript Interpterer v.2.3\r\n");
@@ -319,6 +319,7 @@ while(1/*fayl[faylp]*/)
 					}
 				}
 			else if (!strcmp(buf,"quit")) return;
+			else if (!strcmp(buf,"q")) return;
 #include	"aux-skripts.c"
 			else
 				{puts0("\r\nUnknown operator: '");puts0(buf);puts("'");}

@@ -1470,7 +1470,7 @@ vec - print interrupt vectors\r\n\
 basic - call ROM BASIC (if exist)\r\n\
 diskd0 - disk dump #1 (sector/head/track)\r\n\
 diskd - disk dump #2 (absolute sector)\r\n\
-skript - run prool skript\r\n\
+sk - run prool skript\r\n\
 time - print time\r\n\
 install - install Proolix-l to other disk format - format filesystem\r\n\
 super - view superblock ls - ls creat - create file rm - remove file\r\n\
