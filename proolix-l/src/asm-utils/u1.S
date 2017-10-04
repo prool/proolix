@@ -14,8 +14,8 @@ _start:
 
     print str1
 
-l_loop:	jmp	l_loop
+    int		$0x90
 
 	.include "sayr.S"
 
-str1:	.asciz	" First assembler utility for OS Proolix "
+str1:	.asciz	" First assembler utility for OS Proolix. v.2.0 "

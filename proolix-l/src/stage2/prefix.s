@@ -49,11 +49,24 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
+    # intercept of int 90h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x90*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_90,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
 // for debug
 	  movb $0x0e,%ah
 	  movb $'+',%al
 	  int  $0x10	# putch
-
 
 	jmp	main
 
@@ -82,6 +95,25 @@ interrupt_4:	# Intercept of some interrupts
 	popw	%DS
 	iret
 s_interrupt_4:	.asciz	" Int 4 "
+
+interrupt_90:	# Intercept of some interrupts
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	pushw	%CS
+	popw	%ax
+	movw	%ax,%ES
+	cli
+	movw	%ax,%SS
+	movw	$0xFFFD,%SP
+	sti
+
+	print s_interrupt_90
+
+	jmp	main
+
+s_interrupt_90:	.asciz	" Int 90 "
 
 sayr_proc: # proc       Ver 0.0.2 19-Oct-2004
                         # Процедура вывода строки при помощи функций BIOS
