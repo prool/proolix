@@ -163,7 +163,7 @@ while(1/*fayl[faylp]*/)
 				}
 			else if (!strcmp(buf,"peek2"))
 				{
-				stack[MAXSTACK-1]=peek2(stack[MAXSTACK-2],stack[MAXSTACK-1]);
+				stack[MAXSTACK-1]=peek3(stack[MAXSTACK-2],stack[MAXSTACK-1]);
 				for (i=MAXSTACK-2;i>0;i--) stack[i]=stack[i-1];
 				}
 			else if (!strcmp(buf,"poke")) // Usage: segment offset value POKE

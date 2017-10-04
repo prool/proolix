@@ -12,6 +12,11 @@ close(ram);
 return i;
 }
 
+unsigned char peek3(unsigned short int seg, unsigned short int offset)
+{
+return peek2(seg,offset);
+}
+
 int peek (int addr)
 {
 int ram;

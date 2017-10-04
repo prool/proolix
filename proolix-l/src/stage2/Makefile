@@ -97,7 +97,7 @@ lib2.s:		lib2.c
 #boot.s: boot.S macros.S
 #	$(CPP) -traditional $< -o $@
 clean:
-	rm boot boot_ *.lst *.o ct ctmp.s ctmp2.s pskr pemu
+	rm boot boot_ *.lst *.o ct c2.s ctmp.s ctmp.sBAK ctmp2.s pskr pemu
 
 saycsip.s: saycsip.S macros.S
 	$(CPP) -traditional $< -o $@

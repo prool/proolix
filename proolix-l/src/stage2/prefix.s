@@ -3,11 +3,17 @@
 # some comments from Ralf Brown Interrupt list http://www.ctyme.com/intr/int.htm
 # Interrupt list rulez! prool
 
+	.include "macros.S"
+
 	.text
 	.code16gcc
 _start:
 	.globl	_start
 
+	jmp	obhod
+# human readable magick string
+	.ascii	" Kernel "
+obhod:
 	push	%cs
 	pop	%ds
 
@@ -26,15 +32,63 @@ _start:
 
 // for debug
 	  movb $0x0e,%ah
-	  movb $'#',%al
+	  movb $'_',%al
 	  int  $0x10	# putch
+
+    # intercept of int 4h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x4*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_4,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+// for debug
+	  movb $0x0e,%ah
+	  movb $'+',%al
+	  int  $0x10	# putch
+
 
 	jmp	main
 
-# variables
-# human readable magick string
+interrupt_4:	# Intercept of some interrupts
+	pushw	%DS
 
-	.ascii	" CT-Kernel ;-) "
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_4
+
+	popw	%DS
+	iret
+s_interrupt_4:	.asciz	" Int 4 "
+
+sayr_proc: # proc       Ver 0.0.2 19-Oct-2004
+                        # Процедура вывода строки при помощи функций BIOS
+                        # Вход: %DS:%si - ASCIIZ строка.
+                        # REGS SAVED !!!
+# В графических режимах не работает
+	pushw	%ax
+	
+#       cld
+sayr_l1:
+        lodsb
+        orb     %al,%al
+        jz      sayrret
+        movb    $0x0e,%ah
+        int     $0x10
+        jmp     sayr_l1
+sayrret:
+	popw	%ax
+        ret
+
+# variables
 
 /* Global variables */
 

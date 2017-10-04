@@ -1422,7 +1422,6 @@ print_boot();
 
 void memmap(void)
 { /*
-600 =0060:0000 - load kernel address (see src/stage2/boot.S, KernelSeg constant)\r\n\
 A0000 EGA (in graph modes)\r\n\
 B0000 MDA, Hercules 1st videopage\r\n\
 */
@@ -1434,10 +1433,9 @@ Memory map for Proolix-l (real mode)\r\n\
 400 - 4FF ROM BIOS data: 475: count of HDD\r\n");
 puts0("07C00 =0:7C00 (=0070:7500) Boot sector (stage1)\r\n\
 07E00                      Boot sector end\r\n\
-30000 or 30500 stage2 ('ct' file or kernel)\r\n");
-puts0("end of Kernel (CT) XXXX:");
-puthex(end_of());
-puts0("\r\n\
+30000 or 30500 stage2 ('ct' file or kernel, 3000 - fdd, 3050 - hdd)\r\n\
+3FFFF or 404FF - end of kernel\r\n\
+40500 - memory area #1\r\n\
 MemTop (f.e. 9FFFF)\r\n\
 B8000 CGA, EGA, VGA 1st videopage (mode=3, symbol mode)\r\n\
 C8000 Additional ROM modules (2K blocks)\r\n\
@@ -1539,13 +1537,42 @@ putch('\r');
 } // end while
 }
 
+// сложение 16 битных целых без переполнения (?)
+unsigned short int add_( unsigned short int a, unsigned short int b)
+{
+unsigned int a_, b_, summa;
+unsigned short int ret;
+
+a_=a; b_=b;
+a_=a_&0xFFFFU;
+b_=b_&0xFFFFU;
+summa=a_ + b_;
+if ((a_==0xFFF0U) && (b_==15)) return 0xFFFFU;
+ret=summa&0xFFFFU;
+return ret;
+}
+
+#ifndef PEMU
+unsigned char peek3 ( unsigned short int seg, unsigned short int offset )
+{
+unsigned short int w;
+
+if (offset==0xFFFFU)
+	{
+	w=peek2(seg,0xFFFEU);
+	return (w>>8)&0xFF;
+	}
+return peek2(seg, offset);
+}
+#endif
+
 void memd(void)
 {
 #if 1 // PROOLFOOL
 char c;
 int i;
 char Option = 'M';
-short int segm, off;
+unsigned /*short*/ int segm, off;
 char cmd [MAX_LEN_STR];
 
 /* Adr0 = (char *) 0; */
@@ -1565,19 +1592,19 @@ while (1)
     if (Option=='A') {
     			for(i=0;i<16;i++)
                             {
-                                if ((c=peek2(segm,off+i))>=' ') putch(c);
+                                if ((c=peek3(segm,add_(off,i)))>=' ') putch(c);
                                 else putch('.');
                             }
 	}
     else if (Option=='M') {
-    	for(i=0;i<16;i++){puthex_b(peek2(segm,off+i));putch(' ');}
+    	for(i=0;i<16;i++){puthex_b(peek3(segm,add_(off,i)));putch(' ');}
     	for(i=0;i<16;i++)
                             {
-                                if ((c=peek2(segm,off+i))>=' ') putch(c);
+                                if ((c=peek3(segm,add_(off,i)))>=' ') putch(c);
                                 else putch('.');
                             }
 	}
-    else if (Option=='H') { for(i=0;i<16;i++){puthex_b(peek2(segm,off+i));putch(' ');}
+    else if (Option=='H') { for(i=0;i<16;i++){puthex_b(peek3(segm,add_(off,i)));putch(' ');}
                           }
     }
   puts0("\r\n");
@@ -1612,7 +1639,7 @@ Enter - next string\r\n\
       }
     puts0("\r\n");
     }
-  else if (!cmd[0]) {off+=16;}
+  else if (!cmd[0]) {off=add_(off,16);}
   else ;
   }
 #endif // PROOLFOOL
@@ -2803,7 +2830,7 @@ for (ii=0;ii<127;ii++)
 	{
 		for (jj=0;jj<512;jj++)
 		{
-			buffer512[jj]=peek2(seg,off++);
+			buffer512[jj]=peek3(seg,off++);
 			//puthex(off); //puts0(" ");
 		}
 	asec=ii+1;
