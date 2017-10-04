@@ -1476,7 +1476,7 @@ tofile - string to file tofile2 - debuggin command dd - dd\r\n\
 cat - cat file\r\n\
 reboot - reboot cold - cold reboot\r\n\
 hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD\r\n\
-settimezone - set tz videomod - set video mode");
+settimezone - set tz videomod - set video mode run - run");
 }
 
 void videomod_(void)
@@ -3709,6 +3709,37 @@ puts0("n=");putdec(n);puts0("\r\n");
 for (i=0;i<n;i++)
 	{writec(0,'@'); putch('@'); }
 puts0("close rc=");putdec(close_(0));puts0("\r\n");
+}
+
+void load_and_run (void)
+{
+unsigned short int i, load_segment, offset;
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+char c;
+int rc;
+
+// ввод имени файла
+puts0("file ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+rc=open_(filename,O_READ);
+if (rc==-1) {puts0("can't open file\r\n"); return;}
+
+load_segment=0x4050; offset=0;
+
+while(readc(0,&c)==0)
+	{
+	poke(c,load_segment,offset++);
+	}
+close_(0);
+puts0("\r\nEXEC!\r\n");
+// EXEC!
+run();
 }
 
 void cat(void)

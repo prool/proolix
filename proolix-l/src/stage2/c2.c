@@ -221,6 +221,7 @@ while (1)
 	else if (!strcmp(buf,"dd")) dd();
 	else if (!strcmp(buf,"settimezone")) settimezone();
 	else if (!strcmp(buf,"videomod")) videomod_();
+	else if (!strcmp(buf,"run")) load_and_run();
 #ifdef PEMU
 	else if (!strcmp(buf,"fromhost")) from_host();
 	else if (!strcmp(buf,"quit")) return 0;

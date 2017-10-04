@@ -111,6 +111,9 @@ short int get_day(void);
 short int get_year(void);
 void print_boot(void);
 
+void load_and_run (void);
+void run (void);
+
 void reboot (void);
 void cold (void);
 void hdd0 (void);

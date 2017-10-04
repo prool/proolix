@@ -1,4 +1,4 @@
-# Proolix-l stage2
+# Proolix-l stage2 -- OBSOLETE!!!! Now stage2 is c2.c
 # by Prool
 # www.prool.kharkov.org
 # russian comments in UTF-8 codetable

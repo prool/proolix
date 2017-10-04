@@ -57,6 +57,20 @@ obhod:
 
 	jmp	main
 
+run:
+        # EXEC!
+
+        movw    $0x4050,%ax	# segment
+        movw    %ax,%DS
+	movw	%ax,%ES
+        cli
+        movw    %ax,%SS
+        movw    $0xfffe,%SP
+        sti
+
+        .byte      0xea    # JMP stage2_seg:0000
+        .word      0x0000,0x4050
+
 interrupt_4:	# Intercept of some interrupts
 	pushw	%DS
 
