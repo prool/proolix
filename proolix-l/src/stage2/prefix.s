@@ -63,6 +63,208 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
+    # intercept of int 21h (MSDOS interrupt)
+
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+#    movw	$0xDEAD,%ax
+    pushw	%CS
+    popw	%ax
+    movw	$0x86,%si	# 21*4+2
+    movw	%ax,%ES:(%si)
+#    movw	$0xBEEF,%ax
+    lea		int21p,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+/*
+    # intercept of int 20h (DOS 1+ - TERMINATE PROGRAM)
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x82,%si	# 20*4+2
+    movw	%ax,%ES:(%si)
+    lea		int20p,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 24h DOS 1+ - CRITICAL ERROR HANDLER
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x24*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		int24p,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+
+    # intercept of int 0h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x0*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_0,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 1h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x1*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_1,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 2h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x2*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_2,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 3h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x3*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_3,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 5h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x5*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_5,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 6h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x6*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_6,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 7h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x7*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_7,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int ah
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0xa*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_a,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int bh
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0xb*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_b,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int ch
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0xc*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_c,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int dh
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0xd*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_d,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+*/
+    
 // for debug
 	  movb $0x0e,%ah
 	  movb $'+',%al
@@ -84,17 +286,19 @@ run:
         .byte      0xea    # JMP stage2_seg:0000
         .word      0x0000,0x4050
 
-interrupt_4:	# Intercept of some interrupts
-	pushw	%DS
+run_msdos:
+        # EXEC!
 
-	pushw	%CS
-	popw	%DS	# DS:=CS
+        movw    $0x4050,%ax	# segment
+        movw    %ax,%DS
+	movw	%ax,%ES
+        cli
+        movw    %ax,%SS
+        movw    $0xfffe,%SP
+        sti
 
-	print s_interrupt_4
-
-	popw	%DS
-	iret
-s_interrupt_4:	.asciz	" Int 4 "
+        .byte      0xea    # JMP stage2_seg:0100
+        .word      0x0100,0x4050
 
 interrupt_90:	# Intercept of some interrupts
 
@@ -112,6 +316,440 @@ interrupt_90:	# Intercept of some interrupts
 	print s_interrupt_90
 
 	jmp	main
+
+interrupt_0:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_0
+
+	popw	%DS
+	iret
+
+s_interrupt_0:	.asciz	" Int 0 "
+
+interrupt_1:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_1
+
+	popw	%DS
+	iret
+
+s_interrupt_1:	.asciz	" Int 1 "
+
+interrupt_2:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_2
+
+	popw	%DS
+	iret
+
+s_interrupt_2:	.asciz	" Int 2 "
+
+interrupt_3:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_3
+
+	popw	%DS
+	iret
+
+s_interrupt_3:	.asciz	" Int 3 "
+
+interrupt_4:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_4
+
+	popw	%DS
+	iret
+
+s_interrupt_4:	.asciz	" Int 4 "
+
+interrupt_5:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_5
+
+	popw	%DS
+	iret
+
+s_interrupt_5:	.asciz	" Int 5 "
+
+interrupt_6:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_6
+
+	popw	%DS
+	iret
+
+s_interrupt_6:	.asciz	" Int 6 "
+
+interrupt_7:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_7
+
+	popw	%DS
+	iret
+
+s_interrupt_7:	.asciz	" Int 7 "
+
+interrupt_a:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_a
+
+	popw	%DS
+	iret
+
+s_interrupt_a:	.asciz	" Int a "
+
+interrupt_b:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_b
+
+	popw	%DS
+	iret
+
+s_interrupt_b:	.asciz	" Int b "
+
+interrupt_c:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_c
+
+l_int_c_stop:	jmp l_int_c_stop
+
+	popw	%DS
+	iret
+
+s_interrupt_c:	.asciz	" Int C "
+
+interrupt_d:	# Intercept of some interrupts
+	pushw	%DS
+
+	pushw	%CS
+	popw	%DS	# DS:=CS
+
+	print s_interrupt_d
+l_int_d_stop:	jmp l_int_d_stop
+	
+	movb	$0x20,%al
+	outb	%al,$0x20
+
+	popw	%DS
+	iret
+
+s_interrupt_d:	.asciz	" int d GENERAL PROTECTION VIOLATION "
+
+int80p:		# Proolix-l interrupt (Proolix-l system call)
+	pushw	%DS
+
+	pushw	%ax
+	putch	$'D'
+	putch	$'S'
+	putch	$'='
+	pushw	%DS	# ax:=DS
+	popw	%ax
+	call	ohw
+	popw	%ax
+
+	pushw	%CS	# DS:=CS
+	popw	%DS
+
+	call	print_registers
+	popw	%DS
+	iret
+
+int24p:
+    pushw	%CS
+    popw	%DS # DS:=CS
+	print l_crit
+	jmp	l_msdos_exit
+l_crit:	.asciz	" DOS CRITICAL ERROR "
+
+
+int20p:
+    pushw	%CS
+    popw	%DS # DS:=CS
+	jmp	l_msdos_exit
+
+int21p:
+	# !!!!!!!!!!!!!!!!!!!!!!!!!!!
+	pushw	%DS
+	pushw	%ax
+
+	pushw	%CS
+	popw	%DS # DS:=CS
+
+	call	ohw
+
+	  movb $0x0e,%ah
+	  movb $'=',%al
+	  int  $0x10	# putch
+
+	popw	%ax
+	popw	%DS
+	iret
+
+    pushw	%DS
+
+	pushw	%cx
+	pushw	%DS
+	popw	%cx
+
+    pushw	%CS
+    popw	%DS # DS:=CS
+
+	movw	%cx,DOS_DS
+	popw	%cx
+
+# int21h (MSDOS system call) commands (in AH register):
+
+# AH=0 DOS 1+ - TERMINATE PROGRAM
+
+    orb		%ah,%ah
+    jz		l_msdos_exit
+
+# AH=9 DOS 1+ - WRITE STRING TO STANDARD OUTPUT
+	cmpb	$0x9,%ah
+	jz	l_dos_9
+
+# AH=19 DOS 1+ - GET CURRENT DEFAULT DRIVE
+	cmpb	$0x19,%ah
+	jz	l_dos_19
+
+# AH=25 DOS 1+ - SET INTERRUPT VECTOR
+	cmpb	$0x25,%ah
+	jz	l_dos_25
+
+# AH=30 DOS 2+ - GET DOS VERSION
+	cmpb	$0x30,%ah
+	jz	l_dos_30
+
+# AH=33 DOS 2+ - EXTENDED BREAK CHECKING
+    cmpb	$0x33,%ah
+    jz		l_dos_33
+
+# AH=35 DOS 2+ - GET INTERRUPT VECTOR
+	cmpb	$0x35,%ah
+	jz	l_dos_35
+
+# AH=47 DOS 2+ - CWD - GET CURRENT DIRECTORY
+	cmpb	$0x47,%ah
+	jz	l_dos_47
+
+# AH=58 DOS 5+ - GET OR SET UMB LINK STATE
+	cmpb	$0x58,%ah
+	jz	l_dos_58
+
+    print	s_int21
+    call	print_registers
+#    putch $'I'
+
+l_end_of_int21:
+    pushw	%CS
+    popw	%ES # restore kernel ES
+
+    pushw	%CS
+    popw	%ax
+    movw	%ax,%SS # restore kernel SS
+
+    jmp main
+
+l_dos_9: # DOS 1+ - WRITE STRING TO STANDARD OUTPUT
+	push	%ES
+	push	%ax
+	push	%cx
+	push	%di
+	push	%si
+
+	# search '$' and replace to 0
+	movb	$'$',%al
+	mov	$1000,%cx # 1000 - maxlen
+	mov	%dx,%di
+	push %DS
+	pop  %ES # ES=DS
+	cld
+1:
+	repe scasb
+	jcxz	2f	# end of string
+	xor	%al,%al
+	stosb
+
+	# print:
+	movw	%dx,%si
+	call	sayr_proc
+
+	pop	%si
+	pop	%di
+	pop	%cx
+	pop	%ax
+	pop	%ES
+	jmp	l_iret
+2:
+	print l_longstr
+	jmp	l_end_of_int21
+l_longstr:	.asciz	" MSDOS: VERY LONG STRING OUTPUT "
+
+l_dos_19: # DOS 1+ - GET CURRENT DEFAULT DRIVE
+	movb	DOS_CUR_DRIVE,%al
+	jmp	l_iret
+
+l_dos_25:	# DOS 1+ - SET INTERRUPT VECTOR
+	push	%ax
+	push	%si
+	push	%ES
+
+	xorw	%ax,%ax
+	movw	%ax,%ES # ES=0
+
+	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
+	shlw	$0x2,%ax # ax=ax*4
+	# ax - address of interrupt vector (offset)
+
+	movw	%ax,%si
+	movw	%dx,%es:(%si) # offset := DX
+
+	incw	%si
+	incw	%si
+
+	movw	DOS_DS,%ax
+	movw	%ax,%es:(%si) # segment := DOS DS
+
+	pop	%ES
+	pop	%si
+	pop	%ax
+
+	jmp l_iret
+
+l_dos_30: # DOS 2+ - GET DOS VERSION
+	movw	$0x0303,%ax
+	xorw	%bx,%bx
+	xorw	%cx,%cx
+	jmp l_iret
+
+l_dos_33: # DOS 2+ - EXTENDED BREAK CHECKING
+# AL = subfunction
+# 00h get current extended break state
+    orb	%al,%al
+    jz	1f
+# 06h DOS 5+ - GET TRUE VERSION NUMBER
+    cmpb $0x06,%al
+    jz	2f
+# 01h set state of extended Break checking
+    cmpb $0x01,%al
+    jz	3f
+    jmp		l_msdos_unkn_subf
+2: # DOS 5+ - GET TRUE VERSION NUMBER
+    xor		%bx,%bx
+    xor		%dx,%dx
+    movb	$0xFF,%al
+    jmp		l_iret
+3: # set br
+    movb	%dl,DOS_BREAK
+    jmp l_iret
+1: # al=0 get break
+    movb	DOS_BREAK,%dl
+    jmp		l_iret
+
+l_dos_35:
+	push	%ax
+	push	%si
+
+	xorw	%bx,%bx
+	movw	%bx,%ES # ES=0
+
+	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
+	shlw	$0x2,%ax # ax=ax*4
+	# ax - address of interrupt vector (offset)
+
+	movw	%ax,%si
+	movw	%es:(%si),%bx # offset -> bx
+
+	incw	%si
+	incw	%si
+
+	movw	%es:(%si),%ax
+	movw	%ax,%es # segment -> ES
+
+	pop	%si
+	pop	%ax
+
+	jmp l_iret
+
+l_dos_47: # DOS 2+ - CWD - GET CURRENT DIRECTORY
+	push	%si
+	push	%ES
+
+	movw	DOS_DS,%ax
+	movw	%ax,%ES
+	movb	$'\',%ES:(%si)
+	incw	%si
+	movb	$0,%ES:(%si)
+
+	movw	$0x100,%ax
+
+	pop	%ES
+	pop	%si
+
+	jmp	l_iret
+
+l_dos_58: # DOS 5+ - GET OR SET UMB LINK STATE
+	xor	%al,%al
+	xor	%bx,%bx
+	jmp	l_iret
+
+l_msdos_exit:
+    print s_msdos_exit
+    jmp l_end_of_int21
+
+l_msdos_unkn_subf:
+    print s_unkn_subf
+    call	print_registers
+    jmp l_end_of_int21
+s_unkn_subf:	.asciz	" MSDOS UNKNOWN SUBFUNCTION "
+
+l_iret:
+    popw	%DS
+    iret
 
 s_interrupt_90:	.asciz	" Int 90 "
 
@@ -135,6 +773,17 @@ sayrret:
         ret
 
 # variables
+
+/*MSDOS emu*/
+DOS_DS:	.word
+DOS_BREAK:	.byte	0
+DOS_CUR_DRIVE:	.byte	0 # (00h = A:, 01h = B:, etc)
+s_int21: .byte 13,10
+	.ascii	" Interrupt 21h! "
+	.byte 13,10,0
+s_msdos_exit:	.byte 13,10
+		.ascii "Program terminated"
+		.byte 13,10,0
 
 /* Global variables */
 
@@ -845,3 +1494,129 @@ ohw_l_out: movb     $0xe,%ah
 get_boot_drive:
 	movw	boot_drive,%ax
 	ret
+
+	.global print_registers
+print_registers: # proc    ; REGS SAVED
+        pushw %ax
+
+	newline
+
+        print    s_ax
+        call    ohw
+
+        print    s_cs
+        pushw   %CS
+        popw    %ax
+        call    ohw
+
+	print	s_ip
+	call next
+next:
+	popw	%ax
+	call	ohw
+
+        print    s_ss
+        movw    %SS,%ax
+        call    ohw
+
+        print    s_sp
+        movw     %SP,%ax
+        call    ohw
+
+	print	s_bp
+	movw	%BP,%ax
+	call	ohw
+
+        print    s_ds
+        movw     %DS,%ax
+        call    ohw
+
+        print    s_es
+        movw     %ES,%ax
+        call    ohw
+
+        print    s_bx
+        movw     %bx,%ax
+        call    ohw
+
+        print    s_cx
+        movw     %cx,%ax
+        call    ohw
+
+        print    s_dx
+        movw     %dx,%ax
+        call    ohw
+
+        print    s_si
+        movw     %si,%ax
+        call    ohw
+
+        print    s_di
+        movw     %di,%ax
+        call    ohw
+
+        popw    %ax
+        ret
+s_cs:    .asciz      " CS="
+s_ss:    .asciz      " SS="
+s_sp:    .asciz      " SP="
+s_ds:    .asciz      " DS="
+s_es:    .asciz      " ES="
+s_ax:    .asciz      "AX="
+s_bx:    .asciz      " BX="
+s_cx:    .asciz      " CX="
+s_dx:    .asciz      " DX="
+s_bp:    .asciz      " BP="
+s_si:    .asciz      " SI="
+s_di:    .asciz      " DI="
+s_ip:    .asciz      " IP="
+
+
+	.global print_reg32
+print_reg32: # proc    ; REGS SAVED
+        push %eax
+
+#	mov	$0xDEADBEEF,%eax
+        print    s_eax
+        call    ohd
+
+        print    s_esp
+        mov     %ESP,%eax
+        call    ohd
+
+	print	s_ebp
+	mov	%EBP,%eax
+	call	ohd
+
+        print    s_ebx
+        mov     %ebx,%eax
+        call    ohd
+
+        print    s_ecx
+        mov     %ecx,%eax
+        call    ohd
+
+        print    s_edx
+        mov     %edx,%eax
+        call    ohd
+
+        print    s_esi
+        mov     %esi,%eax
+        call    ohd
+
+        print    s_edi
+        mov     %edi,%eax
+        call    ohd
+
+        pop    %eax
+        ret
+s_esp:    .asciz      " ESP="
+s_ees:    .asciz      " EES="
+s_eax:    .asciz      "EAX="
+s_ebx:    .asciz      " EBX="
+s_ecx:    .asciz      " ECX="
+s_edx:    .asciz      " EDX="
+s_ebp:    .asciz      " EBP="
+s_esi:    .asciz      " ESI="
+s_edi:    .asciz      " EDI="
+s_eip:    .asciz      " EIP="

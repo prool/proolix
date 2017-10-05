@@ -71,6 +71,7 @@ void hdd0 (void) {return;}
 void hdd1 (void) {return;}
 void fdd (void) {return;}
 void basic(void) {return;}
+void run(void) {return;}
 
 void putch_tty(char c) {if (c&0x80) putchar(' '); else putchar(c);}
 

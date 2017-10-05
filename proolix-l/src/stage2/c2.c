@@ -218,10 +218,12 @@ while (1)
 	else if (!strcmp(buf,"tofile2")) tofile2();
 	else if (!strcmp(buf,"rm")) remove_file();
 	else if (!strcmp(buf,"cat")) cat();
+	else if (!strcmp(buf,"hcat")) hexcat();
 	else if (!strcmp(buf,"dd")) dd();
 	else if (!strcmp(buf,"settimezone")) settimezone();
 	else if (!strcmp(buf,"videomod")) videomod_();
 	else if (!strcmp(buf,"run")) load_and_run();
+	else if (!strcmp(buf,"rundos")) load_and_run_msdos();
 #ifdef PEMU
 	else if (!strcmp(buf,"fromhost")) from_host();
 	else if (!strcmp(buf,"quit")) return 0;

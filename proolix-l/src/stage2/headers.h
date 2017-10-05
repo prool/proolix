@@ -112,7 +112,9 @@ short int get_year(void);
 void print_boot(void);
 
 void load_and_run (void);
+void load_and_run_msdos (void);
 void run (void);
+void run_msdos (void);
 
 void reboot (void);
 void cold (void);
@@ -135,6 +137,7 @@ void memmap(void);
 void system(void);
 void test(void);
 void cat(void);
+void hexcat(void);
 void catw(void);
 void ascii(void);
 void cls(void);

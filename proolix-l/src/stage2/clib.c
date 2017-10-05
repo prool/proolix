@@ -1473,10 +1473,10 @@ time - print time\r\n\
 install - install Proolix-l to other disk format - format filesystem\r\n\
 super - view superblock ls - ls creat - create file rm - remove file\r\n\
 tofile - string to file tofile2 - debuggin command dd - dd\r\n\
-cat - cat file\r\n\
+cat - cat file hcat - hex cat file\r\n\
 reboot - reboot cold - cold reboot\r\n\
 hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD\r\n\
-settimezone - set tz videomod - set video mode run - run");
+settimezone - set tz videomod - set video mode run - run rundos - run DOS");
 }
 
 void videomod_(void)
@@ -2534,89 +2534,6 @@ while (1)
 	}
     }
 close(i);
-}
-
-int PathToDir(char *path, char DirName[11])
-{
-char *cc;
-char *point;
-int Counter, MsDos, i, len=2, NameLen, ExtLen, Up;
-
-#ifdef DEBUG
-printf(" P2D: path=`%s' ",path);
-#endif
-
-if (path==NULL) return -1;
-cc=path;
-Up=0;
-Counter=0;
-MsDos=1;
-if (strcmp(path,"..")==0) MsDos=2; /* 2 == ".." */
-else
-  {
-  while(*cc)
-    {
-    if (*cc=='.')
-      {
-      point=cc;
-      Counter++;
-      }
-    else
-      {
-      if (isupper(*cc)) Up=1;
-      }
-    cc++;
-    }
-  if (Up) MsDos=0;
-  len=(int)(cc-path);
-  if (MsDos)
-    {
-    if (Counter) {NameLen=(int)(point-path); ExtLen=(int)(len-NameLen-1);}
-    else {NameLen=len; ExtLen=0;}
-    if (Counter>1) {MsDos=0;}
-    else if (NameLen>8) {MsDos=0;}
-    else if (ExtLen>3) {MsDos=0;}
-    }
-  }
-  for (i=0;i<11;i++) DirName[i]=' ';
-  if (MsDos==1)
-    {
-    memcpy(DirName,path,NameLen);
-    memcpy(DirName+8,point+1,ExtLen);
-    for (i=0;i<11;i++) DirName[i]=toupper(DirName[i]);
-    }
-  else
-    {
-    memcpy(DirName,path,(len>11)?11:len);
-    }
-  #ifdef DEBUG
-  printf(" DirName=`%s' ", DirName);
-  #endif
-
-return MsDos;
-}
-
-char *DirToPath(char filename[11], char *path)
-{char c, *cc, *ret; int i; unsigned len;
-if (path==NULL) return NULL;
-ret=path;
-  for(i=0;i<8;i++)
-    if ((c=filename[i])!=' ') *path++=c;
-    else break;
-  if (filename[8]!=' ')
-    {
-    *path++='.';
-    for (i=8;i<11;i++)
-      if ((c=filename[i])!=' ') *path++=c;
-      else break;
-    }
-  *path=0;
-  strlwr(ret);
-#if 0
-puts0(" path= ");
-puts0(ret);
-#endif
-return ret;
 }
 #endif
 
@@ -3742,6 +3659,37 @@ puts0("\r\nEXEC!\r\n");
 run();
 }
 
+void load_and_run_msdos (void)
+{
+unsigned short int i, load_segment, offset;
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+char c;
+int rc;
+
+// ввод имени файла
+puts0("file ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+rc=open_(filename,O_READ);
+if (rc==-1) {puts0("can't open file\r\n"); return;}
+
+load_segment=0x4060; offset=0;
+
+while(readc(0,&c)==0)
+	{
+	poke(c,load_segment,offset++);
+	}
+close_(0);
+puts0("\r\nEXEC!\r\n");
+// EXEC!
+run_msdos();
+}
+
 void cat(void)
 {
 unsigned short int i;
@@ -3779,6 +3727,38 @@ while(readc(0,&c)==0)
 			line=0;putch('\r');for (i=0;i<70;i++)putch(' ');putch('\r');}
 		}
 	else putch(c);
+
+close_(0);
+}
+
+void hexcat(void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+char c;
+int rc;
+int line=0;
+
+// ввод имени файла
+puts0("file ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+//puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+rc=open_(filename,O_READ);
+//puthex(rc);
+if (rc!=-1) {/*puts0("open OK\r\n");*/}
+else {puts0("can't open file\r\n"); return;}
+
+while(readc(0,&c)==0)
+	puthex_b(c);
 
 close_(0);
 }

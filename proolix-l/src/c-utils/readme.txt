@@ -1,8 +1,6 @@
 REAMDE FILE
 
-This directory contain Proolix asm utilities
-
-u1.S - first assembly utility
+This directory contain Proolix C language utilities
 
 make - make all utilities
 
