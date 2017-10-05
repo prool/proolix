@@ -72,6 +72,7 @@ void hdd1 (void) {return;}
 void fdd (void) {return;}
 void basic(void) {return;}
 void run(void) {return;}
+void run_msdos(void) {return;}
 
 void putch_tty(char c) {if (c&0x80) putchar(' '); else putchar(c);}
 

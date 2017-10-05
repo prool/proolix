@@ -2539,7 +2539,7 @@ close(i);
 
 void vectors(void)
 {short int i;
-for (i=0;i<128+10;i++)
+for (i=0;i<128+25;i++)
 	{
 	puthex_b(i);
 	puts0(" ");
@@ -2548,6 +2548,8 @@ for (i=0;i<128+10;i++)
 	puthex(peek(i*4));
 	if ((i+1)%6==0) puts0("\r\n");
 	else puts0(" ");
+
+	if (i==(128+14)) {puts0("PressAnyKey");getch();puts0("\r\n");}
 	}
 }
 

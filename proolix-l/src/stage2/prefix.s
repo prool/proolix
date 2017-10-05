@@ -63,6 +63,34 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
+    # intercept of int 91h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x91*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_91,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
+    # intercept of int 92h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x92*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		interrupt_92,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+
     # intercept of int 21h (MSDOS interrupt)
 
     pushw	%ES
@@ -280,7 +308,7 @@ run:
 	movw	%ax,%ES
         cli
         movw    %ax,%SS
-        movw    $0xfffe,%SP
+        movw    $0xfffe,%SP # !!! fffe? fffd??
         sti
 
         .byte      0xea    # JMP stage2_seg:0000
@@ -299,6 +327,19 @@ run_msdos:
 
         .byte      0xea    # JMP stage2_seg:0100
         .word      0x0100,0x4050
+
+interrupt_92:
+	  movb $0x0e,%ah
+	  movb $'F',%al
+	  int  $0x10	# putch
+
+	  call	print_registers
+
+	retf
+#	lcall	*0x248 # = 92h * 4
+
+interrupt_91:	# Intercept of some interrupts
+	iret
 
 interrupt_90:	# Intercept of some interrupts
 
@@ -479,25 +520,6 @@ l_int_d_stop:	jmp l_int_d_stop
 
 s_interrupt_d:	.asciz	" int d GENERAL PROTECTION VIOLATION "
 
-int80p:		# Proolix-l interrupt (Proolix-l system call)
-	pushw	%DS
-
-	pushw	%ax
-	putch	$'D'
-	putch	$'S'
-	putch	$'='
-	pushw	%DS	# ax:=DS
-	popw	%ax
-	call	ohw
-	popw	%ax
-
-	pushw	%CS	# DS:=CS
-	popw	%DS
-
-	call	print_registers
-	popw	%DS
-	iret
-
 int24p:
     pushw	%CS
     popw	%DS # DS:=CS
@@ -513,20 +535,20 @@ int20p:
 
 int21p:
 	# !!!!!!!!!!!!!!!!!!!!!!!!!!!
-	pushw	%DS
-	pushw	%ax
+#	pushw	%DS
+#	pushw	%ax
 
-	pushw	%CS
-	popw	%DS # DS:=CS
+#	pushw	%CS
+#	popw	%DS # DS:=CS
 
-	call	ohw
+#	call	ohw
 
-	  movb $0x0e,%ah
-	  movb $'=',%al
-	  int  $0x10	# putch
+#	  movb $0x0e,%ah
+#	  movb $'=',%al
+#	  int  $0x10	# putch
 
-	popw	%ax
-	popw	%DS
+#	popw	%ax
+#	popw	%DS
 	iret
 
     pushw	%DS
