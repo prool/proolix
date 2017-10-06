@@ -353,37 +353,28 @@ interrupt_92:
     	ljmp	*%ES:(%si)
 
 s_txt92:	.asciz " int 92 say "
+s_txt91:	.asciz " int 91 !!!111 "
 
 interrupt_91:	# Intercept of some interrupts
-	  movb $0x0e,%ah
-	  movb $'=',%al
-	  int  $0x10	# putch
 
-	  movw	%sp,%bp
+	movw	%SP,%BP
 
-	  movw	%SS:-8(%bp),%ax
-	  call	ohw
+	  pushw	%DS # save DS
 
-	  movw	%SS:-4(%bp),%ax
-	  call	ohw
+	  pushw %CS
+	  popw	%DS # DS:=CS
 
-	  movw	%SS:(%bp),%ax
-	  call	ohw
+	  movw	$s_txt91, %si
+	  call	sayr_proc
 
-	  movw	%SS:4(%bp),%ax
-	  call	ohw
+	  popw	%DS # restore DS
 
-	  movw	%SS:8(%bp),%ax
-	  call	ohw
+	  /* composite IRET ;) */
+	  popw	%ax
+	  popw	%ax
+	  popw	%ax	# SP-=6
 
-	  movw	%SS:12(%bp),%ax
-	  call	ohw
-
-	  movw	%SS:16(%bp),%ax
-	  call	ohw
-
-l_loop:	jmp	l_loop
-	iret
+	  ljmp	*%SS:(%bp)
 
 interrupt_90:	# Intercept of some interrupts
 

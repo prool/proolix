@@ -14,11 +14,13 @@ _start:
 
     print str1
 
-#    call	print_registers
+    call	print_registers
 
     int		$0x91
 
     putch $'!'
+
+    call	print_registers
 
 /* Это пример системного вызова по "дурацкой" технологии ljmp/ljmp
 
