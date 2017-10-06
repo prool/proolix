@@ -35,6 +35,7 @@ obhod:
 	  movb $'_',%al
 	  int  $0x10	# putch
 
+/*
     # intercept of int 4h
     pushw	%ES
     xorw	%ax,%ax
@@ -48,6 +49,7 @@ obhod:
     decw	%si
     movw	%ax,%ES:(%si)
     popw	%ES
+*/
 
     # intercept of int 90h
     pushw	%ES
@@ -568,23 +570,30 @@ int20p:
     popw	%DS # DS:=CS
 	jmp	l_msdos_exit
 
+s_txt21:	.asciz "=INT 21H "
 int21p:
-	# !!!!!!!!!!!!!!!!!!!!!!!!!!!
-#	pushw	%DS
-#	pushw	%ax
+	movw	%SP,%BP
 
-#	pushw	%CS
-#	popw	%DS # DS:=CS
+	  pushw	%DS # save DS
 
-#	call	ohw
+	  pushw %CS
+	  popw	%DS # DS:=CS
 
-#	  movb $0x0e,%ah
-#	  movb $'=',%al
-#	  int  $0x10	# putch
+	  call	ohw
+	  movw	$s_txt21, %si
+	  call	sayr_proc
 
-#	popw	%ax
-#	popw	%DS
-	iret
+	  popw	%DS # restore DS
+
+	  /* composite IRET ;) */
+	  popw	%ax
+	  popw	%ax
+	  popw	%ax	# SP-=6
+
+	  ljmp	*%SS:(%bp)
+
+
+######################################## old int21h
 
     pushw	%DS
 
