@@ -83,12 +83,16 @@ char buf [BUFLEN];
 int i,j;
 char c,cc;
 char bootsector[512];
-unsigned short int drive, reg_bx, reg_cx, reg_dx;
-unsigned short int cyl, sectors, heads, total_sec;
+//unsigned short int drive, reg_bx, reg_cx, reg_dx;
+//unsigned short int cyl, sectors, heads, total_sec;
 #ifdef PEMU
 FILE *cfg;
 char *pp;
 #endif
+
+if (firstboot)
+ {// begin firstboot
+ firstboot=0;
 
 //putch('/');
 putch_color('@', 4);
@@ -178,7 +182,7 @@ putdec(gTotal[i]);
 puts0("\r\n");
 }
 
-//puts0("cursor coord "); puthex(get_row()); puts0(" "); puthex(get_col()); puts0("\r\n"); 
+ }//end firstboot
 
 while (1)
 	{

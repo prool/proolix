@@ -14,38 +14,6 @@
 
 // variables
 
-#if 0
-extern unsigned char buffer512[];
-extern unsigned short errno;
-
-extern short int SectorsOnCyl;
-extern short int TrkSecs;
-extern short int HeadCnt;
-extern short int RootBeg;
-extern short int DataStart;
-extern int MaxSectors;
-extern int ResSecs;
-extern short int CluSize;
-extern short int CluSizeBytes;
-extern short int FatSize;
-extern short int RootEnd;
-extern short int MaxClusters;
-extern short int MaxCyl;
-
-extern unsigned char current_drive; // 0 - FDD A, 1 - FDD B, 80 - HDD 1, 81 - HDD 2, FF - no mount drive
-extern unsigned short int boot_drive;
-
-extern int reg_ax;
-extern int reg_bx;
-extern int reg_cx;
-extern int reg_dx;
-
-extern int reg_si;
-extern int reg_di;
-
-extern int reg_es;
-#endif
-
 #ifdef PEMU
 unsigned short int FCB [6];
 unsigned short int gCyl[4];
@@ -53,6 +21,9 @@ unsigned short int gSec[4];
 unsigned short int gHeads[4];
 unsigned short int gTotal[4];
 unsigned short int mytimezone;
+unsigned short int firstboot=1;
+unsigned short int drive, reg_bx, reg_cx, reg_dx;
+unsigned short int cyl, sectors, heads, total_sec;
 #else
 extern unsigned short int FCB [6];
 extern unsigned short int gCyl[4];
@@ -60,6 +31,9 @@ extern unsigned short int gSec[4];
 extern unsigned short int gHeads[4];
 extern unsigned short int gTotal[4];
 extern unsigned short int mytimezone;
+extern unsigned short int firstboot;
+extern unsigned short int drive, reg_bx, reg_cx, reg_dx;
+extern unsigned short int cyl, sectors, heads, total_sec;
 #endif
 /*
 	FCB[0]	directory block with file

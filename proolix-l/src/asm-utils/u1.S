@@ -1,4 +1,4 @@
-# Proolix-l first assembler utility
+# Proolix-l first assembler test utility
 
     .code16
 
@@ -15,6 +15,17 @@ _start:
     print str1
 
 #    call	print_registers
+
+    int		$0x91
+
+    putch $'!'
+
+/* Это пример системного вызова по "дурацкой" технологии ljmp/ljmp
+
+Обращение к ядру идет в виде ljmp на адрес обработчика 92h прерывания, но
+перед этим в адрес 93h прерывания кладется адрес возврата, куда ядро потом
+возвращает управление командой ljmp. При этом не используется стек и соответственно
+невозможны вложенные системные вызовы. Но они и так не нужны согласно архитектуре
 
     # intercept of int 93h
     pushw	%ES
@@ -40,7 +51,10 @@ l_return:
 
     putch $'!'
 
-#    call	print_registers
+    call	print_registers
+    call	print_registers
+    call	print_registers
+*/
 
 #    int		$0x21
 
@@ -50,4 +64,5 @@ l_return:
 	.include "ohw.S"
 	.include "saycsip.S"
 
-str1:	.asciz	" First assembler utility for OS Proolix. v.2.0 "
+str1:	.ascii	" First assembler utility for OS Proolix"
+	.byte	13,10,0

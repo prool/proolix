@@ -308,7 +308,7 @@ run:
 	movw	%ax,%ES
         cli
         movw    %ax,%SS
-        movw    $0xfffe,%SP # !!! fffe? fffd??
+        movw    $0xfff0,%SP # !!! fffe? fffd??
         sti
 
         .byte      0xea    # JMP stage2_seg:0000
@@ -322,30 +322,67 @@ run_msdos:
 	movw	%ax,%ES
         cli
         movw    %ax,%SS
-        movw    $0xfffe,%SP
+        movw    $0xfff0,%SP
         sti
 
         .byte      0xea    # JMP stage2_seg:0100
         .word      0x0100,0x4050
 
 interrupt_92:
+
+	pushw	%DS
+
 	  movb $0x0e,%ah
 	  movb $'F',%al
 	  int  $0x10	# putch
 
-#	  call	print_registers
+	  pushw		%CS
+	  popw		%DS
 
-    xorw	%ax,%ax
-    movw	%ax,%ES # ES:=0
+#  call	print_registers
 
-    movw	$0x24C,%si
-    ljmp	*%ES:(%si)
+	movw	$s_txt92, %si
+	call	sayr_proc
 
-l_92:		jmp	l_92
+    	xorw	%ax,%ax
+    	movw	%ax,%ES # ES:=0
 
-	retf
+    	popw	%DS
+
+    	movw	$0x24C,%si
+    	ljmp	*%ES:(%si)
+
+s_txt92:	.asciz " int 92 say "
 
 interrupt_91:	# Intercept of some interrupts
+	  movb $0x0e,%ah
+	  movb $'=',%al
+	  int  $0x10	# putch
+
+	  movw	%sp,%bp
+
+	  movw	%SS:-8(%bp),%ax
+	  call	ohw
+
+	  movw	%SS:-4(%bp),%ax
+	  call	ohw
+
+	  movw	%SS:(%bp),%ax
+	  call	ohw
+
+	  movw	%SS:4(%bp),%ax
+	  call	ohw
+
+	  movw	%SS:8(%bp),%ax
+	  call	ohw
+
+	  movw	%SS:12(%bp),%ax
+	  call	ohw
+
+	  movw	%SS:16(%bp),%ax
+	  call	ohw
+
+l_loop:	jmp	l_loop
 	iret
 
 interrupt_90:	# Intercept of some interrupts
@@ -804,12 +841,15 @@ sayrret:
 # variables
 
 /*MSDOS emu*/
+
 DOS_DS:	.word
 DOS_BREAK:	.byte	0
 DOS_CUR_DRIVE:	.byte	0 # (00h = A:, 01h = B:, etc)
+
 s_int21: .byte 13,10
 	.ascii	" Interrupt 21h! "
 	.byte 13,10,0
+
 s_msdos_exit:	.byte 13,10
 		.ascii "Program terminated"
 		.byte 13,10,0
@@ -818,6 +858,15 @@ s_msdos_exit:	.byte 13,10
 
 boot_drive:	.word	0
 mytimezone:	.word	0
+firstboot:	.word	1
+drive:		.word	0
+reg_bx:		.word	0
+reg_cx:		.word	0
+reg_dx:		.word	0
+cyl:		.word	0
+sectors:	.word	0
+heads:		.word	0
+total_sec:	.word	0
 
 gCyl: .word	0,0,0,0
 gSec: .word	0,0,0,0
