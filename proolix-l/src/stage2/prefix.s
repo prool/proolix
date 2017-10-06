@@ -333,10 +333,17 @@ interrupt_92:
 	  movb $'F',%al
 	  int  $0x10	# putch
 
-	  call	print_registers
+#	  call	print_registers
+
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+
+    movw	$0x24C,%si
+    ljmp	*%ES:(%si)
+
+l_92:		jmp	l_92
 
 	retf
-#	lcall	*0x248 # = 92h * 4
 
 interrupt_91:	# Intercept of some interrupts
 	iret

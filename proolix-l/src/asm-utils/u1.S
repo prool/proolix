@@ -14,13 +14,29 @@ _start:
 
     print str1
 
-    call	print_registers
+#    call	print_registers
+
+    # intercept of int 93h
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x93*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		l_return,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
 
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
 
     movw	$0x248,%si
-    lcall	*%ES:(%si)
+    ljmp	*%ES:(%si)
+
+l_return:
 
     putch $'!'
 
