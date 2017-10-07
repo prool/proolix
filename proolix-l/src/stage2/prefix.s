@@ -110,7 +110,6 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-/*
     # intercept of int 20h (DOS 1+ - TERMINATE PROGRAM)
     pushw	%ES
     xorw	%ax,%ax
@@ -125,6 +124,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
+/*
     # intercept of int 24h DOS 1+ - CRITICAL ERROR HANDLER
     pushw	%ES
     xorw	%ax,%ax
@@ -326,6 +326,19 @@ run_msdos:
         movw    %ax,%SS
         movw    $0xfff0,%SP
         sti
+
+	/* формирование PSP */
+	movw	$0x20CD,%ax
+	movw	%ax,%ES:(0)
+
+	movw	$0x5050,%ax
+	movw	%ax,%ES:(2)
+
+	movb	$0,%al
+	movb	%al,%ES:(80)
+
+	movb	$0x0D,%al
+	movb	%al,%ES:(81)
 
         .byte      0xea    # JMP stage2_seg:0100
         .word      0x0100,0x4050
@@ -573,15 +586,72 @@ int20p:
 */
 
 /********************************* MSDOS emulator *****************************/
+int20p:
+	jmp	l_21_4c
+
 s_txt21:	.asciz "=INT 21H "
 int21p:
 	movw	%SP,%BP
 
+	cmpb	$0x0,%ah	# DOS 1+ - TERMINATE PROGRAM
+	jz	l_21_0
+
+	cmpb	$0x1,%ah	# DOS 1+ - READ CHARACTER FROM STANDARD INPUT, WITH ECHO
+	jz	l_21_1
+
+	cmpb	$0x2,%ah	# DOS 1+ - WRITE CHARACTER TO STANDARD OUTPUT
+	jz	l_21_2
+
+	cmpb	$0x6,%ah	# DOS 1+ - DIRECT CONSOLE OUTPUT
+	jz	l_21_2		# prool: maybe same as ah=2 !
+
+	cmpb	$0x7,%ah	# DIRECT CHARACTER INPUT, WITHOUT ECHO
+	jz	l_21_1		# prool: maybe same as ah=1		
+
+	cmpb	$0x8,%ah	# CHARACTER INPUT WITHOUT ECHO
+	jz	l_21_1		# prool: maybe same as ah=1		
+
 	cmpb	$0x9,%ah	# DOS 1+ - WRITE STRING TO STANDARD OUTPUT
 	jz	l_21_9
 
+	cmpb	$0xb,%ah	# GET STDIN STATUS
+	jz	l_21_b
+
 	cmpb	$0x1a,%ah	# DOS 1+ - SET DISK TRANSFER AREA ADDRESS
 	jz	l_21_1a
+
+	cmpb	$0x25,%ah	# DOS 1+ - SET INTERRUPT VECTOR
+	jz	l_21_25
+
+	cmpb	$0x29,%ah	# DOS 1+ - PARSE FILENAME INTO FCB
+	jz	l_21_29
+
+	cmpb	$0x2a,%ah	# DOS 1+ - GET SYSTEM DATE
+	jz	l_21_2a
+
+	cmpb	$0x30,%ah	# DOS 2+ - GET DOS VERSION
+	jz	l_21_30
+
+	cmpb	$0x34,%ah	# DOS 2+ - GET ADDRESS OF INDOS FLAG
+	jz	l_21_34
+
+	cmpb	$0x35,%ah	# DOS 2+ - GET INTERRUPT VECTOR
+	jz	l_21_35
+
+	cmpb	$0x37,%ah	# DOS 2+ - SWITCHAR - GET SWITCH CHARACTER
+	jz	l_21_37
+
+	cmpb	$0x3d,%ah	# DOS 2+ - OPEN - OPEN EXISTING FILE
+	jz	l_21_3d
+
+	cmpb	$0x3f,%ah	# DOS 2+ - READ - READ FROM FILE OR DEVICE
+	jz	l_21_3f
+
+	cmpb	$0x40,%ah	# DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
+	jz	l_21_40
+
+	cmpb	$0x44,%ah	# DOS 2+ - IOCTL - GET DEVICE INFORMATION
+	jz	l_21_44
 
 	cmpb	$0x48,%ah	# DOS 2+ - ALLOCATE MEMORY
 	jz	l_21_48
@@ -604,6 +674,9 @@ int21p:
 	cmpb	$0x55,%ah	# DOS 2+ internal - CREATE CHILD PSP
 	jz	l_21_55
 
+	cmpb	$0x5d,%ah	# DOS 3.1+ internal - SERVER FUNCTION CALL
+	jz	l_21_5d
+
 	cmpb	$0x58,%ah	# DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY
 	jz	l_21_58
 
@@ -611,6 +684,23 @@ int21p:
 	jz	l_21_60
 
 	jmp	l_21_unkn_fn
+
+l_21_0: # DOS 1+ - TERMINATE PROGRAM
+	jmp	l_21_4c
+
+l_21_1: # READ CHARACTER FROM STANDARD INPUT, WITH ECHO
+	xorb	%ah,%ah
+	int	$0x16
+	xorb	%ah,%ah
+	jmp	l_21_exit
+
+l_21_2:	# DOS 1+ - WRITE CHARACTER TO STANDARD OUTPUT DL = character to write
+	movb	$0x0e, %ah
+	movb	%dl,%al
+	xorw	$1,%bx
+	movw	$1,%cx
+	int	$0x10
+	jmp	l_21_exit
 
 l_21_9:	# AH=9 DOS 1+ - WRITE STRING TO STANDARD OUTPUT
 	pushw	%si
@@ -631,13 +721,159 @@ l_21_9_exit:
 	
 	jmp	l_21_exit
 
+l_21_b: # GET STDIN STATUS Return: AL = status 00h if no character available FFh if character is available
+	movb	$1,%ah
+	int	$0x10
+	jz	l_21_b_symbol_here
+	xorb	%al,%al
+	jmp	l_21_exit
+l_21_b_symbol_here:
+	movb	$0xFF,%al
+	jmp	l_21_exit
+
 l_21_1a: # DOS 1+ - SET DISK TRANSFER AREA ADDRESS
 	jmp	l_21_exit
 
-l_21_48:	# DOS 2+ - ALLOCATE MEMORY
+l_21_25: # DOS 1+ - SET INTERRUPT VECTOR
+	xorw	%ax,%ax
+	movw	%ax,%ES # ES=0
+
+	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
+	shlw	$0x2,%ax # ax=ax*4
+	# ax - address of interrupt vector (offset)
+
+	movw	%ax,%si
+	movw	%dx,%es:(%si) # offset := DX
+
+	incw	%si
+	incw	%si
+
+	movw	DOS_DS,%ax
+	movw	%ax,%es:(%si) # segment := DOS DS
+	jmp	l_21_exit
+
+l_21_29:	# DOS 1+ - PARSE FILENAME INTO FCB
+#call	sayr_proc
+	jmp	l_21_exit
+
+l_21_2a:	# DOS 1+ - GET SYSTEM DATE
+# Return: CX = year (1980-2099) DH = month DL = day ---DOS 1.10+--- AL = day of week (00h=Sunday)
+
+	movb	$4,%ah
+	int	$0x1a	# GET REAL-TIME CLOCK DATE (AT,XT286,PS)
+	# Return: CH = century (BCD) CL = year (BCD) DH = month (BCD) DL = day (BCD)
+
+	movb	%dl,%al
+	shrb	$4,%al
+	movb	$10,%bl
+	mul	%bl
+	movb	%dl,%bl
+	andb	$0x0F,%bl
+	xorb	%bh,%bh
+	addw	%bx,%ax
+	movw	%ax,day
+
+	movb	%dh,%al
+	shrb	$4,%al
+	movb	$10,%bl
+	mul	%bl
+	movb	%dh,%bl
+	andb	$0x0F,%bl
+	xorb	%bh,%bh
+	addw	%bx,%ax
+	movw	%ax,month
+
+	movb	%ch,%al
+	shrb	$4,%al
+	movb	$10,%bl
+	mul	%bl
+	movb	%ch,%bl
+	andb	$0x0F,%bl
+	xorb	%bh,%bh
+	addw	%bx,%ax
+	movw	%ax,century
+
+	movb	%cl,%al
+	shrb	$4,%al
+	movb	$10,%bl
+	mul	%bl
+	movb	%cl,%bl
+	andb	$0x0F,%bl
+	xorb	%bh,%bh
+	addw	%bx,%ax
+	movw	%ax,year
+
+	movw	century,%ax
+	movw	$100,%bx
+	mul	%bx
+	movw	year,%cx
+	addw	%cx,%ax
+# Return: CX = year (1980-2099) DH = month DL = day ---DOS 1.10+--- AL = day of week (00h=Sunday)
+	movw	%ax,%cx
+	movb	month,%dh
+	movb	day,%dl
+	xorb	%al,%al
+
+	jmp	l_21_exit
+day:		.word	0
+month:		.word	0
+century:	.word	0
+year:		.word	0
+
+l_21_30:	# DOS 2+ - GET DOS VERSION
+	xorw	%ax,%ax		# DOS 1.x ;-)
+	jmp	l_21_exit
+
+l_21_34:	# DOS 2+ - GET ADDRESS OF INDOS FLAG
+	jmp	l_21_exit	# prool: ;-)
+
+l_21_35: # DOS 2+ - GET INTERRUPT VECTOR
+	xorw	%bx,%bx
+	movw	%bx,%ES # ES=0
+
+	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
+	shlw	$0x2,%ax # ax=ax*4
+	# ax - address of interrupt vector (offset)
+
+	movw	%ax,%si
+	movw	%es:(%si),%bx # offset -> bx
+
+	incw	%si
+	incw	%si
+
+	movw	%es:(%si),%ax
+	movw	%ax,%es # segment -> ES
+	jmp	l_21_exit
+
+l_21_37:	# DOS 2+ - SWITCHAR - GET SWITCH CHARACTER
+	xorb	%al,%al
+	movb	$'/',%dl
+	jmp	l_21_exit
+
+l_21_3d:	# DOS 2+ - OPEN - OPEN EXISTING FILE
+	movw	$2,%ax	# err: file not found
 	stc
+	jmp	l_21_exit
+
+l_21_3f:	# DOS 2+ - READ - READ FROM FILE OR DEVICE
+	movw	$5,%ax # err: access denied
+	stc
+	jmp	l_21_exit
+
+l_21_40: # DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
+	movw	$5,%ax # err
+	stc
+	jmp	l_21_exit
+
+l_21_44: # INT 21 - DOS 2+ - IOCTL - GET DEVICE INFORMATION
+	movw	$5,%ax	# error 5: access denied
+	stc
+	jmp	l_21_exit
+
+l_21_48:	# DOS 2+ - ALLOCATE MEMORY
 	movw	$0, %bx
 	movw	$8, %ax # err: insuff. memory
+	stc
 	jmp	l_21_exit
 
 l_21_4a:	# DOS 2+ - RESIZE MEMORY BLOCK
@@ -646,8 +882,8 @@ l_21_4a:	# DOS 2+ - RESIZE MEMORY BLOCK
 	jmp	l_21_exit
 
 l_21_4b:	# DOS 2+ - EXEC - LOAD AND/OR EXECUTE PROGRAM
-	stc
 	movw	$5,%ax	# err: file not found
+	stc
 	jmp	l_21_exit
 
 l_21_4c:	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
@@ -678,13 +914,16 @@ l_21_55: # DOS 2+ internal - CREATE CHILD PSP
 	jmp	l_21_exit
 
 l_21_58: # DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY
-	stc	# set CF flag (error)
 	movw	$1,%ax # error code "invalid function"
+	stc	# set CF flag (error)
 	jmp	l_21_exit
 
+l_21_5d:	# DOS 3.1+ internal - SERVER FUNCTION CALL
+	jmp	l_21_exit	# ;-)
+
 l_21_60: # DOS 3.0+ - TRUENAME - CANONICALIZE FILENAME OR PATH
-	stc		# err
 	movw	$2,%ax	# err 2: invalid component in directory path or drive letter only
+	stc		# err
 	jmp	l_21_exit
 
 l_21_unkn_fn:
