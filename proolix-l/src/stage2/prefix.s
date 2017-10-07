@@ -557,6 +557,7 @@ l_int_d_stop:	jmp l_int_d_stop
 
 s_interrupt_d:	.asciz	" int d GENERAL PROTECTION VIOLATION "
 
+/*
 int24p:
     pushw	%CS
     popw	%DS # DS:=CS
@@ -569,21 +570,133 @@ int20p:
     pushw	%CS
     popw	%DS # DS:=CS
 	jmp	l_msdos_exit
+*/
 
+/********************************* MSDOS emulator *****************************/
 s_txt21:	.asciz "=INT 21H "
 int21p:
 	movw	%SP,%BP
 
-	  pushw	%DS # save DS
+	cmpb	$0x9,%ah	# DOS 1+ - WRITE STRING TO STANDARD OUTPUT
+	jz	l_21_9
 
-	  pushw %CS
-	  popw	%DS # DS:=CS
+	cmpb	$0x1a,%ah	# DOS 1+ - SET DISK TRANSFER AREA ADDRESS
+	jz	l_21_1a
+
+	cmpb	$0x48,%ah	# DOS 2+ - ALLOCATE MEMORY
+	jz	l_21_48
+
+	cmpb	$0x4a,%ah	# DOS 2+ - RESIZE MEMORY BLOCK
+	jz	l_21_4a
+
+	cmpb	$0x4b,%ah	# DOS 2+ - EXEC - LOAD AND/OR EXECUTE PROGRAM
+	jz	l_21_4b
+
+	cmpb	$0x4c,%ah	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
+	jz	l_21_4c
+
+	cmpb	$0x50,%ah	# DOS 2+ internal - SET CURRENT PROCESS ID (SET PSP ADDRESS)
+	jz	l_21_50
+
+	cmpb	$0x52,%ah	# DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY
+	jz	l_21_52
+
+	cmpb	$0x55,%ah	# DOS 2+ internal - CREATE CHILD PSP
+	jz	l_21_55
+
+	cmpb	$0x58,%ah	# DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY
+	jz	l_21_58
+
+	cmpb	$0x60,%ah	# DOS 3.0+ - TRUENAME - CANONICALIZE FILENAME OR PATH
+	jz	l_21_60
+
+	jmp	l_21_unkn_fn
+
+l_21_9:	# AH=9 DOS 1+ - WRITE STRING TO STANDARD OUTPUT
+	pushw	%si
+
+	movw	%dx,%si
+l_21_9_0:
+	movb	%DS:(%si),%al
+	cmpb	$'$', %al
+	je	l_21_9_exit
+	movb $0x0e,%ah
+	int  $0x10	# putch
+
+	incw	%si
+	jmp	l_21_9_0
+l_21_9_exit:
+	movb	$0x24,%al
+	popw	%si
+	
+	jmp	l_21_exit
+
+l_21_1a: # DOS 1+ - SET DISK TRANSFER AREA ADDRESS
+	jmp	l_21_exit
+
+l_21_48:	# DOS 2+ - ALLOCATE MEMORY
+	stc
+	movw	$0, %bx
+	movw	$8, %ax # err: insuff. memory
+	jmp	l_21_exit
+
+l_21_4a:	# DOS 2+ - RESIZE MEMORY BLOCK
+	clc
+	movw	$1,%bx
+	jmp	l_21_exit
+
+l_21_4b:	# DOS 2+ - EXEC - LOAD AND/OR EXECUTE PROGRAM
+	stc
+	movw	$5,%ax	# err: file not found
+	jmp	l_21_exit
+
+l_21_4c:	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
+	pushw	%CS
+	popw	%DS
+	movw	$0xFFFE,%SP
+
+    	pushw	%CS
+    	popw	%ES # restore kernel ES
+
+    	pushw	%CS
+    	popw	%ax
+    	movw	%ax,%SS # restore kernel SS
+
+#	call	print_registers
+	jmp	main
+
+l_21_50:	# DOS 2+ internal - SET CURRENT PROCESS ID (SET PSP ADDRESS)
+	clc
+	jmp	l_21_exit
+
+l_21_52: # DOS 2+ internal - SYSVARS - GET LIST OF LISTS
+	# ничего не делаем! потом разберемся!
+	jmp l_21_exit
+
+l_21_55: # DOS 2+ internal - CREATE CHILD PSP
+	stc
+	jmp	l_21_exit
+
+l_21_58: # DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY
+	stc	# set CF flag (error)
+	movw	$1,%ax # error code "invalid function"
+	jmp	l_21_exit
+
+l_21_60: # DOS 3.0+ - TRUENAME - CANONICALIZE FILENAME OR PATH
+	stc		# err
+	movw	$2,%ax	# err 2: invalid component in directory path or drive letter only
+	jmp	l_21_exit
+
+l_21_unkn_fn:
+	  pushw		%CS
+	  popw		%DS
 
 	  call	ohw
 	  movw	$s_txt21, %si
 	  call	sayr_proc
 
-	  popw	%DS # restore DS
+l_21_stop:	jmp	l_21_stop
+l_21_exit:
 
 	  /* composite IRET ;) */
 	  popw	%ax
@@ -593,8 +706,8 @@ int21p:
 	  ljmp	*%SS:(%bp)
 
 
-######################################## old int21h
-
+/* ######################################## old int21h ################# */
+/*
     pushw	%DS
 
 	pushw	%cx
@@ -816,7 +929,7 @@ s_unkn_subf:	.asciz	" MSDOS UNKNOWN SUBFUNCTION "
 l_iret:
     popw	%DS
     iret
-
+*/
 s_interrupt_90:	.asciz	" Int 90 "
 
 sayr_proc: # proc       Ver 0.0.2 19-Oct-2004
