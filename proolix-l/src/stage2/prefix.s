@@ -78,7 +78,7 @@ obhod:
     decw	%si
     movw	%ax,%ES:(%si)
     popw	%ES
-
+/*
     # intercept of int 92h
     pushw	%ES
     xorw	%ax,%ax
@@ -92,7 +92,7 @@ obhod:
     decw	%si
     movw	%ax,%ES:(%si)
     popw	%ES
-
+*/
     # intercept of int 21h (MSDOS interrupt)
 
     pushw	%ES
@@ -342,7 +342,7 @@ run_msdos:
 
         .byte      0xea    # JMP stage2_seg:0100
         .word      0x0100,0x4050
-
+/*
 interrupt_92:
 
 	pushw	%DS
@@ -369,25 +369,58 @@ interrupt_92:
 
 s_txt92:	.asciz " int 92 say "
 s_txt91:	.asciz " int 91 !!!111 "
+*/
 
 interrupt_91:	# Intercept of some interrupts
 
-	movw	%SP,%BP
+	  movw	%SP,%BP
 
 	  pushw	%DS # save DS
 
 	  pushw %CS
 	  popw	%DS # DS:=CS
 
-	  movw	$s_txt91, %si
-	  call	sayr_proc
+#		body
+	  cmpb	$0,%ah		# function 0 - test
+	  je	l_91_0
+
+	  cmpb	$1,%ah		# function 1 - input character from console
+	  je	l_91_1
+
+	  cmpb	$2,%ah		# function 2 - output character from %al
+	  je	l_91_2
+
+	  jmp	l_91_unknown_fn
+
+l_91_0:		call	test91
+		jmp	l_91_exit
+
+l_91_1:
+	xorb	%ah,%ah
+	int	$0x16
+	xorb	%ah,%ah
+	jmp	l_91_exit
+
+l_91_2:
+	xorb	%bh,%bh
+	pushl	%eax
+	call	putch
+	jmp	l_91_exit
+
+l_91_unknown_fn:
+		call	int91_unknown
+
+l_91_exit:
 
 	  popw	%DS # restore DS
 
 	  /* composite IRET ;) */
-	  popw	%ax
-	  popw	%ax
-	  popw	%ax	# SP-=6
+	  decw	%SP
+	  decw	%SP
+	  decw	%SP
+	  decw	%SP
+	  decw	%SP
+	  decw	%SP
 
 	  ljmp	*%SS:(%bp)
 
@@ -1169,7 +1202,8 @@ l_iret:
     popw	%DS
     iret
 */
-s_interrupt_90:	.asciz	" Int 90 "
+s_interrupt_90:	.ascii	"exit"
+		.byte	13,10,0
 
 sayr_proc: # proc       Ver 0.0.2 19-Oct-2004
                         # Процедура вывода строки при помощи функций BIOS

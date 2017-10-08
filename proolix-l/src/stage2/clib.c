@@ -16,19 +16,22 @@
 #define MAX_LEN_STR 256 
 #define MAXLEN 256 
 
-#if 0
-void two_parameters(int *i, int *j) // see translated text in .s file
+void test91 (void)
 {
-*i=getch();
-*j=getch();
+puts0("test of int 91\r\n");
 }
-#endif
+
+void int91_unknown(void)
+{
+puts0("Error: Unknown int 91 function!\r\n");
+}
 
 int toupper (int ch)
 {
 if ((ch>='a')&&(ch<='z'))return ch + 'A' - 'a'; else return ch;
 }
 
+#if 0 // эта функция пока не нужна. коментим для экономии места
 char *strchr (const char *str, int c)
 {
 /* if (str==NULL) return NULL; */
@@ -57,13 +60,6 @@ cc=dest;
   while (*src++);
 return cc;
 }
-
-#if 0
-void cls(void)
-{
-cls_();
-setpos(0,0);
-}
 #endif
 
 #if PROOLFOOL
@@ -85,7 +81,6 @@ switch(c)
 		setpos(g_row,g_col);
 	}
 }
-$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #else
 void putch(char c)
 {
@@ -1537,21 +1532,6 @@ putch('\r');
 } // end while
 }
 
-// сложение 16 битных целых без переполнения (?)
-unsigned short int add_( unsigned short int a, unsigned short int b)
-{
-unsigned int a_, b_, summa;
-unsigned short int ret;
-
-a_=a; b_=b;
-a_=a_&0xFFFFU;
-b_=b_&0xFFFFU;
-summa=a_ + b_;
-if ((a_==0xFFF0U) && (b_==15)) return 0xFFFFU;
-ret=summa&0xFFFFU;
-return ret;
-}
-
 #ifndef PEMU
 unsigned char peek3 ( unsigned short int seg, unsigned short int offset )
 {
@@ -1592,19 +1572,19 @@ while (1)
     if (Option=='A') {
     			for(i=0;i<16;i++)
                             {
-                                if ((c=peek3(segm,add_(off,i)))>=' ') putch(c);
+                                if ((c=peek3(segm,(off+i)))>=' ') putch(c);
                                 else putch('.');
                             }
 	}
     else if (Option=='M') {
-    	for(i=0;i<16;i++){puthex_b(peek3(segm,add_(off,i)));putch(' ');}
+    	for(i=0;i<16;i++){puthex_b(peek3(segm,(off+i)));putch(' ');}
     	for(i=0;i<16;i++)
                             {
-                                if ((c=peek3(segm,add_(off,i)))>=' ') putch(c);
+                                if ((c=peek3(segm,(off+i)))>=' ') putch(c);
                                 else putch('.');
                             }
 	}
-    else if (Option=='H') { for(i=0;i<16;i++){puthex_b(peek3(segm,add_(off,i)));putch(' ');}
+    else if (Option=='H') { for(i=0;i<16;i++){puthex_b(peek3(segm,(off+i)));putch(' ');}
                           }
     }
   puts0("\r\n");
@@ -1639,7 +1619,7 @@ Enter - next string\r\n\
       }
     puts0("\r\n");
     }
-  else if (!cmd[0]) {off=add_(off,16);}
+  else if (!cmd[0]) {off=(off+16);}
   else ;
   }
 #endif // PROOLFOOL

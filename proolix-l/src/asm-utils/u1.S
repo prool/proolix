@@ -8,63 +8,35 @@
 
 _start:
 
-    putch $'1'
-    putch $'2'
-    putch $'3'
-
     print str1
 
-    call	print_registers
-
+    movb	$0,%ah	# fn 0 - test
     int		$0x91
 
-    putch $'!'
+    print str2
 
-    call	print_registers
+    movb	$1,%ah
+    int		$0x91
 
-/* Это пример системного вызова по "дурацкой" технологии ljmp/ljmp
+    print str3
+    call	ohw
 
-Обращение к ядру идет в виде ljmp на адрес обработчика 92h прерывания, но
-перед этим в адрес 93h прерывания кладется адрес возврата, куда ядро потом
-возвращает управление командой ljmp. При этом не используется стек и соответственно
-невозможны вложенные системные вызовы. Но они и так не нужны согласно архитектуре
+    print str4
 
-    # intercept of int 93h
-    pushw	%ES
-    xorw	%ax,%ax
-    movw	%ax,%ES # ES:=0
-    pushw	%CS
-    popw	%ax
-    movw	$0x93*4+2,%si
-    movw	%ax,%ES:(%si)
-    lea		l_return,%ax
-    decw	%si
-    decw	%si
-    movw	%ax,%ES:(%si)
-    popw	%ES
-
-    xorw	%ax,%ax
-    movw	%ax,%ES # ES:=0
-
-    movw	$0x248,%si
-    ljmp	*%ES:(%si)
-
-l_return:
-
-    putch $'!'
-
-    call	print_registers
-    call	print_registers
-    call	print_registers
-*/
-
-#    int		$0x21
+    movb	$'Z',%al
+    movb	$2,%ah
+    int	$0x91
 
     int		$0x90
 
 	.include "sayr.S"
 	.include "ohw.S"
-	.include "saycsip.S"
+#	.include "saycsip.S"
 
 str1:	.ascii	" First assembler utility for OS Proolix"
 	.byte	13,10,0
+str2:	.ascii	"Press any key "
+	.byte	13,10,0
+str3:	.ascii	"Register AX: "
+	.byte	0
+str4:	.asciz	"output char="
