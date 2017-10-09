@@ -415,12 +415,12 @@ l_91_exit:
 	  popw	%DS # restore DS
 
 	  /* composite IRET ;) */
-	  decw	%SP
-	  decw	%SP
-	  decw	%SP
-	  decw	%SP
-	  decw	%SP
-	  decw	%SP
+	  incw	%SP
+	  incw	%SP
+	  incw	%SP
+	  incw	%SP
+	  incw	%SP
+	  incw	%SP
 
 	  ljmp	*%SS:(%bp)
 

@@ -176,8 +176,8 @@ while(1)
 #ifdef DEBUG
 puts0("debug getsn() ");
 while (*str0) puthex_b(*str0++);
-puts0("\r\n");
 #endif
+puts0("\r\n");
 
 return str;
 }
@@ -3131,7 +3131,7 @@ for (i=0;i<ROOT_SIZE;i++)
 
 				if (current_block) while (1)
 				{
-				puts0("debug rm 1st block "); putdec(current_block); puts0("\r\n");
+				//puts0("debug rm 1st block "); putdec(current_block); puts0("\r\n");
 				// находим следующий блок
 				rc=secread(device, current_block, buffer512);
 				if (rc!=1) {puts0("block read error!\r\n"); return;}

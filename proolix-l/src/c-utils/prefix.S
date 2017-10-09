@@ -23,32 +23,51 @@ _start:
 	movw	$0xFFFC,%SP
 	sti
 
+#	call	print_registers
+
 // for debug
 	  movb $0x0e,%ah
 	  movb $'1',%al
 	  int  $0x10	# putch
 
-    print str1
+    call	syscall_test
+#    call	subroutine
 
-    movb	$0,%ah	# fn 0 - test
-    int		$0x91
-
-    print str3
-    call	ohw
-
-    print str4
-
-    movb	$'Z',%al
-    movb	$2,%ah
-    int	$0x91
+#    xorb	%ah,%ah
+#    int		$0x91
 
     call	main
 
     int		$0x90
 
+subroutine:
+    ret
+
+    .globl	syscall_test
+syscall_test:
+// for debug
+	  movb $0x0e,%ah
+	  movb $'3',%al
+	  int  $0x10	# putch
+	    movb	$0,%ah	# fn 0 - test
+	    int		$0x91
+// for debug
+	  movb $0x0e,%ah
+	  movb $'4',%al
+	  int  $0x10	# putch
+	ret
+
+    .globl	stop
+stop:
+// for debug
+	  movb $0x0e,%ah
+	  movb $'S',%al
+	  int  $0x10	# putch
+	int	$0x90
+
 	.include "sayr.S"
 	.include "ohw.S"
-#	.include "saycsip.S"
+	.include "saycsip.S"
 
 str1:	.ascii	" First C utility for OS Proolix"
 	.byte	13,10,0
