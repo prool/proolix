@@ -1,7 +1,15 @@
 #include "headers.h"
 
+void subroutine(void);
+
+void empty_function(void)
+{
+}
+
 void main (void)
 {
-syscall_test();
+//empty_function();
+subroutine();
+//syscall_test();
 //stop();
 }

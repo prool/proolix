@@ -1,6 +1,6 @@
 /* prefix by prool */
 
-    .code16gcc
+    .code16
 
     .include "macros.S"
 
@@ -9,14 +9,14 @@
 _start:
 	.globl	_start
 
-	push	%cs
-	pop	%ds
+	pushw	%cs
+	popw	%ds
 
-	push	%cs
-	pop	%es
+	pushw	%cs
+	popw	%es
 
-	push	%cs
-	pop	%bx
+	pushw	%cs
+	popw	%bx
 
 	cli
 	movw	%bx,%SS
@@ -25,10 +25,7 @@ _start:
 
 #	call	print_registers
 
-// for debug
-	  movb $0x0e,%ah
-	  movb $'1',%al
-	  int  $0x10	# putch
+    putch	$'1'
 
 #    call	syscall_test
 #    call	subroutine
@@ -45,25 +42,15 @@ subroutine:
 
     .globl	syscall_test
 syscall_test:
-// for debug
-	  movb $0x0e,%ah
-	  movb $'3',%al
-	  int  $0x10	# putch
+	putch	$'3'
 	    movb	$0,%ah	# fn 0 - test
 //$$$	    int		$0x91
-// for debug
-	  movb $0x0e,%ah
-	  movb $'4',%al
-	  int  $0x10	# putch
+	putch	$'4'
 	ret
 
     .globl	stop
 stop:
-// for debug
-	  movb $0x0e,%ah
-	  movb $'S',%al
-	  int  $0x10	# putch
-	int	$0x90
+	putch	$'5'
 
 	.include "sayr.S"
 	.include "ohw.S"
@@ -78,5 +65,4 @@ str3:	.ascii	"Register AX: "
 str4:	.asciz	"output char="
 
 /* end of prool prefix */
-
 

@@ -9,6 +9,8 @@ sed -i -e 's/@GOTOFF(%eax)//g' ctmp.s
 
 sed -i -e 's/@GOTOFF(%ebx)//g' ctmp.s
 
+sed -i -e 's/@PLT//g' ctmp.s
+
 #	replace
 # movl    test_global@GOT(%ebx), %eax
 #	to
