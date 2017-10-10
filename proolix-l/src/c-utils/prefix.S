@@ -44,7 +44,7 @@ subroutine:
 syscall_test:
 	putch	$'3'
 	    movb	$0,%ah	# fn 0 - test
-//$$$	    int		$0x91
+	    int		$0x91
 	putch	$'4'
 	ret
 
