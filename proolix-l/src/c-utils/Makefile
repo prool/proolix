@@ -11,4 +11,4 @@ ctest:	ctmp.s
 	chmod a-x ctest
 
 clean:
-	rm *.o c1.S *.lst *.map ctmp.s c1 ctest
+	rm *.o c1.S *.lst *.map ctmp.s c1 ctest *.orig

@@ -25,7 +25,7 @@ _start:
 
 #	call	print_registers
 
-    putch	$'1'
+#    putch	$'1'
 
 #    call	syscall_test
 #    call	subroutine
@@ -35,7 +35,7 @@ _start:
 
     call	main
 
-    putch	$'m'
+#    putch	$'m'
 
     int		$0x90
 
@@ -52,7 +52,7 @@ syscall_test:
 
     .globl	stop
 stop:
-	putch	$'S'
+#	putch	$'S'
 	int	$0x90
 
     .globl	getchar
@@ -63,6 +63,11 @@ getchar:
 	ret
 
 putch:
+
+	movw	%sp, %bp
+	movb	2(%bp), %al
+	movb	$2,%ah	# fn 2 - putchar
+	int	$0x91
 	ret
 
 	.include "sayr.S"
