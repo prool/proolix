@@ -19,7 +19,7 @@ _start:
 	pop	%bx
 
 	cli
-	mov	%bx,%SS
+	movw	%bx,%SS
 	movw	$0xFFFC,%SP
 	sti
 
@@ -30,7 +30,7 @@ _start:
 	  movb $'1',%al
 	  int  $0x10	# putch
 
-    call	syscall_test
+#    call	syscall_test
 #    call	subroutine
 
 #    xorb	%ah,%ah
@@ -50,7 +50,7 @@ syscall_test:
 	  movb $'3',%al
 	  int  $0x10	# putch
 	    movb	$0,%ah	# fn 0 - test
-	    int		$0x91
+//$$$	    int		$0x91
 // for debug
 	  movb $0x0e,%ah
 	  movb $'4',%al

@@ -2,6 +2,6 @@
 
 void main (void)
 {
-//syscall_test();
+syscall_test();
 //stop();
 }
