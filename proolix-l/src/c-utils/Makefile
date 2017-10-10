@@ -5,7 +5,7 @@ c1:	c1.c prefix.S britva.sh headers.h
 	ld -M -Ttext 0x0 -s --oformat binary -o c1 c1.o > c1.map
 	chmod a-x c1
 
-ctest:
+ctest:	ctmp.s
 	as -o c1.o -a=c1.lst ctmp.s
 	ld -M -Ttext 0x0 -s --oformat binary -o ctest c1.o > c1.map
 	chmod a-x ctest

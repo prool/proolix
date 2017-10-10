@@ -414,7 +414,11 @@ l_91_exit:
 
 	  popw	%DS # restore DS
 
+		.code16
+	  	iret
+	  	.code16gcc
 	  /* composite IRET ;) */
+	/*
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
@@ -423,6 +427,7 @@ l_91_exit:
 	  incw	%SP
 
 	  ljmp	*%SS:(%bp)
+	*/
 
 interrupt_90:	# Intercept of some interrupts
 
@@ -971,12 +976,12 @@ l_21_stop:	jmp	l_21_stop
 l_21_exit:
 
 	  /* composite IRET ;) */
+	
 	  popw	%ax
 	  popw	%ax
 	  popw	%ax	# SP-=6
 
 	  ljmp	*%SS:(%bp)
-
 
 /* ######################################## old int21h ################# */
 /*

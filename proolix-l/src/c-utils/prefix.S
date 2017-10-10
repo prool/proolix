@@ -35,6 +35,8 @@ _start:
 
     call	main
 
+    putch	$'m'
+
     int		$0x90
 
 subroutine:
@@ -42,15 +44,26 @@ subroutine:
 
     .globl	syscall_test
 syscall_test:
-	putch	$'3'
+#	putch	$'3'
 	    movb	$0,%ah	# fn 0 - test
 	    int		$0x91
-	putch	$'4'
+#	putch	$'4'
 	ret
 
     .globl	stop
 stop:
-	putch	$'5'
+	putch	$'S'
+	int	$0x90
+
+    .globl	getchar
+getchar:
+	movb	$1,%ah	# fn 1 - getchar
+	int	$0x91
+	call	ohw
+	ret
+
+putch:
+	ret
 
 	.include "sayr.S"
 	.include "ohw.S"
@@ -65,4 +78,3 @@ str3:	.ascii	"Register AX: "
 str4:	.asciz	"output char="
 
 /* end of prool prefix */
-
