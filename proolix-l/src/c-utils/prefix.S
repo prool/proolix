@@ -63,13 +63,14 @@ getchar:
 	ret
 
 putch:
+	pushw	%bp
 
 	movw	%sp, %bp
-	movb	2(%bp), %al
+	movb	4(%bp), %al
 	movb	$2,%ah	# fn 2 - putchar
 	int	$0x91
 
-#l_stop:	jmp	l_stop	# STOP
+	popw	%bp
 	ret
 
 	.include "sayr.S"

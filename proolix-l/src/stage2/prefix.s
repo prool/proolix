@@ -373,7 +373,7 @@ s_txt91:	.asciz " int 91 !!!111 "
 
 interrupt_91:	# Intercept of some interrupts
 
-	  movw	%SP,%BP
+#	  movw	%SP,%BP
 
 	  pushw	%DS # save DS
 
@@ -402,10 +402,13 @@ l_91_1:
 	jmp	l_91_exit
 
 l_91_2:
-	xorb	%bh,%bh
+	#xorb	%bh,%bh # ?????
 	pushl	%eax
 	call	putch
-	popl	%eax	# ??????????????
+	incw	%sp
+	incw	%sp
+	incw	%sp
+	incw	%sp
 
 	jmp	l_91_exit
 
@@ -416,19 +419,21 @@ l_91_exit:
 
 	  popw	%DS # restore DS
 
+	  .code16
+	  iret
+	  .code16gcc
+
 	  /* composite IRET ;) */
+	  /*
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
-/*
-	call	print_registers	# debug
-l_stop:	jmp	l_stop	# debug stop
-*/
 
 	  ljmp	*%SS:(%bp)
+	  */
 
 interrupt_90:	# Intercept of some interrupts
 

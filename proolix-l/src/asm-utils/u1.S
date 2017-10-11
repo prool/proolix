@@ -8,8 +8,6 @@
 
 _start:
 
-    call	print_registers
-
     print str1
 
     movb	$0,%ah	# fn 0 - test
