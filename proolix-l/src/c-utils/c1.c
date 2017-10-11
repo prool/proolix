@@ -15,7 +15,7 @@ putch(*s);
 
 void test(char c)
 {
-putch(c);
+//putch(c);
 }
 
 void main (void)
@@ -23,6 +23,7 @@ void main (void)
 putch('Y');
 //putch('1');
 //puts0("-+=");
-//test('T');
+test('T');
+empty_function();
 //stop();
 }
