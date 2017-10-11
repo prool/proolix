@@ -405,6 +405,8 @@ l_91_2:
 	xorb	%bh,%bh
 	pushl	%eax
 	call	putch
+	popl	%eax	# ??????????????
+
 	jmp	l_91_exit
 
 l_91_unknown_fn:
@@ -414,20 +416,19 @@ l_91_exit:
 
 	  popw	%DS # restore DS
 
-		.code16
-	  	iret
-	  	.code16gcc
 	  /* composite IRET ;) */
-	/*
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
 	  incw	%SP
+/*
+	call	print_registers	# debug
+l_stop:	jmp	l_stop	# debug stop
+*/
 
 	  ljmp	*%SS:(%bp)
-	*/
 
 interrupt_90:	# Intercept of some interrupts
 

@@ -8,6 +8,8 @@
 
 _start:
 
+    call	print_registers
+
     print str1
 
     movb	$0,%ah	# fn 0 - test
@@ -31,7 +33,7 @@ _start:
 
 	.include "sayr.S"
 	.include "ohw.S"
-#	.include "saycsip.S"
+	.include "saycsip.S"
 
 str1:	.ascii	" First assembler utility for OS Proolix"
 	.byte	13,10,0

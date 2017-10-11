@@ -59,7 +59,7 @@ stop:
 getchar:
 	movb	$1,%ah	# fn 1 - getchar
 	int	$0x91
-	call	ohw
+#	call	ohw
 	ret
 
 putch:
@@ -68,6 +68,8 @@ putch:
 	movb	2(%bp), %al
 	movb	$2,%ah	# fn 2 - putchar
 	int	$0x91
+
+#l_stop:	jmp	l_stop	# STOP
 	ret
 
 	.include "sayr.S"
