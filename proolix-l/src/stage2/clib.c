@@ -1472,6 +1472,11 @@ cat - cat file hcat - hex cat file\r\n\
 reboot - reboot cold - cold reboot\r\n\
 hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD\r\n\
 settimezone - set tz videomod - set video mode run - run rundos - run DOS");
+#ifdef PEMU
+printf("\n\nEmulator commands:\n\
+fr - copy file from host machine to virtual disk\n\
+quit, q - quit from emulator\n\n");
+#endif
 }
 
 void videomod_(void)
@@ -3084,6 +3089,70 @@ puts0("No space in root dir\r\n");
 }
 #endif
 
+int remove_(char *filename)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+unsigned char buffer512 [512];
+unsigned char str[MAX_LEN_STR];
+unsigned short int rc, c1, c2, current_block, next_block;
+
+if (filename[0]==0) {return -1;}
+
+i=get_boot_drive();
+if (i==0xAAAA) device=0; else device=0x80;
+
+rc=secread(device, ROOT_DIR, buffer512);
+if (rc!=1) {puts0("Root dir read error!\r\n"); return -1;}
+
+// ищем такое же имя
+for (i=0;i<ROOT_SIZE;i++)
+	{
+	if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
+		{// not empty dir record
+		equal=1;
+		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
+		if (equal)	{// puts0("file exists!\r\n");
+				buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]=0;
+				rc=secwrite(device, ROOT_DIR, buffer512);
+				if (rc!=1) {puts0("Root dir write error!\r\n"); return -1;}
+				// находим первый блок файла
+				c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
+				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
+				current_block=(c2<<8) | c1;
+
+				if (current_block) while (1)
+				{
+				//puts0("debug rm 1st block "); putdec(current_block); puts0("\r\n");
+				// находим следующий блок
+				rc=secread(device, current_block, buffer512);
+				if (rc!=1) {puts0("block read error!\r\n"); return -1;}
+				c1=buffer512[1];
+				c2=buffer512[2];
+				next_block=(c2<<8) | c1;
+				// чистим блок файла
+				buffer512[0]=0;
+				//buffer512[1]=0;
+				//buffer512[2]=0;
+				rc=secwrite(device, current_block, buffer512);
+				if (rc!=1) {puts0("block write error!\r\n"); return -1;}
+				if (next_block==0) break;
+				else current_block=next_block;
+				// повторить
+				} // end while (1)
+
+				return 0;
+				}
+		}
+	}
+
+// file not found
+puts0("Deleted file not found\r\n");
+return -1;
+}
+
 void remove_file (void)
 {
 unsigned short int i;
@@ -3103,59 +3172,10 @@ getsn(str,MAX_LEN_STR);
 for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
 filename[FILENAME_LEN]=0;
 
-puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+//puts0("\r\n'"); puts0(filename); puts0("'\r\n");
 
-if (filename[0]==0) {return;}
+if(remove_(filename)) {puts0("Can't remove file '"); puts0(filename); puts0("'\r\n");}
 
-i=get_boot_drive();
-if (i==0xAAAA) device=0; else device=0x80;
-
-rc=secread(device, ROOT_DIR, buffer512);
-if (rc!=1) {puts0("Root dir read error!\r\n"); return;}
-
-// ищем такое же имя
-for (i=0;i<ROOT_SIZE;i++)
-	{
-	if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
-		{// not empty dir record
-		equal=1;
-		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
-		if (equal)	{// puts0("file exists!\r\n");
-				buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]=0;
-				rc=secwrite(device, ROOT_DIR, buffer512);
-				if (rc!=1) {puts0("Root dir write error!\r\n"); return;}
-				// находим первый блок файла
-				c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
-				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
-				current_block=(c2<<8) | c1;
-
-				if (current_block) while (1)
-				{
-				//puts0("debug rm 1st block "); putdec(current_block); puts0("\r\n");
-				// находим следующий блок
-				rc=secread(device, current_block, buffer512);
-				if (rc!=1) {puts0("block read error!\r\n"); return;}
-				c1=buffer512[1];
-				c2=buffer512[2];
-				next_block=(c2<<8) | c1;
-				// чистим блок файла
-				buffer512[0]=0;
-				//buffer512[1]=0;
-				//buffer512[2]=0;
-				rc=secwrite(device, current_block, buffer512);
-				if (rc!=1) {puts0("block write error!\r\n"); return;}
-				if (next_block==0) break;
-				else current_block=next_block;
-				// повторить
-				} // end while (1)
-
-				return;
-				}
-		}
-	}
-
-// file not found
-puts0("file not found!\r\n");
 }
 
 void view_superblock(void)

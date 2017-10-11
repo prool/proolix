@@ -142,6 +142,7 @@ int open_ (char *filename, int flag);
 int close_(int h);
 int writec(int h, char c);
 int readc (int h, char *c);
+int remove_(char *filename);
 void dd(void);
 
 #ifndef PEMU

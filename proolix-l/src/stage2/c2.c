@@ -229,7 +229,7 @@ while (1)
 	else if (!strcmp(buf,"run")) load_and_run();
 	else if (!strcmp(buf,"rundos")) load_and_run_msdos();
 #ifdef PEMU
-	else if (!strcmp(buf,"fromhost")) from_host();
+	else if (!strcmp(buf,"fr")) from_host();
 	else if (!strcmp(buf,"quit")) return 0;
 	else if (!strcmp(buf,"q")) return 0;
 #endif

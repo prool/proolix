@@ -1,3 +1,5 @@
+// C-lib for Proolix emulator
+
 #define MAXLEN 256
 
 void videomod(unsigned short int ax)
@@ -87,21 +89,31 @@ char *cc;
 char c;
 int i, fi, fo;
 
+for (i=0;i<MAXLEN;i++) virtual_file[i]=0;
+
 printf("From host file ? ");
 fgets(host_file, MAXLEN, stdin);
 cc=strchr(host_file,'\n');
 if (cc) *cc=0;
 //printf("Host file '%s'\n", host_file);
 
+fi=open(host_file,O_READ);
+if (fi==-1) {printf("Can't open host file '%s'\n",host_file); return;}
+
 printf("To virtual file ? ");
 //for (i=0;i<MAXLEN;i++) virtual_file[i]=0;
 fgets(virtual_file, MAXLEN, stdin);
 cc=strchr(virtual_file,'\n');
 if (cc) *cc=0;
+if (virtual_file[0]==0) {strcpy(virtual_file,host_file);}
 printf("Virtual file '%s'\n", virtual_file);
 
-fi=open(host_file,O_READ);
-if (fi==-1) {printf("Can't open host file '%s'\n",host_file); return;}
+fo=open_(virtual_file,O_READ);
+if (fo!=-1)
+{// target file exitst: need to remove old file
+close_(fo);
+remove_(virtual_file);
+}
 
 fo=open_(virtual_file,O_CREAT);
 if (fo==-1) {printf("Can't create virtual file '%s'\n",virtual_file); return;}
@@ -113,7 +125,7 @@ while(1)
 	}
 
 close(fi);
-if (close_(fi)==-1) {printf("Can't close virtual file '%s'\n",virtual_file); return;}
+if (close_(fo)==-1) {printf("Can't close virtual file '%s'\n",virtual_file); return;}
 }
 
 void to_host (void)
