@@ -337,8 +337,24 @@ run_msdos:
 	movb	$0,%al
 	movb	%al,%ES:(80)
 
-	movb	$0x0D,%al
+	movb	$' ',%al
 	movb	%al,%ES:(81)
+
+	movb	$0x0D,%al
+	movb	%al,%ES:(82)
+/*
+	movb	$3,%al
+	movb	%al,%ES:(80)
+
+	movb	$'/',%al
+	movb	%al,%ES:(81)
+
+	movb	$'?',%al
+	movb	%al,%ES:(82)
+
+	movb	$0x0D,%al
+	movb	%al,%ES:(83)
+*/
 
         .byte      0xea    # JMP stage2_seg:0100
         .word      0x0100,0x4050
