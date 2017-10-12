@@ -2608,13 +2608,16 @@ puts0("\r\ncount ? ");
 getsn(str,MAX_LEN_STR);
 count=atoi(str);
 
-puts0("\r\nfrom ");puthex(drive1);puts0("/");putdec(sec1);
+
+puts0("\r\nfrom ");puthex_b(drive1);puts0("/");putdec(sec1);
 
 puts0(" to ");
 
-puthex(drive2);puts0("/");putdec(sec2);
+puthex_b(drive2);puts0("/");putdec(sec2);
 
 puts0(" count ");putdec(count);puts0(" blocks\r\n");
+
+if (count==0) return;
 
 puts0("WARNING! All data in all disks will be destroyed!!!\r\n");
 if ((drive2==0x80) || (drive2==0x81)) puts0("Dest. disk is HDD!!!!1\r\n");
