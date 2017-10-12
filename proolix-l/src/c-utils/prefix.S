@@ -1,6 +1,6 @@
 /* prefix by prool */
 
-    .code16
+    .code16gcc
 
     .include "macros.S"
 
@@ -66,7 +66,7 @@ putch:
 	pushw	%bp
 
 	movw	%sp, %bp
-	movb	4(%bp), %al
+	movb	6(%bp), %al
 	movb	$2,%ah	# fn 2 - putchar
 	int	$0x91
 

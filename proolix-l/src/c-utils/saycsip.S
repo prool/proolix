@@ -1,4 +1,3 @@
-	.code16
 	.text
 	.global print_registers
 print_registers: # proc    ; REGS SAVED

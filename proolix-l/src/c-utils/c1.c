@@ -8,22 +8,28 @@ void empty_function(void)
 
 void puts0(char *s)
 {
-putch(*s);
-s++;
-putch(*s);
+while (*s) putch(*s++);
 }
 
 void test(char c)
 {
-//putch(c);
+putch(c);
 }
 
 void main (void)
-{
-putch('Y');
-//putch('1');
-//puts0("-+=");
-test('T');
-empty_function();
+{char c;
+syscall_test();
+putch(':');
+puts0("press anykey\r\n");
+c=getchar();
+#if 1
+puts0("\r\n");
+puts0("You pressed ");
+putch(c);
+#endif
+//stop();
+puts0("\r\n");
+//test('t');
+//empty_function();
 //stop();
 }
