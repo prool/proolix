@@ -15,7 +15,7 @@ sed -i -e 's/@PLT//g' ctmp.s
 # movl    test_global@GOT(%ebx), %eax
 #	to
 # movl    $test_global, %eax
-#sed -iBAK -e 's/\([a-zA-Z0-9_]\{1,\}\)@GOT(%[a-zA-Z]\{1,\})/$\1/' ctmp.s
+sed -iBAK -e 's/\([a-zA-Z0-9_]\{1,\}\)@GOT(%[a-zA-Z]\{1,\})/$\1/' ctmp.s
 
 if grep @GOT ctmp.s
 then
