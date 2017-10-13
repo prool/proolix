@@ -1,3 +1,5 @@
+	.include "macros.S"
+	.code16gcc
 	.text
 	.global print_registers
 print_registers: # proc    ; REGS SAVED
@@ -17,6 +19,8 @@ print_registers: # proc    ; REGS SAVED
 	call next
 next:
 	popw	%ax
+	incw	%sp
+	incw	%sp
 	call	ohw
 
         print    s_ss

@@ -1,7 +1,6 @@
     .code16
     .text
-    
-    
+
     .global sayr_proc
 
 sayr_proc: # proc       Ver 0.0.2 19-Oct-2004

@@ -1,4 +1,5 @@
 #!/bin/sh
+# britva ("razor") - foolish and dirty [hack] preprocessor for proolix c-utilities
 echo britva 2
 cat prefix.S $1 > ctmp.orig
 cp prefix.S ctmp.s

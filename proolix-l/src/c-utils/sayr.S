@@ -1,13 +1,14 @@
+    .code16gcc
+
     .text
-    
-    
+
     .global sayr_proc
 
 sayr_proc: # proc       Ver 0.0.2 19-Oct-2004
-                        # Процедура вывода строки при помощи функций BIOS
-                        # Вход: %DS:%si - ASCIIZ строка.
+                        # Print sting using BIOS int 0x10
+                        # Enter: %DS:%si - ASCIIZ string.
                         # REGS SAVED !!!
-# В графических режимах не работает
+# Not worked under grafical modes of video adapter
 	pushw	%ax
 	
 #       cld

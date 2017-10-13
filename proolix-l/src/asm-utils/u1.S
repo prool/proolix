@@ -8,6 +8,10 @@
 
 _start:
 
+	jmp	l_continue
+signature:	.word	0xDDDD
+l_continue:
+
     print str1
 
     movb	$0,%ah	# fn 0 - test

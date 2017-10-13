@@ -1,3 +1,4 @@
+    .code16gcc
     .text
     
     

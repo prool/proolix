@@ -1,10 +1,6 @@
+// first test proolix c-language utility
+
 #include "headers.h"
-
-void subroutine(void);
-
-void empty_function(void)
-{
-}
 
 void puts0(char *s)
 {
