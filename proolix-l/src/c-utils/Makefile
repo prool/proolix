@@ -41,5 +41,10 @@ putch.o:	putch.S
 getchar.o:	getchar.S
 	$(AS) $(ASFLAG) -a=$@.lst -o $@ $<
 
-libc.a:		sayr.o saycsip.o ohw.o stop.o syscall_test.o getchar.o putch.o
+puts0.o:	puts0.c headers.h
+	gcc -m16 -S -o tmp.S $<
+	./britva2.sh tmp.S
+	as -o $@ -a=tmp.lst ctmp.s
+
+libc.a:		sayr.o saycsip.o ohw.o stop.o syscall_test.o getchar.o putch.o puts0.o
 	ar r libc.a $^

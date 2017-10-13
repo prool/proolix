@@ -2,15 +2,12 @@
 
 #include "headers.h"
 
+#if 0
 void puts0(char *s)
 {
 while (*s) putch(*s++);
 }
-
-void test(char c)
-{
-putch(c);
-}
+#endif
 
 void main (void)
 {char c;
@@ -23,9 +20,6 @@ puts0("\r\n");
 puts0("You pressed ");
 putch(c);
 #endif
-//stop();
 puts0("\r\n");
-//test('t');
-//empty_function();
 //stop();
 }
