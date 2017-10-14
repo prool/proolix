@@ -13,7 +13,7 @@ void main (void)
 {char c;
 syscall_test();
 putch(':');
-puts0("press anykey\r\n");
+puts("press anykey");
 c=getchar();
 #if 1
 puts0("\r\n");
