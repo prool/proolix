@@ -108,7 +108,7 @@ void gluck2(char *);
 
 void help(void);
 void memmap(void);
-void system(void);
+void sysinfo(void);
 void test(void);
 void cat(void);
 void hexcat(void);

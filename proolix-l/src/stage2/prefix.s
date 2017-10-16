@@ -333,16 +333,14 @@ run_msdos:
 
 	movw	$0x5050,%ax
 	movw	%ax,%ES:(2)
-
+/*
 	movb	$0,%al
 	movb	%al,%ES:(80)
 
-	movb	$' ',%al
-	movb	%al,%ES:(81)
-
 	movb	$0x0D,%al
-	movb	%al,%ES:(82)
-/*
+	movb	%al,%ES:(81)
+*/
+
 	movb	$3,%al
 	movb	%al,%ES:(80)
 
@@ -354,7 +352,6 @@ run_msdos:
 
 	movb	$0x0D,%al
 	movb	%al,%ES:(83)
-*/
 
         .byte      0xea    # JMP stage2_seg:0100
         .word      0x0100,0x4050
@@ -717,6 +714,9 @@ int21p:
 	cmpb	$0x48,%ah	# DOS 2+ - ALLOCATE MEMORY
 	jz	l_21_48
 
+	cmpb	$0x49,%ah	# DOS 2+ - FREE MEMORY
+	jz	l_21_49
+
 	cmpb	$0x4a,%ah	# DOS 2+ - RESIZE MEMORY BLOCK
 	jz	l_21_4a
 
@@ -935,6 +935,12 @@ l_21_48:	# DOS 2+ - ALLOCATE MEMORY
 	movw	$0, %bx
 	movw	$8, %ax # err: insuff. memory
 	stc
+	jmp	l_21_exit
+
+l_21_49:	# DOS 2+ - FREE MEMORY
+	movw	%ES,%ax
+	stc
+	movw	$7,%ax	# error: memory block destroyed
 	jmp	l_21_exit
 
 l_21_4a:	# DOS 2+ - RESIZE MEMORY BLOCK

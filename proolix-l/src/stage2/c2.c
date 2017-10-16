@@ -15,6 +15,7 @@ set_color(7); puts0("end of palette");
 #ifdef PEMU // code for Proolix emulator under Linux
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -201,7 +202,7 @@ while (1)
 	else if (!strcmp(buf,"fdd"))  fdd();
 	else if (!strcmp(buf,"test")) test();
 	else if (!strcmp(buf,"ascii")) ascii();
-	else if (!strcmp(buf,"system")) system();
+	else if (!strcmp(buf,"sysinfo")) sysinfo();
 	else if (!strcmp(buf,"memd0")) memd0();
 	else if (!strcmp(buf,"memd")) memd();
 	else if (!strcmp(buf,"memmap")) memmap();
@@ -230,6 +231,7 @@ while (1)
 	else if (!strcmp(buf,"rundos")) load_and_run_msdos();
 #ifdef PEMU
 	else if (!strcmp(buf,"fr")) from_host();
+	else if (!strcmp(buf,"sh")) system("sh");
 	else if (!strcmp(buf,"quit")) return 0;
 	else if (!strcmp(buf,"q")) return 0;
 #endif

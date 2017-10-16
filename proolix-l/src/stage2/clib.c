@@ -1400,7 +1400,7 @@ else {puts0("Booted from unknown device ");puthex(i);}
 puts0("\r\n");
 }
 
-void system(void)
+void sysinfo(void)
 {
 #ifdef PEMU
 	printf("Proolix emulator\n");
@@ -1455,7 +1455,7 @@ ver - version\r\n\
 ascii - write ascii table\r\n\
 off - screensaver (clear screen and wait of press any key\r\n\
 scr - screensaver #2\r\n\
-system - print system parameters\r\n\
+sysinfo - print system parameters\r\n\
 memd0 - memory dump for extended processor mode\r\n\
 memd - memory dump for real mode\r\n\
 memmap - print memory map\r\n\
@@ -1474,6 +1474,7 @@ hdd0 - boot from HDD0 hdd1 - boot from HDD1 fdd - boot from FDD\r\n\
 settimezone - set tz videomod - set video mode run - run rundos - run DOS");
 #ifdef PEMU
 printf("\n\nEmulator commands:\n\
+sh - host OS shell\n\
 fr - copy file from host machine to virtual disk\n\
 quit, q - quit from emulator\n\n");
 #endif
