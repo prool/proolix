@@ -1,4 +1,5 @@
 #define BUFLEN 100
+#define CMDLEN 17
 
 #include "headers.h"
 
@@ -74,21 +75,23 @@ puts0("? - for help\r\n");
 puts0("End of code "); puthex(end_of()); puts0(" = "); putdec(end_of()); puts0("\r\n");
 }
 
+/************************************** main() *****************************************/
 #ifndef PEMU
 void main(void)
 #else
 int main (int argc, char **argv)
 #endif
 {
+char command [CMDLEN];
 char buf [BUFLEN];
 int i,j;
 char c,cc;
 char bootsector[512];
 //unsigned short int drive, reg_bx, reg_cx, reg_dx;
 //unsigned short int cyl, sectors, heads, total_sec;
+char *pp;
 #ifdef PEMU
 FILE *cfg;
-char *pp;
 #endif
 
 if (firstboot)
@@ -188,58 +191,89 @@ puts0("\r\n");
 while (1)
 	{
 	puts0("\r\nEnter command -> ");
+		for(i=0;i<CMDLEN;i++) command[i]=0;
 	getsn(buf,BUFLEN);
+	pp=strchr(buf,' ');
+	if (pp==0)
+		{// аргументов нет
+		strncpy(command,buf,CMDLEN);
+		arguments[0]=0;
+		}
+	else
+		{// аргументы есть
+		strncpy(arguments,pp+1,BUFLEN);
+		*pp=0;
+		strncpy(command,buf,CMDLEN);
+		}
+#if 1 // debug
+	puts0("command ='");
+	puts0(command);
+	puts0("' arguments='");
+	puts0(arguments);
+	puts0("'\r\n");
+#endif
 	puts0("\r\n");
 
-	if (buf[0]==0) puts0("");
-	else if (!strcmp(buf,"ver")) version();
-	else if (!strcmp(buf,"help")) help();
-	else if (!strcmp(buf,"?")) help();
-	else if (!strcmp(buf,"reboot")) reboot();
-	else if (!strcmp(buf,"cold")) cold();
-	else if (!strcmp(buf,"hdd0")) hdd0();
-	else if (!strcmp(buf,"hdd1")) hdd1();
-	else if (!strcmp(buf,"fdd"))  fdd();
-	else if (!strcmp(buf,"test")) test();
-	else if (!strcmp(buf,"ascii")) ascii();
-	else if (!strcmp(buf,"sysinfo")) sysinfo();
-	else if (!strcmp(buf,"memd0")) memd0();
-	else if (!strcmp(buf,"memd")) memd();
-	else if (!strcmp(buf,"memmap")) memmap();
-	else if (!strcmp(buf,"basic")) basic();
-	else if (!strcmp(buf,"diskd0")) diskd0();
-	else if (!strcmp(buf,"diskd")) diskd();
-	else if (!strcmp(buf,"off")) off();
-	else if (!strcmp(buf,"vec")) vectors();
-	else if (!strcmp(buf,"sk")) skript();
-	else if (!strcmp(buf,"scr")) screensaver();
-	else if (!strcmp(buf,"time")) print_time();
-	else if (!strcmp(buf,"install")) install();
-	else if (!strcmp(buf,"format")) format();
-	else if (!strcmp(buf,"super")) view_superblock();
-	else if (!strcmp(buf,"ls")) ls();
-	else if (!strcmp(buf,"create")) create_file3();
-	else if (!strcmp(buf,"tofile")) tofile();
-	else if (!strcmp(buf,"tofile2")) tofile2();
-	else if (!strcmp(buf,"rm")) remove_file();
-	else if (!strcmp(buf,"cat")) cat();
-	else if (!strcmp(buf,"hcat")) hexcat();
-	else if (!strcmp(buf,"dd")) dd();
-	else if (!strcmp(buf,"settimezone")) settimezone();
-	else if (!strcmp(buf,"videomod")) videomod_();
-	else if (!strcmp(buf,"run")) load_and_run();
-	else if (!strcmp(buf,"rundos")) load_and_run_msdos();
+	if (command[0]==0) puts0("");
+	else if (!strcmp(command,"ver")) version();
+	else if (!strcmp(command,"help")) help();
+	else if (!strcmp(command,"?")) help();
+	else if (!strcmp(command,"reboot")) reboot();
+	else if (!strcmp(command,"cold")) cold();
+	else if (!strcmp(command,"hdd0")) hdd0();
+	else if (!strcmp(command,"hdd1")) hdd1();
+	else if (!strcmp(command,"fdd"))  fdd();
+	else if (!strcmp(command,"test")) test();
+	else if (!strcmp(command,"ascii")) ascii();
+	else if (!strcmp(command,"sysinfo")) sysinfo();
+	else if (!strcmp(command,"memd0")) memd0();
+	else if (!strcmp(command,"memd")) memd();
+	else if (!strcmp(command,"memmap")) memmap();
+	else if (!strcmp(command,"basic")) basic();
+	else if (!strcmp(command,"diskd0")) diskd0();
+	else if (!strcmp(command,"diskd")) diskd();
+	else if (!strcmp(command,"off")) off();
+	else if (!strcmp(command,"vec")) vectors();
+	else if (!strcmp(command,"sk")) skript();
+	else if (!strcmp(command,"scr")) screensaver();
+	else if (!strcmp(command,"time")) print_time();
+	else if (!strcmp(command,"install")) install();
+	else if (!strcmp(command,"format")) format();
+	else if (!strcmp(command,"super")) view_superblock();
+	else if (!strcmp(command,"ls")) ls();
+	else if (!strcmp(command,"create")) create_file3();
+	else if (!strcmp(command,"tofile")) tofile();
+	else if (!strcmp(command,"tofile2")) tofile2();
+	else if (!strcmp(command,"rm")) remove_file();
+	else if (!strcmp(command,"cat")) cat();
+	else if (!strcmp(command,"hcat")) hexcat();
+	else if (!strcmp(command,"dd")) dd();
+	else if (!strcmp(command,"settimezone")) settimezone();
+	else if (!strcmp(command,"videomod")) videomod_();
+	else if (!strcmp(command,"run")) load_and_run();
+	else if (!strcmp(command,"rundos")) load_and_run_msdos();
 #ifdef PEMU
-	else if (!strcmp(buf,"fr")) from_host();
-	else if (!strcmp(buf,"sh")) system("sh");
-	else if (!strcmp(buf,"quit")) return 0;
-	else if (!strcmp(buf,"q")) return 0;
+	else if (!strcmp(command,"fr")) from_host();
+	else if (!strcmp(command,"sh")) system("sh");
+	else if (!strcmp(command,"quit")) return 0;
+	else if (!strcmp(command,"q")) return 0;
 #endif
 	else
-		{
-		puts0("Unknown command '");
-		puts0(buf);
-		puts0("'\r\n");
+		{short int fexec;
+		unsigned short int load_segment, offset;
+		fexec=open_(command,O_READ);
+		if (fexec!=-1) {//puts0("file exists!\r\n");
+			load_segment=0x4050; offset=0;
+			while(readc(0,&c)==0)
+				{
+				poke(c,load_segment,offset++);
+				}
+			puts0("\r\nEXEC!\r\n");
+			close_(fexec);
+			run();}
+		else {puts0("Unknown command '");
+		puts0(command);
+		puts0("'\r\n"); }
 		}
 	}
 }

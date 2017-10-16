@@ -31,7 +31,6 @@ int toupper (int ch)
 if ((ch>='a')&&(ch<='z'))return ch + 'A' - 'a'; else return ch;
 }
 
-#if 0 // ÜÔÁ ÆÕÎËÃÉÑ ĞÏËÁ ÎÅ ÎÕÖÎÁ. ËÏÍÅÎÔÉÍ ÄÌÑ ÜËÏÎÏÍÉÉ ÍÅÓÔÁ
 char *strchr (const char *str, int c)
 {
 /* if (str==NULL) return NULL; */
@@ -42,6 +41,7 @@ while (*str)
 return NULL;
 }
 
+#if 0 // ÜÔÁ ÆÕÎËÃÉÑ ĞÏËÁ ÎÅ ÎÕÖÎÁ. ËÏÍÅÎÔÉÍ ÄÌÑ ÜËÏÎÏÍÉÉ ÍÅÓÔÁ
 size_t strlen (const char *s)
 {
 size_t i;
@@ -333,7 +333,33 @@ while (c1&&c2);
 return 0;
 }
 
-#if 0 // çàïàñ ôóíêöèé, êîòîğûå ïîêà íå èñïîëüçóşòñÿ
+char  * strncpy (char  * dest, const char  * src, size_t maxlen)
+{char  * cc; size_t i;
+/* if (dest==NULL) return NULL; */
+/* if (src==NULL) return NULL; */
+cc=dest;
+for(i=0;(i<maxlen);i++) {*dest++=*src; if (!*src++) break;}
+
+return cc;
+}
+
+#if 0 
+int strncmp(const char  *s1, const char  *s2, size_t maxlen)
+{char c1,c2;
+size_t i;
+
+/* if (s1==NULL) return 0; */
+/* if (s2==NULL) return 0; */
+for(i=0;i<maxlen;i++)
+ {
+ c1=*s1++;
+ c2=*s2++;
+ if (c1>c2) return 1;
+ else if (c1<c2) return -1;
+ if(!(c1&&c2))break;
+ }
+return 0;
+}
 
 /****************************************************************************/
 char  *stpcpy (char  *dest, const char  *src)
@@ -404,32 +430,6 @@ strncpy(--dest,src,maxlen);
 return cc;
 }
 /****************************************************************************/
-int strncmp(const char  *s1, const char  *s2, size_t maxlen)
-{char c1,c2;
-size_t i;
-
-/* if (s1==NULL) return 0; */
-/* if (s2==NULL) return 0; */
-for(i=0;i<maxlen;i++)
- {
- c1=*s1++;
- c2=*s2++;
- if (c1>c2) return 1;
- else if (c1<c2) return -1;
- if(!(c1&&c2))break;
- }
-return 0;
-}
-/****************************************************************************/
-char  * strncpy (char  * dest, const char  * src, size_t maxlen)
-{char  * cc; size_t i;
-/* if (dest==NULL) return NULL; */
-/* if (src==NULL) return NULL; */
-cc=dest;
-for(i=0;(i<maxlen);i++) {*dest++=*src; if (!*src++) break;}
-
-return cc;
-}
 /****************************************************************************/
 int strnicmp(const char  *s1, const char  *s2, size_t maxlen)
 {char c1,c2;

@@ -34,6 +34,7 @@ extern unsigned short int mytimezone;
 extern unsigned short int firstboot;
 extern unsigned short int drive, reg_bx, reg_cx, reg_dx;
 extern unsigned short int cyl, sectors, heads, total_sec;
+extern char arguments [];
 #endif
 /*
 	FCB[0]	directory block with file

@@ -10,8 +10,10 @@
 _start:
 	.globl	_start
 
-	jmp	l_continue
-signature:	.word	0xDDDD
+		jmp	l_continue
+signature:		.word	0xDDDD
+argument_offset:	.word	0
+argument_seg:		.word	0
 l_continue:
 
 	pushw	%cs

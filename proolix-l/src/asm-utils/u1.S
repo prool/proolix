@@ -10,6 +10,8 @@ _start:
 
 	jmp	l_continue
 signature:	.word	0xDDDD
+arguments_offset:	.word	0
+arguments_seg:		.word	0
 l_continue:
 
     print str1
