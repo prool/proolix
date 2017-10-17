@@ -198,8 +198,9 @@ obhod:
     decw	%si
     movw	%ax,%ES:(%si)
     popw	%ES
-
-    # intercept of int 5h
+*/
+/*
+    # intercept of int 5h - print screen
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -212,7 +213,8 @@ obhod:
     decw	%si
     movw	%ax,%ES:(%si)
     popw	%ES
-
+*/
+/*
     # intercept of int 6h
     pushw	%ES
     xorw	%ax,%ax
@@ -392,7 +394,7 @@ s_txt92:	.asciz " int 92 say "
 s_txt91:	.asciz " int 91 !!!111 "
 */
 
-interrupt_91:	# Intercept of some interrupts
+interrupt_91:	# 
 
 #	  movw	%SP,%BP
 
@@ -457,7 +459,7 @@ l_91_exit:
 	  ljmp	*%SS:(%bp)
 	  */
 
-interrupt_90:	# Intercept of some interrupts
+interrupt_90:	# 
 
 	pushw	%CS
 	popw	%DS	# DS:=CS
@@ -473,8 +475,8 @@ interrupt_90:	# Intercept of some interrupts
 	print s_interrupt_90
 
 	jmp	main
-
-interrupt_0:	# Intercept of some interrupts
+/*
+interrupt_0:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -487,7 +489,7 @@ interrupt_0:	# Intercept of some interrupts
 
 s_interrupt_0:	.asciz	" Int 0 "
 
-interrupt_1:	# Intercept of some interrupts
+interrupt_1:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -500,7 +502,7 @@ interrupt_1:	# Intercept of some interrupts
 
 s_interrupt_1:	.asciz	" Int 1 "
 
-interrupt_2:	# Intercept of some interrupts
+interrupt_2:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -513,7 +515,7 @@ interrupt_2:	# Intercept of some interrupts
 
 s_interrupt_2:	.asciz	" Int 2 "
 
-interrupt_3:	# Intercept of some interrupts
+interrupt_3:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -526,7 +528,7 @@ interrupt_3:	# Intercept of some interrupts
 
 s_interrupt_3:	.asciz	" Int 3 "
 
-interrupt_4:	# Intercept of some interrupts
+interrupt_4:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -537,9 +539,10 @@ interrupt_4:	# Intercept of some interrupts
 	popw	%DS
 	iret
 
-s_interrupt_4:	.asciz	" Int 4 "
-
-interrupt_5:	# Intercept of some interrupts
+s_interrupt_4:	.asciz	" Int 4 CPU-generated - INTO DETECTED OVERFLOW"
+*/
+/*
+interrupt_5:	# Print screen
 	pushw	%DS
 
 	pushw	%CS
@@ -550,9 +553,10 @@ interrupt_5:	# Intercept of some interrupts
 	popw	%DS
 	iret
 
-s_interrupt_5:	.asciz	" Int 5 "
-
-interrupt_6:	# Intercept of some interrupts
+s_interrupt_5:	.asciz	" Int 5 - printscreen "
+*/
+/*
+interrupt_6:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -565,7 +569,7 @@ interrupt_6:	# Intercept of some interrupts
 
 s_interrupt_6:	.asciz	" Int 6 "
 
-interrupt_7:	# Intercept of some interrupts
+interrupt_7:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -578,7 +582,7 @@ interrupt_7:	# Intercept of some interrupts
 
 s_interrupt_7:	.asciz	" Int 7 "
 
-interrupt_a:	# Intercept of some interrupts
+interrupt_a:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -591,7 +595,7 @@ interrupt_a:	# Intercept of some interrupts
 
 s_interrupt_a:	.asciz	" Int a "
 
-interrupt_b:	# Intercept of some interrupts
+interrupt_b:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -604,7 +608,7 @@ interrupt_b:	# Intercept of some interrupts
 
 s_interrupt_b:	.asciz	" Int b "
 
-interrupt_c:	# Intercept of some interrupts
+interrupt_c:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -619,7 +623,7 @@ l_int_c_stop:	jmp l_int_c_stop
 
 s_interrupt_c:	.asciz	" Int C "
 
-interrupt_d:	# Intercept of some interrupts
+interrupt_d:	# 
 	pushw	%DS
 
 	pushw	%CS
@@ -635,6 +639,7 @@ l_int_d_stop:	jmp l_int_d_stop
 	iret
 
 s_interrupt_d:	.asciz	" int d GENERAL PROTECTION VIOLATION "
+*/
 
 /*
 int24p:
