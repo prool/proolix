@@ -308,11 +308,14 @@ obhod:
 run:
         # EXEC!
 
+	pushw	%CS
+	popw	%bx
+
         movw    $0x4050,%ax	# segment
         movw    %ax,%DS
 	movw	%ax,%ES
 	movw	$arguments,%ES:(6)
-	movw	%ax,%ES:(8)
+	movw	%bx,%ES:(8)
         cli
         movw    %ax,%SS
         movw    $0xfff0,%SP # !!! fffe? fffd??

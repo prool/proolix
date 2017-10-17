@@ -24,7 +24,7 @@ puts0("You pressed ");
 putch(c);
 #endif
 
-#if 0
+#if 1
 arg_off=peek(6);
 puthex(arg_off);
 arg_seg=peek(8);
@@ -34,7 +34,9 @@ c=peek_far_b(arg_seg, arg_off);
 putch(c);
 #endif
 
+#if 0
 for (i=0;i<40;i++) puthex_b (peek_far_b(0,i));
+#endif
 
 puts0("\r\n");
 //stop();

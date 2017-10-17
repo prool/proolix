@@ -22,7 +22,7 @@ peek_far_b:
 
 	movw	%sp, %bp
 	movw	10(%bp), %ES
-	movw	12(%bp), %bx
+	movw	14(%bp), %bx
 	movb	%ES:(%bx),%al
 	xorb	%ah,%ah
 
