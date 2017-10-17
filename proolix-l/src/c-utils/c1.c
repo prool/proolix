@@ -25,13 +25,23 @@ putch(c);
 #endif
 
 #if 1
-arg_off=peek(6);
-puthex(arg_off);
-arg_seg=peek(8);
-puthex(arg_seg);
 
+arg_off=peek(6);
+//puthex(arg_off);
+//putch(' ');
+arg_seg=peek(8);
+//puthex(arg_seg);
+//putch(' ');
+
+putch('\'');
+while(1)
+{
 c=peek_far_b(arg_seg, arg_off);
+if (c==0) break;
 putch(c);
+arg_off++;
+}
+putch('\'');
 #endif
 
 #if 0

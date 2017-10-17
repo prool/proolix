@@ -29,6 +29,8 @@ set_color(7); puts0("end of palette");
 
 int disk_a;
 
+char arguments [100];
+
 #endif
 
 void print_time(void)
