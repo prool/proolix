@@ -684,7 +684,6 @@ int20p:
 int20p:
 	jmp	l_21_4c
 
-s_txt21:	.asciz "=INT 21H "
 int21p:
 	movw	%SP,%BP
 
@@ -1048,8 +1047,13 @@ l_21_unkn_fn:
 	  call	ohw
 	  movw	$s_txt21, %si
 	  call	sayr_proc
+	# getch
+	  xorb	%ah,%ah
+	  int	$0x16
+	# exit to OS
+	  jmp	interrupt_90
 
-l_21_stop:	jmp	l_21_stop
+#l_21_stop:	jmp	l_21_stop
 l_21_exit:
 
 	  /* composite IRET ;) */
@@ -1060,230 +1064,7 @@ l_21_exit:
 
 	  ljmp	*%SS:(%bp)
 
-/* ######################################## old int21h ################# */
-/*
-    pushw	%DS
-
-	pushw	%cx
-	pushw	%DS
-	popw	%cx
-
-    pushw	%CS
-    popw	%DS # DS:=CS
-
-	movw	%cx,DOS_DS
-	popw	%cx
-
-# int21h (MSDOS system call) commands (in AH register):
-
-# AH=0 DOS 1+ - TERMINATE PROGRAM
-
-    orb		%ah,%ah
-    jz		l_msdos_exit
-
-# AH=9 DOS 1+ - WRITE STRING TO STANDARD OUTPUT
-	cmpb	$0x9,%ah
-	jz	l_dos_9
-
-# AH=19 DOS 1+ - GET CURRENT DEFAULT DRIVE
-	cmpb	$0x19,%ah
-	jz	l_dos_19
-
-# AH=25 DOS 1+ - SET INTERRUPT VECTOR
-	cmpb	$0x25,%ah
-	jz	l_dos_25
-
-# AH=30 DOS 2+ - GET DOS VERSION
-	cmpb	$0x30,%ah
-	jz	l_dos_30
-
-# AH=33 DOS 2+ - EXTENDED BREAK CHECKING
-    cmpb	$0x33,%ah
-    jz		l_dos_33
-
-# AH=35 DOS 2+ - GET INTERRUPT VECTOR
-	cmpb	$0x35,%ah
-	jz	l_dos_35
-
-# AH=47 DOS 2+ - CWD - GET CURRENT DIRECTORY
-	cmpb	$0x47,%ah
-	jz	l_dos_47
-
-# AH=58 DOS 5+ - GET OR SET UMB LINK STATE
-	cmpb	$0x58,%ah
-	jz	l_dos_58
-
-    print	s_int21
-    call	print_registers
-#    putch $'I'
-
-l_end_of_int21:
-    pushw	%CS
-    popw	%ES # restore kernel ES
-
-    pushw	%CS
-    popw	%ax
-    movw	%ax,%SS # restore kernel SS
-
-    jmp main
-
-l_dos_9: # DOS 1+ - WRITE STRING TO STANDARD OUTPUT
-	push	%ES
-	push	%ax
-	push	%cx
-	push	%di
-	push	%si
-
-	# search '$' and replace to 0
-	movb	$'$',%al
-	mov	$1000,%cx # 1000 - maxlen
-	mov	%dx,%di
-	push %DS
-	pop  %ES # ES=DS
-	cld
-1:
-	repe scasb
-	jcxz	2f	# end of string
-	xor	%al,%al
-	stosb
-
-	# print:
-	movw	%dx,%si
-	call	sayr_proc
-
-	pop	%si
-	pop	%di
-	pop	%cx
-	pop	%ax
-	pop	%ES
-	jmp	l_iret
-2:
-	print l_longstr
-	jmp	l_end_of_int21
-l_longstr:	.asciz	" MSDOS: VERY LONG STRING OUTPUT "
-
-l_dos_19: # DOS 1+ - GET CURRENT DEFAULT DRIVE
-	movb	DOS_CUR_DRIVE,%al
-	jmp	l_iret
-
-l_dos_25:	# DOS 1+ - SET INTERRUPT VECTOR
-	push	%ax
-	push	%si
-	push	%ES
-
-	xorw	%ax,%ax
-	movw	%ax,%ES # ES=0
-
-	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
-	shlw	$0x2,%ax # ax=ax*4
-	# ax - address of interrupt vector (offset)
-
-	movw	%ax,%si
-	movw	%dx,%es:(%si) # offset := DX
-
-	incw	%si
-	incw	%si
-
-	movw	DOS_DS,%ax
-	movw	%ax,%es:(%si) # segment := DOS DS
-
-	pop	%ES
-	pop	%si
-	pop	%ax
-
-	jmp l_iret
-
-l_dos_30: # DOS 2+ - GET DOS VERSION
-	movw	$0x0303,%ax
-	xorw	%bx,%bx
-	xorw	%cx,%cx
-	jmp l_iret
-
-l_dos_33: # DOS 2+ - EXTENDED BREAK CHECKING
-# AL = subfunction
-# 00h get current extended break state
-    orb	%al,%al
-    jz	1f
-# 06h DOS 5+ - GET TRUE VERSION NUMBER
-    cmpb $0x06,%al
-    jz	2f
-# 01h set state of extended Break checking
-    cmpb $0x01,%al
-    jz	3f
-    jmp		l_msdos_unkn_subf
-2: # DOS 5+ - GET TRUE VERSION NUMBER
-    xor		%bx,%bx
-    xor		%dx,%dx
-    movb	$0xFF,%al
-    jmp		l_iret
-3: # set br
-    movb	%dl,DOS_BREAK
-    jmp l_iret
-1: # al=0 get break
-    movb	DOS_BREAK,%dl
-    jmp		l_iret
-
-l_dos_35:
-	push	%ax
-	push	%si
-
-	xorw	%bx,%bx
-	movw	%bx,%ES # ES=0
-
-	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
-	shlw	$0x2,%ax # ax=ax*4
-	# ax - address of interrupt vector (offset)
-
-	movw	%ax,%si
-	movw	%es:(%si),%bx # offset -> bx
-
-	incw	%si
-	incw	%si
-
-	movw	%es:(%si),%ax
-	movw	%ax,%es # segment -> ES
-
-	pop	%si
-	pop	%ax
-
-	jmp l_iret
-
-l_dos_47: # DOS 2+ - CWD - GET CURRENT DIRECTORY
-	push	%si
-	push	%ES
-
-	movw	DOS_DS,%ax
-	movw	%ax,%ES
-	movb	$'\',%ES:(%si)
-	incw	%si
-	movb	$0,%ES:(%si)
-
-	movw	$0x100,%ax
-
-	pop	%ES
-	pop	%si
-
-	jmp	l_iret
-
-l_dos_58: # DOS 5+ - GET OR SET UMB LINK STATE
-	xor	%al,%al
-	xor	%bx,%bx
-	jmp	l_iret
-
-l_msdos_exit:
-    print s_msdos_exit
-    jmp l_end_of_int21
-
-l_msdos_unkn_subf:
-    print s_unkn_subf
-    call	print_registers
-    jmp l_end_of_int21
-s_unkn_subf:	.asciz	" MSDOS UNKNOWN SUBFUNCTION "
-
-l_iret:
-    popw	%DS
-    iret
-*/
+s_txt21:	.asciz "=INT 21H press anykey "
 s_interrupt_90:	.ascii	"exit"
 		.byte	13,10,0
 
@@ -1305,24 +1086,6 @@ sayr_l1:
 sayrret:
 	popw	%ax
         ret
-
-# variables
-
-/*MSDOS emu*/
-
-/*
-DOS_DS:	.word
-DOS_BREAK:	.byte	0
-DOS_CUR_DRIVE:	.byte	0 # (00h = A:, 01h = B:, etc)
-
-s_int21: .byte 13,10
-	.ascii	" Interrupt 21h! "
-	.byte 13,10,0
-
-s_msdos_exit:	.byte 13,10
-		.ascii "Program terminated"
-		.byte 13,10,0
-*/
 
 /* Global variables */
 

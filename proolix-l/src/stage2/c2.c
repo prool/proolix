@@ -207,7 +207,7 @@ while (1)
 		*pp=0;
 		strncpy(command,buf,CMDLEN);
 		}
-#if 1 // debug
+#if 0 // debug
 	puts0("command ='");
 	puts0(command);
 	puts0("' arguments='");
