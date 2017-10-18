@@ -39,7 +39,23 @@ obhod:
 	  int  $0x10	# putch
 
 /*
-    # intercept of int 4h
+    # intercept of int 15h	for debug!
+    pushw	%ES
+    xorw	%ax,%ax
+    movw	%ax,%ES # ES:=0
+    pushw	%CS
+    popw	%ax
+    movw	$0x15*4+2,%si
+    movw	%ax,%ES:(%si)
+    lea		int_15,%ax
+    decw	%si
+    decw	%si
+    movw	%ax,%ES:(%si)
+    popw	%ES
+*/
+
+/*
+    # intercept of int 4h	CPU-generated - INTO DETECTED OVERFLOW
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -54,7 +70,7 @@ obhod:
     popw	%ES
 */
 
-    # intercept of int 90h
+    # intercept of int 90h	Proolix: terminate proolix program (similar to int 20h in MSDOS)
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -68,7 +84,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int 91h
+    # intercept of int 91h	Proolix: various functions (similar to int 21h in MSDOS)
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -82,7 +98,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 /*
-    # intercept of int 92h
+    # intercept of int 92h	Proolix: dirty functions (obsolete, experimental)
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -143,7 +159,7 @@ obhod:
     popw	%ES
 
 
-    # intercept of int 0h
+    # intercept of int 0h	Zenith - ROM DEBUGGER (Interrupt List by Ralf Brown)
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -157,7 +173,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int 1h
+    # intercept of int 1h	CPU-generated - SINGLE STEP
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -171,7 +187,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int 2h
+    # intercept of int 2h	External hardware - NON-MASKABLE INTERRUPT
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -185,7 +201,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int 3h
+    # intercept of int 3h	CPU-generated - BREAKPOINT
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -199,7 +215,6 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 */
-/*
     # intercept of int 5h - print screen
     pushw	%ES
     xorw	%ax,%ax
@@ -213,9 +228,8 @@ obhod:
     decw	%si
     movw	%ax,%ES:(%si)
     popw	%ES
-*/
 /*
-    # intercept of int 6h
+    # intercept of int 6h	CPU-generated (80186+) - INVALID OPCODE
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -229,7 +243,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int 7h
+    # intercept of int 7h	CPU-generated (80286+) - PROCESSOR EXTENSION NOT AVAILABLE
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -243,7 +257,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int ah
+    # intercept of int ah	IRQ2 - LPT2 (PC), VERTICAL RETRACE INTERRUPT (EGA,VGA)
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -257,7 +271,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int bh
+    # intercept of int bh	IRQ3 - SERIAL COMMUNICATIONS (COM2)	CPU-generated (80286+) - SEGMENT NOT PRESENT
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -271,7 +285,7 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int ch
+    # intercept of int ch	RQ4 - SERIAL COMMUNICATIONS (COM1)	CPU-generated (80286+) - STACK FAULT
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -285,7 +299,8 @@ obhod:
     movw	%ax,%ES:(%si)
     popw	%ES
 
-    # intercept of int dh
+    # intercept of int dh	IRQ5 - FIXED DISK (PC,XT), LPT2 (AT), reserved (PS/2)
+    #  CPU-generated (80286+) - GENERAL PROTECTION VIOLATION
     pushw	%ES
     xorw	%ax,%ax
     movw	%ax,%ES # ES:=0
@@ -306,7 +321,13 @@ obhod:
 	  int  $0x10	# putch
 
 	jmp	main
-
+/*
+int_15:	
+	putch	$'#'
+	  .code16
+	  iret
+	  .code16gcc
+*/
 run:
         # EXEC!
 
@@ -394,7 +415,7 @@ s_txt92:	.asciz " int 92 say "
 s_txt91:	.asciz " int 91 !!!111 "
 */
 
-interrupt_91:	# 
+interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 
 #	  movw	%SP,%BP
 
@@ -469,7 +490,7 @@ interrupt_90:	#
 	movw	%ax,%ES
 	cli
 	movw	%ax,%SS
-	movw	$0xFFFD,%SP
+	movw	$0xFFFE,%SP
 	sti
 
 	print s_interrupt_90
@@ -541,8 +562,7 @@ interrupt_4:	#
 
 s_interrupt_4:	.asciz	" Int 4 CPU-generated - INTO DETECTED OVERFLOW"
 */
-/*
-interrupt_5:	# Print screen
+interrupt_5:	# Print screen. In Proolix: break program
 	pushw	%DS
 
 	pushw	%CS
@@ -551,10 +571,14 @@ interrupt_5:	# Print screen
 	print s_interrupt_5
 
 	popw	%DS
-	iret
 
-s_interrupt_5:	.asciz	" Int 5 - printscreen "
+	jmp	interrupt_90
+/*
+	  .code16
+	  iret
+	  .code16gcc
 */
+s_interrupt_5:	.asciz	" Int 5 - printscreen "
 /*
 interrupt_6:	# 
 	pushw	%DS
@@ -809,8 +833,11 @@ l_21_1a: # DOS 1+ - SET DISK TRANSFER AREA ADDRESS
 	jmp	l_21_exit
 
 l_21_25: # DOS 1+ - SET INTERRUPT VECTOR
-	xorw	%ax,%ax
-	movw	%ax,%ES # ES=0
+	pushw	%ES
+	pushw	%cx
+
+	xorw	%cx,%cx
+	movw	%cx,%ES # ES=0
 
 	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
 	shlw	$0x2,%ax # ax=ax*4
@@ -822,8 +849,12 @@ l_21_25: # DOS 1+ - SET INTERRUPT VECTOR
 	incw	%si
 	incw	%si
 
-	movw	DOS_DS,%ax
+	pushw	%DS
+	popw	%ax	# ax:=DS
 	movw	%ax,%es:(%si) # segment := DOS DS
+
+	popw	%cx
+	popw	%ES
 	jmp	l_21_exit
 
 l_21_29:	# DOS 1+ - PARSE FILENAME INTO FCB
@@ -902,8 +933,10 @@ l_21_34:	# DOS 2+ - GET ADDRESS OF INDOS FLAG
 	jmp	l_21_exit	# prool: ;-)
 
 l_21_35: # DOS 2+ - GET INTERRUPT VECTOR
-	xorw	%bx,%bx
-	movw	%bx,%ES # ES=0
+	pushw	%cx
+
+	xorw	%cx,%cx
+	movw	%cx,%ES # ES=0
 
 	xorb	%ah,%ah # ah=0, al=interrupt number; ax=interrupt number
 	shlw	$0x2,%ax # ax=ax*4
@@ -917,6 +950,8 @@ l_21_35: # DOS 2+ - GET INTERRUPT VECTOR
 
 	movw	%es:(%si),%ax
 	movw	%ax,%es # segment -> ES
+
+	popw	%cx
 	jmp	l_21_exit
 
 l_21_37:	# DOS 2+ - SWITCHAR - GET SWITCH CHARACTER
@@ -1275,6 +1310,7 @@ sayrret:
 
 /*MSDOS emu*/
 
+/*
 DOS_DS:	.word
 DOS_BREAK:	.byte	0
 DOS_CUR_DRIVE:	.byte	0 # (00h = A:, 01h = B:, etc)
@@ -1286,6 +1322,7 @@ s_int21: .byte 13,10
 s_msdos_exit:	.byte 13,10
 		.ascii "Program terminated"
 		.byte 13,10,0
+*/
 
 /* Global variables */
 
@@ -1584,7 +1621,6 @@ readsec0: # unsigned short int readsec0(char drive, char sec, char head, char tr
 	movw	$0x0201,%ax # ah = 02 (command 'read'), al=1 - number of sectors to read
 	int	$0x13
 /*
-   $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 	jnc	1f
 	xorw	%ax,%ax
 1:
