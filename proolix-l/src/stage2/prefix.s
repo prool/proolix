@@ -434,6 +434,28 @@ interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 	  cmpb	$2,%ah		# function 2 - output character from %al
 	  je	l_91_2
 
+	  			# function 3 - test of input character
+
+	  			# function 0x10 - read phys. sector addressed CHS (?)
+
+	  			# function 0x11 - write phys. sector addressed CHS (?)
+
+	  			# function 0x12 - read absolute phys. sector numer N
+
+	  			# function 0x13 - write absolute phys. sector numer N
+
+	  			# function 0x20 - open file
+
+	  			# function 0x21 - read file
+	  		
+	  			# function 0x22 - write file
+
+	  			# function 0x23 - close file
+
+	  			# function 0x24 - delete file
+
+	  			# function 0x30 - exec file
+
 	  jmp	l_91_unknown_fn
 
 l_91_0:		call	test91
