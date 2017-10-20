@@ -37,6 +37,7 @@ extern unsigned short int drive, reg_bx, reg_cx, reg_dx;
 extern unsigned short int cyl, sectors, heads, total_sec;
 extern char arguments [];
 extern char g_filename [];
+extern unsigned char g_buffer512 [];
 #endif
 /*
 	FCB[0]	directory block with file

@@ -1870,7 +1870,6 @@ int Track, SecNoOnCyl, Head, SecOnTrk;
 unsigned short int reg_bx, reg_cx, reg_dx;
 int sectors, heads;
 unsigned short int SectorsOnCyl, MaxCyl;
-unsigned char buffer512 [512];
 unsigned short int total_sectors;
 unsigned short int loop;
 unsigned short int search_zeroes;
@@ -1966,9 +1965,9 @@ puts0("/");
 putdec(sectors);
 puts0(" ) ");
 
-for(i=0;i<512;i++) buffer512[i]='~';
+for(i=0;i<512;i++) g_buffer512[i]='~';
 
-i=secread(drive, asec, buffer512);
+i=secread(drive, asec, g_buffer512);
 
 if (i==1) puts0(" OK");
 else {
@@ -1984,14 +1983,14 @@ for (line=0;line<32;line++)
     if (line==15) {puts0(" press any key "); if (loop==0) getch(); putch('\r');}
     for (i=0;i<MEMD_STEP;i++)
 	{
-	c=buffer512[ii++];
+	c=g_buffer512[ii++];
 	puthex_b(c);
 	putch(' ');
 	}
     ii=ii-MEMD_STEP;
     for (i=0;i<MEMD_STEP;i++)
 	{
-	c=(buffer512[ii++])&0xFFU;
+	c=(g_buffer512[ii++])&0xFFU;
 	if (c<' ') putch('.');
 	else putch(c);
 	}
@@ -2004,12 +2003,12 @@ if (loop)
 	if (search_zeroes==1)
 		{int summa;
 		summa=0;
-		for (i=0;i<512;i++) summa+=buffer512[i];
+		for (i=0;i<512;i++) summa+=g_buffer512[i];
 		if (summa==0) {loop=0;search_zeroes=0;c='r';}
 		}
 	else if (search_zeroes==2)
 		{
-		for (i=0;i<512;i++) if (buffer512[i]) {loop=0;search_zeroes=0;c='r';break;}
+		for (i=0;i<512;i++) if (g_buffer512[i]) {loop=0;search_zeroes=0;c='r';break;}
 		}
 	}
 else c=getch();
@@ -2028,14 +2027,14 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		getsn(str,MAX_LEN_STR);
 		delta=atoi(str);
 		asec=delta;}
-    else if (c=='D') {buffer512[0]='Z'; puts0("buffer[512]='Z'");
-		i=writesec0(drive, SecOnTrk, Head, Track /* or cyl */, buffer512);
+    else if (c=='D') {g_buffer512[0]='Z'; puts0("buffer[512]='Z'");
+		i=writesec0(drive, SecOnTrk, Head, Track /* or cyl */, g_buffer512);
 		puts0("Disk write. Return code=");
 		puthex(i);
 		if (i==1) puts0(" OK");
 		puts(""); }
-    else if (c=='W') {/*i=secwrite(drive, asec, buffer512);*/
-		i=writesec0(drive, SecOnTrk, Head, Track /* or cyl */, buffer512);
+    else if (c=='W') {/*i=secwrite(drive, asec, g_buffer512);*/
+		i=writesec0(drive, SecOnTrk, Head, Track /* or cyl */, g_buffer512);
 		puts0("Disk write. Return code=");
 		puthex(i);
 		if (i==1) puts0(" OK");
@@ -2053,7 +2052,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		int ii=446;
 		for (i=0;i<4;i++)
 		{
-		switch(buffer512[ii++])
+		switch(g_buffer512[ii++])
 		    {
 		    case 0: putch('N'); break; // no active partition
 		    case 0x80: putch('A'); break; // active partititon
@@ -2061,41 +2060,41 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		    }
 
 		puts0("         ");
-		putdec2(buffer512[ii++], 3, 1); // head
+		putdec2(g_buffer512[ii++], 3, 1); // head
 		puts0("    ");
-		putdec2(buffer512[ii]&0x3FU, 2, 1); // sector
+		putdec2(g_buffer512[ii]&0x3FU, 2, 1); // sector
 		puts0("    ");
-		short int cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
+		short int cyl=((short int)(g_buffer512[ii+1])) | ((g_buffer512[ii]&0xC0U)<<2);
 		putdec2(cyl, 4, 1); // cyl
 		ii+=2;
 		puts0(" ");
 
-		out_os(buffer512[ii++]); // OS type
+		out_os(g_buffer512[ii++]); // OS type
 		puts0("     ");
 
-		putdec2(buffer512[ii++], 3, 1); // head
+		putdec2(g_buffer512[ii++], 3, 1); // head
 		puts0(" ");
-		putdec2(buffer512[ii]&0x3FU, 2, 1); // sector
+		putdec2(g_buffer512[ii]&0x3FU, 2, 1); // sector
 		puts0(" ");
-		cyl=((short int)(buffer512[ii+1])) | ((buffer512[ii]&0xC0U)<<2);
+		cyl=((short int)(g_buffer512[ii+1])) | ((g_buffer512[ii]&0xC0U)<<2);
 		putdec2(cyl, 4, 1); // cyl
 		ii+=2;
 		puts0("  ");
 		
 		// Horner algorythm
-		long l=buffer512[ii+3]&0xFFUL;
-		l=(l<<8) | buffer512[ii+2];
-		l=(l<<8) | buffer512[ii+1];
-		l=(l<<8) | buffer512[ii];
+		long l=g_buffer512[ii+3]&0xFFUL;
+		l=(l<<8) | g_buffer512[ii+2];
+		l=(l<<8) | g_buffer512[ii+1];
+		l=(l<<8) | g_buffer512[ii];
 		putdec2(l, 10, 1);
 		puts0("  ");
 		ii+=4;
 
 		// Horner algorythm #2
-		l=buffer512[ii+3]&0xFFUL;
-		l=(l<<8) | buffer512[ii+2];
-		l=(l<<8) | buffer512[ii+1];
-		l=(l<<8) | buffer512[ii];
+		l=g_buffer512[ii+3]&0xFFUL;
+		l=(l<<8) | g_buffer512[ii+2];
+		l=(l<<8) | g_buffer512[ii+1];
+		l=(l<<8) | g_buffer512[ii];
 		putdec2(l, 10, 1);
 		ii+=4;
 		puts0("\r\n");
@@ -2103,7 +2102,7 @@ q-quit,r-retry,b-back,V-viewMBR,B-viewboot,W-write,D-debug,otherkey-next\r\n\
 		// view_mbr end
 		}
     else if (c=='B') {
-		out_boot(buffer512);
+		out_boot(g_buffer512);
 		puts0("press any key");
 		getch();
 		}
@@ -2240,8 +2239,8 @@ if ((i=Track &0x0300)!=0)
   {
   SecOnTrk = (SecOnTrk & 0x3F) | (short int)(i>>2);
   }
-err=readsec0(drive, SecOnTrk, Head, Track, buffer512);
-if (err==1) memcpy(Buffer,buffer512,512);
+err=readsec0(drive, SecOnTrk, Head, Track, g_buffer512);
+if (err==1) memcpy(Buffer,g_buffer512,512);
 return err;
 }
 
@@ -2586,7 +2585,7 @@ void dd (void)
 char str[MAX_LEN_STR];
 unsigned short int drive1, drive2, sec1, sec2, count, i;
 short int rc;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 char c;
 
 puts0("drive from (hex, 0-FDD1, 1-FDD2, 80-HDD1, 81-HDD2) ? ");
@@ -2630,9 +2629,9 @@ if ((c!='y') && (c!='Y')) {puts0("\r\ndd aborted\r\n");return;}
 
 for(i=0;i<count;i++)
 	{
-	rc=secread(drive1, sec1++, buffer512);
+	rc=secread(drive1, sec1++, g_buffer512);
 	if (rc!=1) {puts0("dd read error!\r\n"); return;}
-	rc=secwrite(drive2, sec2++, buffer512);
+	rc=secwrite(drive2, sec2++, g_buffer512);
 	if (rc!=1) {puts0("dd write error!\r\n"); return;}
 	puts0("*");
 	}
@@ -2651,7 +2650,7 @@ int sectors, heads;
 unsigned short int SectorsOnCyl, MaxCyl;
 int MaxSectors=0;
 unsigned short int *superblock;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned short int seg, off;
 int j;
 unsigned short int rc;
@@ -2738,7 +2737,7 @@ for (ii=0;ii<127;ii++)
 	{
 		for (jj=0;jj<512;jj++)
 		{
-			buffer512[jj]=peek3(seg,off++);
+			g_buffer512[jj]=peek3(seg,off++);
 			//puthex(off); //puts0(" ");
 		}
 	asec=ii+1;
@@ -2746,43 +2745,43 @@ for (ii=0;ii<127;ii++)
 	SecNoOnCyl=(asec%SectorsOnCyl);
 	Head=SecNoOnCyl/sectors;
 	SecOnTrk=SecNoOnCyl%sectors+1;
-	i=writesec0(drive, SecOnTrk, Head, Track, buffer512);
+	i=writesec0(drive, SecOnTrk, Head, Track, g_buffer512);
 	puts0("*");
 	if (i!=1) {puts0("Disk write error!\r\n"); return;}
 	}
 
 
 // Write superblock
-superblock = (unsigned short int *) buffer512;
+superblock = (unsigned short int *) g_buffer512;
 
-for (i=0;i<512;i++) buffer512[i]=0;
+for (i=0;i<512;i++) g_buffer512[i]=0;
 *superblock = 0xBEBE; // magick
 *(superblock+1) = 0; // type of FS
 *(superblock+2) = ROOT_DIR; // startroot
 *(superblock+3) = sectors*(heads)*(MaxCyl+1) -1 ; // end bl
 *(superblock+4) = 0; // end formatted bl
 
-rc=secwrite(drive, SUPERBLOCK, buffer512);
+rc=secwrite(drive, SUPERBLOCK, g_buffer512);
 if (rc!=1) {puts0("Superblock write error!\r\n"); return;}
 
 #if 0
 // Write root dir
-for (i=0;i<512;i++) buffer512[i]=0;
-buffer512[0]=1; // block used
+for (i=0;i<512;i++) g_buffer512[i]=0;
+g_buffer512[0]=1; // block used
 
-//buffer512[1]=1; // next block=0
-//buffer512[2]=1; // 
+//g_buffer512[1]=1; // next block=0
+//g_buffer512[2]=1; // 
 
-buffer512[3]='.'; // link to current dir
+g_buffer512[3]='.'; // link to current dir
 
-rc=secwrite(drive, ROOT_DIR, buffer512);
+rc=secwrite(drive, ROOT_DIR, g_buffer512);
 if (rc!=1) {puts0("Root dir write error!\r\n"); return;}
 
 #if 0 // для отладки очищаем N блоков после корневого каталога, а вообще это не нужно
-for (j=0;j<512;j++) buffer512[j]=0;
+for (j=0;j<512;j++) g_buffer512[j]=0;
 for (j=0;j<2;j++)
 	{
-	rc=secwrite(drive, ROOT_DIR+1+j, buffer512);
+	rc=secwrite(drive, ROOT_DIR+1+j, g_buffer512);
 	if (rc!=1) {puts0("Clean sectors write error!\r\n"); return;}
 	putch('.');
 	}
@@ -2804,7 +2803,7 @@ int sectors, heads;
 unsigned short int SectorsOnCyl, MaxCyl;
 int MaxSectors=0;
 unsigned short int *superblock;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned short int seg, off;
 int j;
 unsigned short int rc;
@@ -2868,36 +2867,36 @@ if ((c!='y') && (c!='Y')) {puts0("\r\nformat aborted\r\n");return;}
 puts0("\r\nformat started!\r\n");
 
 // Write superblock
-superblock = (unsigned short int *) buffer512;
+superblock = (unsigned short int *) g_buffer512;
 
-for (i=0;i<512;i++) buffer512[i]=0;
+for (i=0;i<512;i++) g_buffer512[i]=0;
 *superblock = 0xBEBE; // magick
 *(superblock+1) = 0; // type of FS
 *(superblock+2) = ROOT_DIR; // startroot
 *(superblock+3) = sectors*(heads)*(MaxCyl+1) -1 ; // end bl
 *(superblock+4) = 0; // end formatted bl
 
-rc=secwrite(drive, SUPERBLOCK, buffer512);
+rc=secwrite(drive, SUPERBLOCK, g_buffer512);
 if (rc!=1) {puts0("Superblock write error!\r\n"); return;}
 
 #if 1
 // Write root dir
-for (i=0;i<512;i++) buffer512[i]=0;
-buffer512[0]=1; // block used
+for (i=0;i<512;i++) g_buffer512[i]=0;
+g_buffer512[0]=1; // block used
 
-//buffer512[1]=1; // next block=0
-//buffer512[2]=1; // 
+//g_buffer512[1]=1; // next block=0
+//g_buffer512[2]=1; // 
 
-buffer512[3]='.'; // link to current dir
+g_buffer512[3]='.'; // link to current dir
 
-rc=secwrite(drive, ROOT_DIR, buffer512);
+rc=secwrite(drive, ROOT_DIR, g_buffer512);
 if (rc!=1) {puts0("Root dir write error!\r\n"); return;}
 
 #if 0 // для отладки очищаем N блоков после корневого каталога, а вообще это не нужно
-for (j=0;j<512;j++) buffer512[j]=0;
+for (j=0;j<512;j++) g_buffer512[j]=0;
 for (j=0;j<2;j++)
 	{
-	rc=secwrite(drive, ROOT_DIR+1+j, buffer512);
+	rc=secwrite(drive, ROOT_DIR+1+j, g_buffer512);
 	if (rc!=1) {puts0("Clean sectors write error!\r\n"); return;}
 	putch('.');
 	}
@@ -2911,7 +2910,7 @@ void ls(void)
 unsigned short int i;
 unsigned short int j;
 unsigned char device;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned char filename[FILENAME_LEN+1];
 unsigned char c1;
 unsigned short int c2;
@@ -2922,31 +2921,31 @@ unsigned short int rc;
 i=get_boot_drive();
 if (i==0xAAAA) device=0; else device=0x80;
 
-rc=secread(device, ROOT_DIR, buffer512);
+rc=secread(device, ROOT_DIR, g_buffer512);
 if (rc!=1) {puts0("Root dir read error!\r\n"); return;}
 
-puts0("Descr ");puthex_b(buffer512[0]);
+puts0("Descr ");puthex_b(g_buffer512[0]);
 puts0(" Next Block ");
-puthex_b(buffer512[2]);
-puthex_b(buffer512[1]);
+puthex_b(g_buffer512[2]);
+puthex_b(g_buffer512[1]);
 puts0("\r\n");
 
 for (i=0;i<ROOT_SIZE;i++)
 	{
 	putdec2(i+1,2,1);
 	puts0(" ");
-	for (j=0;j<FILENAME_LEN;j++) (filename[j]=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]);
+	for (j=0;j<FILENAME_LEN;j++) (filename[j]=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]);
 	filename[FILENAME_LEN]=0;
 	if (filename[0]==0) puts0("<unused>        ");
 	else for (j=0;j<FILENAME_LEN;j++) if (filename[j]) putch(filename[j]); else putch(' ');
 	puts0(" ");
-	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
-	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
+	c1=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
+	c2=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
 	putdec((c2<<8) | c1);
-	c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2];
-	c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3];
-	c3=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4];
-	c4=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5];
+	c1=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2];
+	c2=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3];
+	c3=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4];
+	c4=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5];
 	puts0(" ");
 	putdec ((((((c4<<8)|c3)<<8)|c2)<<8)|c1);
 	puts0("\r\n");
@@ -2959,7 +2958,7 @@ unsigned short int i;
 unsigned short int j;
 unsigned short int equal;
 unsigned char device;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned char filename[FILENAME_LEN+2];
 unsigned char str[MAX_LEN_STR];
 int first_line;
@@ -3009,7 +3008,7 @@ unsigned short int i;
 unsigned short int j;
 unsigned short int equal;
 unsigned char device;
-unsigned char buffer512 [512];
+unsigned char g_buffer512 [512];
 unsigned char filename[FILENAME_LEN+2];
 unsigned char str[MAX_LEN_STR];
 unsigned short int rc;
@@ -3042,7 +3041,7 @@ unsigned short int i;
 unsigned short int j;
 unsigned short int equal;
 unsigned char device;
-unsigned char buffer512 [512];
+unsigned char g_buffer512 [512];
 unsigned char filename[FILENAME_LEN+2];
 unsigned char str[MAX_LEN_STR];
 
@@ -3061,16 +3060,16 @@ if (filename[0]==0) {return;}
 i=get_boot_drive();
 if (i==0xAAAA) device=0; else device=0x80;
 
-rc=secread(device, ROOT_DIR, buffer512);
+rc=secread(device, ROOT_DIR, g_buffer512);
 if (rc!=1) {puts0("Root dir read error!\r\n"); return;}
 
 // ищем такое же имя
 for (i=0;i<ROOT_SIZE;i++)
 	{
-	if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
+	if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
 		{// not empty dir record
 		equal=1;
-		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
+		for (j=0;j<FILENAME_LEN;j++) if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
 		if (equal)	{
 				puts0("file exists!\r\n");
 				return;
@@ -3080,11 +3079,11 @@ for (i=0;i<ROOT_SIZE;i++)
 
 for (i=0;i<ROOT_SIZE;i++)
 	{
-	if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
+	if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
 		{// empty dir record
 		puts0("create dir rec #");putdec(i+1);puts0("\r\n");
-		for (j=0;j<FILENAME_LEN;j++) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
-		rc=secwrite(device, ROOT_DIR, buffer512);
+		for (j=0;j<FILENAME_LEN;j++) g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
+		rc=secwrite(device, ROOT_DIR, g_buffer512);
 		if (rc!=1) {puts0("Root dir read error!\r\n"); return;}
 		return;
 		}
@@ -3099,7 +3098,7 @@ unsigned short int i;
 unsigned short int j;
 unsigned short int equal;
 unsigned char device;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned char str[MAX_LEN_STR];
 unsigned short int rc, c1, c2, current_block, next_block;
 
@@ -3108,39 +3107,39 @@ if (filename[0]==0) {return -1;}
 i=get_boot_drive();
 if (i==0xAAAA) device=0; else device=0x80;
 
-rc=secread(device, ROOT_DIR, buffer512);
+rc=secread(device, ROOT_DIR, g_buffer512);
 if (rc!=1) {puts0("Root dir read error!\r\n"); return -1;}
 
 // ищем такое же имя
 for (i=0;i<ROOT_SIZE;i++)
 	{
-	if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
+	if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
 		{// not empty dir record
 		equal=1;
-		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
+		for (j=0;j<FILENAME_LEN;j++) if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
 		if (equal)	{// puts0("file exists!\r\n");
-				buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]=0;
-				rc=secwrite(device, ROOT_DIR, buffer512);
+				g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]=0;
+				rc=secwrite(device, ROOT_DIR, g_buffer512);
 				if (rc!=1) {puts0("Root dir write error!\r\n"); return -1;}
 				// находим первый блок файла
-				c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
-				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
+				c1=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
+				c2=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
 				current_block=(c2<<8) | c1;
 
 				if (current_block) while (1)
 				{
 				//puts0("debug rm 1st block "); putdec(current_block); puts0("\r\n");
 				// находим следующий блок
-				rc=secread(device, current_block, buffer512);
+				rc=secread(device, current_block, g_buffer512);
 				if (rc!=1) {puts0("block read error!\r\n"); return -1;}
-				c1=buffer512[1];
-				c2=buffer512[2];
+				c1=g_buffer512[1];
+				c2=g_buffer512[2];
 				next_block=(c2<<8) | c1;
 				// чистим блок файла
-				buffer512[0]=0;
-				//buffer512[1]=0;
-				//buffer512[2]=0;
-				rc=secwrite(device, current_block, buffer512);
+				g_buffer512[0]=0;
+				//g_buffer512[1]=0;
+				//g_buffer512[2]=0;
+				rc=secwrite(device, current_block, g_buffer512);
 				if (rc!=1) {puts0("block write error!\r\n"); return -1;}
 				if (next_block==0) break;
 				else current_block=next_block;
@@ -3163,7 +3162,7 @@ unsigned short int i;
 unsigned short int j;
 unsigned short int equal;
 unsigned char device;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned char filename[FILENAME_LEN+2];
 unsigned char str[MAX_LEN_STR];
 unsigned short int rc, c1, c2, current_block, next_block;
@@ -3186,16 +3185,16 @@ void view_superblock(void)
 {
 unsigned short int i;
 unsigned char device;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned short int *superblock;
 unsigned short int rc;
 
 i=get_boot_drive();
 if (i==0xAAAA) device=0; else device=0x80;
 
-rc=secread(device, SUPERBLOCK, buffer512);
+rc=secread(device, SUPERBLOCK, g_buffer512);
 if (rc!=1) {puts0("Superblock read error!\r\n"); return;}
-superblock = (unsigned short int *) buffer512;
+superblock = (unsigned short int *) g_buffer512;
 
 puts0("superblock # ");
 putdec(SUPERBLOCK);
@@ -3221,7 +3220,7 @@ unsigned short int i, ii;
 unsigned short int j;
 unsigned short int equal;
 unsigned char device;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 //unsigned char str[MAX_LEN_STR];
 unsigned short int rc;
 unsigned short int file_exist;
@@ -3231,8 +3230,11 @@ unsigned int c3;
 unsigned int c4;
 unsigned int file_len;
 
-#if 1 // debug
-puts0("open_ filename='");
+#if 0 // debug
+
+puts0("open_ array=[");
+for (i=0;i<FILENAME_LEN;i++) putch(filename[i]);
+puts0("] filename='");
 puts0(filename);
 puts0("' flag=");
 puthex(flag);
@@ -3259,20 +3261,20 @@ file_exist=0;
 	i=get_boot_drive();
 	if (i==0xAAAA) device=0; else {device=0x80;/*puts0("debug open_ device=80\r\n");*/}
 
-	rc=secread(device, ROOT_DIR, buffer512);
+	rc=secread(device, ROOT_DIR, g_buffer512);
 	if (rc!=1) {puts0("open_: root dir read error "); puthex(rc);
 		if ((rc&0xFF00)==0x0900) puts0(" (data boundary error, only for FDD)");puts0("\r\n"); return -1;}
 
-	//for (i=0;i<512; i++) putch(buffer512[i]); // debug 
+	//for (i=0;i<512; i++) putch(g_buffer512[i]); // debug 
 
 	// ищем такое же имя
 	for (i=0;i<ROOT_SIZE;i++)
 		{
 		//putch('R'); /* debug */
-		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
+		if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
 			{// not empty dir record
 		equal=1;
-		for (j=0;j<FILENAME_LEN;j++) if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
+		for (j=0;j<FILENAME_LEN;j++) if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
 						else if (filename[j]==0) break; // prool: bugfix!
 		if (equal)	{// файл есть
 				file_exist=1;
@@ -3280,14 +3282,14 @@ file_exist=0;
 				FCB[0]=ROOT_DIR;
 				FCB[1]=i;
 				// first file block
-				c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
-				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
+				c1=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN];
+				c2=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1];
 				FCB[2]=(c2<<8) | c1;
 				// file length
-				c1=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2];
-				c2=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3];
-				c3=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4];
-				c4=buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5];
+				c1=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2];
+				c2=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3];
+				c3=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4];
+				c4=g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5];
 				file_len=((((((c4<<8)|c3)<<8)|c2)<<8)|c1); // file len
 				FCB[6]=file_len;
 				FCB[7]=file_len>>16;
@@ -3306,14 +3308,14 @@ if (flag==O_CREAT)
 	// файла нет
 	for (i=0;i<ROOT_SIZE;i++)
 		{
-		if (buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
+		if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
 			{// empty dir record
 			/*puts0("create dir rec #");putdec(i+1);puts0("\r\n");*/
-			for (j=0;j<FILENAME_LEN;j++) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=0;
+			for (j=0;j<FILENAME_LEN;j++) g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=0;
 			for (j=0;j<FILENAME_LEN;j++)
-				if (filename[j]) buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
+				if (filename[j]) g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
 				else break;
-			rc=secwrite(device, ROOT_DIR, buffer512);
+			rc=secwrite(device, ROOT_DIR, g_buffer512);
 			if (rc!=1) {puts0("open_: Root dir write error!\r\n"); return -1;}
 			FCB[0]=ROOT_DIR;
 			FCB[1]=i;
@@ -3325,7 +3327,7 @@ if (flag==O_CREAT)
 else
 if (flag==O_READ)
 	{
-	if (file_exist==0) return -1;
+	if (file_exist==0) {/*puts0("File not found\r\n");*/ return -1;}
 	// offset:=0
 	FCB[3]=0;
 	FCB[4]=0;
@@ -3342,7 +3344,7 @@ int writec(int h, char c)
 {
 unsigned int offset;
 unsigned short int i,j, device,newbl, end_formatted_bl;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned short int rc;
 
 i=get_boot_drive();
@@ -3361,22 +3363,22 @@ if (FCB[0])
 		// ищем свободный блок на диске (до первой ошибки, которая наверное конец диска)
 		// еще ни один свободный блок не выдан?
 			// читаем superblock
-			rc=secread(device, SUPERBLOCK, buffer512);
+			rc=secread(device, SUPERBLOCK, g_buffer512);
 			if (rc!=1) {puts0("Superblock read err\r\n"); return -1;}
-			if ((buffer512[0]!=0xBE) || (buffer512[1])!=0xBE) // проверяем magick
+			if ((g_buffer512[0]!=0xBE) || (g_buffer512[1])!=0xBE) // проверяем magick
 				{// это не суперблок, а хрень какая-то
 				puts0("ERROR!!!111 Superblock corrupted!\r\n");
 				return -1;
 				}
-			end_formatted_bl=buffer512[8] | (unsigned int)buffer512[9]<<8;
+			end_formatted_bl=g_buffer512[8] | (unsigned int)g_buffer512[9]<<8;
 			if (end_formatted_bl==0)
 				{// не было форматирования, берем первый блок за корневым каталогом
 				newbl=ROOT_DIR+1;
 				end_formatted_bl=newbl;
 				// пишем суперблок назад
-				buffer512[8]=end_formatted_bl;
-				buffer512[9]=end_formatted_bl>>8;
-				rc=secwrite(device, SUPERBLOCK, buffer512);
+				g_buffer512[8]=end_formatted_bl;
+				g_buffer512[9]=end_formatted_bl>>8;
+				rc=secwrite(device, SUPERBLOCK, g_buffer512);
 				if (rc!=1) {puts0("Superblock write err\r\n"); return -1;}
 				}
 			else
@@ -3385,9 +3387,9 @@ if (FCB[0])
 				newbl=0;
 				for (j=ROOT_DIR+1; j<=end_formatted_bl;j++)
 					{
-					rc=secread(device, j, buffer512);
+					rc=secread(device, j, g_buffer512);
 					if (rc!=1) {puts0("Free block read err\r\n"); return -1;}
-					if (buffer512[0])
+					if (g_buffer512[0])
 						{// блок занят. ищем дальше
 						/*puts0("busy block "); putdec(j); puts0("\r\n");*/
 					}
@@ -3403,11 +3405,11 @@ if (FCB[0])
 					// берем след блок после отформатированной области
 					newbl=++end_formatted_bl;
 					// и пишем всё это в суперблок
-					rc=secread(device, SUPERBLOCK, buffer512);
+					rc=secread(device, SUPERBLOCK, g_buffer512);
 					if (rc!=1) {puts0("Superblock read err\r\n"); return -1;}
-					buffer512[8]=end_formatted_bl;
-					buffer512[9]=end_formatted_bl>>8;
-					rc=secwrite(device, SUPERBLOCK, buffer512);
+					g_buffer512[8]=end_formatted_bl;
+					g_buffer512[9]=end_formatted_bl>>8;
+					rc=secwrite(device, SUPERBLOCK, g_buffer512);
 					if (rc!=1) {puts0("Superblock write err\r\n"); return -1;}
 					}
 				}
@@ -3417,40 +3419,40 @@ if (FCB[0])
 		if (FCB[2]) // FCB[2] - номер текущего блока
 			{// добавляем не первый блок
 			// пишем ссылку на новый блок в текущем блоке
-			rc=secread(device, FCB[2], buffer512);
+			rc=secread(device, FCB[2], g_buffer512);
 			if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
-			buffer512[1]=newbl;
-			buffer512[2]=newbl>>8;
-			rc=secwrite(device, FCB[2], buffer512);
+			g_buffer512[1]=newbl;
+			g_buffer512[2]=newbl>>8;
+			rc=secwrite(device, FCB[2], g_buffer512);
 			if (rc!=1) {puts0("Sec write error!\r\n"); return -1;}
 			// пишем на диск новый блок с первым записанным в него байтом
-			for (i=0;i<512;i++)buffer512[i]=0;
-			buffer512[0]=1;
-			buffer512[3]=c;
+			for (i=0;i<512;i++)g_buffer512[i]=0;
+			g_buffer512[0]=1;
+			g_buffer512[3]=c;
 			offset++;
 			FCB[3]=offset;
 			FCB[4]=offset>>16;
-			rc=secwrite(device, newbl, buffer512);
+			rc=secwrite(device, newbl, g_buffer512);
 			if (rc!=1) {puts0("Sec write error!\r\n"); return -1;}
 			FCB[2]=newbl;
 			}
 		else
 			{// добавляем первый блок
 			// пишем ссылку на 1 блок файла в каталог
-			rc=secread(device, ROOT_DIR, buffer512);
+			rc=secread(device, ROOT_DIR, g_buffer512);
 			if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
-			buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN]=newbl;
-			buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1]=newbl>>8;
-			rc=secwrite(device, ROOT_DIR, buffer512);
+			g_buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN]=newbl;
+			g_buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+1]=newbl>>8;
+			rc=secwrite(device, ROOT_DIR, g_buffer512);
 			if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
 			// пишем на диск новый блок с первым записанным в него байтом
-			for (i=0;i<512;i++)buffer512[i]=0;
-			buffer512[0]=1;
-			buffer512[3]=c;
+			for (i=0;i<512;i++)g_buffer512[i]=0;
+			g_buffer512[0]=1;
+			g_buffer512[3]=c;
 			offset++;
 			FCB[3]=offset;
 			FCB[4]=offset>>16;
-			rc=secwrite(device, newbl, buffer512);
+			rc=secwrite(device, newbl, g_buffer512);
 			if (rc!=1) {puts0("Sec write error!\r\n"); return -1;}
 			FCB[2]=newbl;
 			}
@@ -3458,15 +3460,15 @@ if (FCB[0])
 	else
 		{// не надо добавлять блок
 		// читаем текущий блок
-		rc=secread(device, FCB[2], buffer512);
+		rc=secread(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
 		// пишем в него
-		buffer512[offset%499+3]=c;
+		g_buffer512[offset%499+3]=c;
 		offset++;
 		FCB[3]=offset;
 		FCB[4]=offset>>16;
 		// пишем блок на диск
-		rc=secwrite(device, FCB[2], buffer512);
+		rc=secwrite(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec write error!\r\n"); return -1;}
 		}
 	}
@@ -3478,7 +3480,7 @@ return 0;
 int readc (int h, char *c)
 {
 unsigned short int i,j, device,newbl, end_formatted_bl;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned short int rc;
 unsigned int offset, file_len, next_bl;
 
@@ -3499,11 +3501,11 @@ if (FCB[0])
 	if ((offset%499) || (offset==0))
 		{// читаем из тек.бл
 		// читаем текущий блок
-		rc=secread(device, FCB[2], buffer512);
+		rc=secread(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
-			//int i0; puts0("debug: readc(): [");for (i0=1;i0<256;i0++) putch(buffer512[i0]);puts0(" ] ");
+			//int i0; puts0("debug: readc(): [");for (i0=1;i0<256;i0++) putch(g_buffer512[i0]);puts0(" ] ");
 		// копируем байт из него
-		*c = buffer512[offset%499+3];
+		*c = g_buffer512[offset%499+3];
 		// инкрементируем оффсет
 		offset++;
 		FCB[3]=offset;
@@ -3512,17 +3514,17 @@ if (FCB[0])
 	else
 		{// ищем след. бл и читаем там первый байт
 		// читаем текущий блок
-		rc=secread(device, FCB[2], buffer512);
+		rc=secread(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
-		next_bl=buffer512[2];
-		next_bl=next_bl<<8 | buffer512[1];
+		next_bl=g_buffer512[2];
+		next_bl=next_bl<<8 | g_buffer512[1];
 		if (next_bl==0) // следующего блока нет
 			return -1;
 		FCB[2]=next_bl;
-		rc=secread(device, FCB[2], buffer512);
+		rc=secread(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
 		// копируем байт из него
-		*c = buffer512[offset%499+3];
+		*c = g_buffer512[offset%499+3];
 		// инкрементируем оффсет
 		offset++;
 		FCB[3]=offset;
@@ -3537,7 +3539,8 @@ else
 int close_(int h)
 {
 unsigned short int i, offset;
-unsigned char buffer512[512], device;
+//unsigned char g_buffer512[512];
+unsigned char device;
 unsigned short int rc;
 
 // если хандлер не открыт, то эррор
@@ -3550,17 +3553,17 @@ if (i==0xAAAA) {/*puts0("debug close_ device 0\r\n"); */device=0;} else {/*puts0
 if ((FCB[5]==O_CREAT) || (FCB[5]==O_APPEND) || (FCB[5]==O_WRITE))
 	{
 	// читаем блок каталога
-		rc=secread(device, FCB[0], buffer512);
+		rc=secread(device, FCB[0], g_buffer512);
 		if (rc!=1) {puts0("Dir read error!\r\n"); return -1;}
 	// пишем туда длину (оффсет)
 		offset=(FCB[4]<<16)|FCB[3];
 		//puts0("debug close_() offset=");putdec(offset);puts0("\r\n");
-		buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2]=offset;
-		buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3]=offset>>8;
-		buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4]=offset>>16;
-		buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5]=offset>>24;
+		g_buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+2]=offset;
+		g_buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+3]=offset>>8;
+		g_buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+4]=offset>>16;
+		g_buffer512[3+FCB[1]*(FILENAME_LEN+FLAGS_LEN)+FILENAME_LEN+5]=offset>>24;
 	// пишем блок каталога назад
-		rc=secwrite(device, FCB[0], buffer512);
+		rc=secwrite(device, FCB[0], g_buffer512);
 		if (rc!=1) {puts0("Dir write error!\r\n"); return -1;}
 	}
 // освободжаем FCB
@@ -3574,7 +3577,7 @@ unsigned short int i;
 unsigned short int j;
 unsigned short int equal;
 unsigned char device;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned char filename[FILENAME_LEN+2];
 unsigned char str[MAX_LEN_STR];
 
@@ -3612,7 +3615,7 @@ unsigned short int j;
 unsigned short int n;
 unsigned short int equal;
 unsigned char device;
-unsigned char buffer512 [512];
+//unsigned char g_buffer512 [512];
 unsigned char filename[FILENAME_LEN+2];
 unsigned char str[MAX_LEN_STR];
 
