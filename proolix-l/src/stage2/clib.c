@@ -3231,6 +3231,14 @@ unsigned int c3;
 unsigned int c4;
 unsigned int file_len;
 
+#if 1 // debug
+puts0("open_ filename='");
+puts0(filename);
+puts0("' flag=");
+puthex(flag);
+puts0("\r\n");
+#endif
+
 if (filename==0) {puts0("open_: err 1\r\n"); return -1;}
 if (*filename==0) {puts0("open_: err 2\r\n"); return -1;}
 

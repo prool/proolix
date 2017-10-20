@@ -1,7 +1,6 @@
     .code16gcc
     .text
     
-    
     .global ohw
     .global ohb
     .global ohd

@@ -16,6 +16,8 @@ _start:
 
 arguments:
 	.fill	100,1,0
+g_filename:
+	.fill	17,1,0
 obhod:
 	push	%cs
 	pop	%ds
@@ -427,10 +429,8 @@ interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 #		body
 	  cmpb	$0,%ah		# function 0 - test
 	  je	l_91_0
-
 	  cmpb	$1,%ah		# function 1 - input character from console
 	  je	l_91_1
-
 	  cmpb	$2,%ah		# function 2 - output character from %al
 	  je	l_91_2
 
@@ -440,12 +440,12 @@ interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 
 	  			# function 0x11 - write phys. sector addressed CHS (?)
 
-	  			# function 0x12 - read absolute phys. sector numer N
+	  			# function 0x12 - read absolute phys. sector numer N (?)
 
-	  			# function 0x13 - write absolute phys. sector numer N
+	  			# function 0x13 - write absolute phys. sector numer N (?)
 
-	  			# function 0x20 - open file
-
+	cmpb	$0x20,%ah	# function 0x20 - open file
+	je	l_91_20
 	  			# function 0x21 - read file
 	  		
 	  			# function 0x22 - write file
@@ -476,6 +476,41 @@ l_91_2:
 	incw	%sp
 	incw	%sp
 	incw	%sp
+
+	jmp	l_91_exit
+
+l_91_20:	# open file
+		# input: es:bx - filename, al - filemode (f.e. O_READ)
+		# output: ax - descriptor (-1 - error)
+
+/*
+	pushw	%ax
+	movw	%es,%ax
+	call	ohw
+	movw	%bx,%ax
+	call	ohw
+	popw	%ax
+	call	ohw
+*/
+
+	movw	$g_filename,%si
+	movw	$16,%cx
+l_91_20_1:
+	movb	%ES:(%bx),%dh
+	movb	%dh,(%si)
+	testb	%dh,%dh
+	jz	l_91_20_2
+	incw	%bx
+	incw	%si
+
+	loop	l_91_20_1
+l_91_20_2:
+	pushw	$0
+	xorb	%ah,%ah
+	pushw	%ax
+	pushl	$g_filename
+	call	open_
+	addw	$8,%sp
 
 	jmp	l_91_exit
 

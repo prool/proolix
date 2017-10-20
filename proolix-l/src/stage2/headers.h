@@ -1,11 +1,12 @@
 // C-headers for c utilities
 
 #define NULL 0
-#define SECTOR_SIZE	512
 
+/*
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
+*/
 
 #define O_READ 0
 #define O_WRITE 1
@@ -35,6 +36,7 @@ extern unsigned short int firstboot;
 extern unsigned short int drive, reg_bx, reg_cx, reg_dx;
 extern unsigned short int cyl, sectors, heads, total_sec;
 extern char arguments [];
+extern char g_filename [];
 #endif
 /*
 	FCB[0]	directory block with file

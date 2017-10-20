@@ -2,13 +2,6 @@
 
 #include "headers.h"
 
-#if 0
-void puts0(char *s)
-{
-while (*s) putch(*s++);
-}
-#endif
-
 void main (void)
 {char c;
 short int i;
