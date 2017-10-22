@@ -270,7 +270,7 @@ while (1)
 				{
 				poke(c,load_segment,offset++);
 				}
-			puts0("\r\nEXEC!\r\n");
+			//puts0("\r\nEXEC!\r\n");
 			close_(fexec);
 			run();}
 		else {puts0("Unknown command '");

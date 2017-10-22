@@ -3,7 +3,7 @@
 # for crosscompilation use only 64 bit Linuses!
 # gcc (Ubuntu 6.2.0-5ubuntu12) 6.2.0 20161005 or similar
 
-all:	c1 c2
+all:	c1 c2 kat createfile
 
 c1:	c1.c prefix.S britva.sh headers.h libc.a
 	gcc -m16 -S -o c1.S c1.c
@@ -18,6 +18,20 @@ c2:	c2.c prefix.S britva.sh headers.h libc.a
 	as -o c2.o -a=c2.lst ctmp.s
 	ld -M -Ttext 0x0 -s --oformat binary -o c2 c2.o libc.a> c2.map
 	chmod a-x c2
+
+kat:	kat.c prefix.S britva.sh headers.h libc.a
+	gcc -m16 -S -o kat.S kat.c
+	./britva.sh kat.S
+	as -o kat.o -a=kat.lst ctmp.s
+	ld -M -Ttext 0x0 -s --oformat binary -o kat kat.o libc.a> kat.map
+	chmod a-x kat
+
+createfile:	createfile.c prefix.S britva.sh headers.h libc.a
+	gcc -m16 -S -o createfile.S createfile.c
+	./britva.sh createfile.S
+	as -o createfile.o -a=createfile.lst ctmp.s
+	ld -M -Ttext 0x0 -s --oformat binary -o createfile createfile.o libc.a> createfile.map
+	chmod a-x createfile
 
 ctest:	ctmp.s
 	as -o c1.o -a=c1.lst ctmp.s
@@ -71,5 +85,10 @@ puthex.o:	puthex.c headers.h
 	./britva2.sh tmp.S
 	as -o $@ -a=tmp.lst ctmp.s
 
-libc.a:		sayr.o saycsip.o ohw.o stop.o syscall_test.o getchar.o putch.o puts0.o puts.o peek.o puthex.o files.o
+getsn.o:	getsn.c headers.h
+	gcc -m16 -S -o tmp.S $<
+	./britva2.sh tmp.S
+	as -o $@ -a=tmp.lst ctmp.s
+
+libc.a:		sayr.o saycsip.o ohw.o stop.o syscall_test.o getchar.o putch.o puts0.o puts.o peek.o puthex.o files.o getsn.o
 	ar r libc.a $^

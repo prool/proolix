@@ -1,4 +1,6 @@
-// test proolix c-language utility
+// kat
+
+// katenate file to stdout (similar to Linux' cat)
 
 #include "headers.h"
 

@@ -25,6 +25,7 @@ unsigned short int mytimezone;
 unsigned short int firstboot=1;
 unsigned short int drive, reg_bx, reg_cx, reg_dx;
 unsigned short int cyl, sectors, heads, total_sec;
+unsigned char g_buffer512 [512];
 #else
 extern unsigned short int FCB [6];
 extern unsigned short int gCyl[4];

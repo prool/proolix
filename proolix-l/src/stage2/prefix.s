@@ -419,16 +419,15 @@ s_txt91:	.asciz " int 91 !!!111 "
 
 interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 
-#	  movw	%SP,%BP
-
 	  pushw	%DS # save DS
 
 	  pushw %CS
 	  popw	%DS # DS:=CS
 
-#		body
+/*
 	  cmpb	$0,%ah		# function 0 - test
 	  je	l_91_0
+*/
 	  cmpb	$1,%ah		# function 1 - input character from console
 	  je	l_91_1
 	  cmpb	$2,%ah		# function 2 - output character from %al
@@ -447,21 +446,24 @@ interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 	cmpb	$0x20,%ah	# function 0x20 - open file
 	je	l_91_20
 	  			# function 0x21 - read file
-	  		
+	cmpb	$0x21,%ah
+	je	l_91_21
 	  			# function 0x22 - write file
-
+	cmpb	$0x22,%ah
+	je	l_91_22
 	  			# function 0x23 - close file
-
+	cmpb	$0x23,%ah
+	je	l_91_23
 	  			# function 0x24 - delete file
 
 	  			# function 0x30 - exec file
 
 	  jmp	l_91_unknown_fn
-
+/*
 l_91_0:		call	test91
 #putch	$'@'
 		jmp	l_91_exit
-
+*/
 l_91_1:
 	xorb	%ah,%ah
 	int	$0x16
@@ -514,6 +516,45 @@ l_91_20_2:
 
 	jmp	l_91_exit
 
+l_91_21:	# read file
+		# input: al - file descriptor
+		# output:
+		#	al - readed character
+		#	ah - error code
+		leal	char_buffer,%ebx
+		pushl	%ebx
+		pushw	$0
+		xorb	%ah,%ah
+		pushw	%ax
+		call	readc
+		addw	$8,%sp
+		movb	%al,%ah
+		movb	char_buffer,%al
+	jmp	l_91_exit
+char_buffer:	.byte	0
+
+l_91_22:	# write file
+		# input: al - file descriptor
+		#	dl - writed character
+		# output:
+		#	ax - error code
+		pushl	%edx
+		pushw	$0
+		xorb	%ah,%ah
+		pushw	%ax
+		call	writec
+		addw	$8,%sp
+	jmp	l_91_exit
+
+l_91_23:	# close file
+		# input al - file descriptor
+		# output ax - error code
+		xorb	%bh,%bh
+		pushl	%eax
+		call	close_
+		addw	$4,%sp
+		jmp	l_91_exit
+
 l_91_unknown_fn:
 		call	int91_unknown
 
@@ -536,7 +577,10 @@ l_91_exit:
 
 	  ljmp	*%SS:(%bp)
 	  */
-
+/*
+s_interrupt_90:	.ascii	"exit"
+		.byte	13,10,0
+*/
 interrupt_90:	# 
 
 	pushw	%CS
@@ -550,7 +594,7 @@ interrupt_90:	#
 	movw	$0xFFFE,%SP
 	sti
 
-	print s_interrupt_90
+#	print s_interrupt_90
 
 	jmp	main
 /*
@@ -1122,9 +1166,6 @@ l_21_exit:
 	  ljmp	*%SS:(%bp)
 
 s_txt21:	.asciz "=INT 21H press anykey "
-s_interrupt_90:	.ascii	"exit"
-		.byte	13,10,0
-
 sayr_proc: # proc       Ver 0.0.2 19-Oct-2004
                         # Процедура вывода строки при помощи функций BIOS
                         # Вход: %DS:%si - ASCIIZ строка.

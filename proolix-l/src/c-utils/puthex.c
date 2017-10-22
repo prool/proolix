@@ -1,3 +1,5 @@
+#include "headers.h"
+
 void puthex1(char c)
 {
 if (c>9) putch('A'+c-10);

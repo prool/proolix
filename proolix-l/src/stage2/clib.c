@@ -2480,46 +2480,6 @@ while(1)
 close(i);
 
 }
-
-void cat(void)
-{
-char buf[MAXLEN];
-int i,j, line;
-
-while(1)
-	{
-	puts0("Filename (? for dir) > ");
-	getsn(buf,MAXLEN);
-	if (buf[0]=='?') ls();
-	else	break;
-	}
-if ((i=open(buf,0))==-1) {puts0("\r\nFile not found :("); return;}
-//puts0("\nFile found. descr=");putdec(i);puts0("\n");
-
-line=0;
-
-int avto=0;
-
-while (1)
-    {
-    j=read(i,buf,1);
-    if (j==0) break;
-    putch(buf[0]); if (buf[0]=='\n')
-	{
-	if (!avto) if (++line>=24)
-		{char c;
-		puts0("\rpress anykey (q - quit, a - auto)");
-		c=getch();
-		if (c=='q') break;
-		if (c=='a') avto=1;
-		line=0;
-		//cls();
-		}
-	putch('\r');
-	}
-    }
-close(i);
-}
 #endif
 
 void vectors(void)
@@ -3671,7 +3631,7 @@ while(readc(0,&c)==0)
 	poke(c,load_segment,offset++);
 	}
 close_(0);
-puts0("\r\nEXEC!\r\n");
+//puts0("\r\nEXEC!\r\n");
 // EXEC!
 run();
 }
@@ -3702,7 +3662,7 @@ while(readc(0,&c)==0)
 	poke(c,load_segment,offset++);
 	}
 close_(0);
-puts0("\r\nEXEC!\r\n");
+//puts0("\r\nEXEC!\r\n");
 // EXEC!
 run_msdos();
 }

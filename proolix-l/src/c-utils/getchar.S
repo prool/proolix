@@ -1,3 +1,5 @@
+// system call getchar
+
     .code16gcc
     .text
 

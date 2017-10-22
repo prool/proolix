@@ -1,3 +1,5 @@
+// asm macros
+
     .macro	print str
         pushw	%si
         movw	$\str,%si

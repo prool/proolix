@@ -1,6 +1,11 @@
+/*
+ohw - output word in hex mode (word = 2 bytes)
+ohb - output byte in hex mode
+ohd - output double word in hex mode
+*/
     .code16gcc
     .text
-    
+
     .global ohw
     .global ohb
     .global ohd
