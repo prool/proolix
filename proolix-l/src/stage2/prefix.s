@@ -455,9 +455,8 @@ interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 	cmpb	$0x23,%ah
 	je	l_91_23
 	  			# function 0x24 - delete file
-
-				# function 0x25 - append file
-
+	cmpb	$0x24,%ah
+	je	l_91_24
 	  			# function 0x30 - exec file
 
 	  jmp	l_91_unknown_fn
@@ -486,16 +485,6 @@ l_91_2:
 l_91_20:	# open file
 		# input: es:bx - filename, al - filemode (f.e. O_READ)
 		# output: ax - descriptor (-1 - error)
-
-/*
-	pushw	%ax
-	movw	%es,%ax
-	call	ohw
-	movw	%bx,%ax
-	call	ohw
-	popw	%ax
-	call	ohw
-*/
 
 	movw	$g_filename,%si
 	movw	$16,%cx
@@ -555,6 +544,28 @@ l_91_23:	# close file
 		pushl	%eax
 		call	close_
 		addw	$4,%sp
+		jmp	l_91_exit
+
+l_91_24:	# delete file
+		# input: es:bx - filename
+		# output: ax - error code
+
+	movw	$g_filename,%si
+	movw	$16,%cx
+l_91_24_1:
+	movb	%ES:(%bx),%dh
+	movb	%dh,(%si)
+	testb	%dh,%dh
+	jz	l_91_24_2
+	incw	%bx
+	incw	%si
+
+	loop	l_91_24_1
+l_91_24_2:
+	pushl	$g_filename
+	call	remove_
+	addw	$4,%sp
+
 		jmp	l_91_exit
 
 l_91_unknown_fn:

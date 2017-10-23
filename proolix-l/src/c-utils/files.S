@@ -3,6 +3,21 @@
     .code16gcc
     .text
 
+    .global	remove
+remove:
+	pushw	%bp
+
+	movw	%sp,%bp
+	movw	6(%bp),%bx	# es:bx - filename
+	pushw	%CS
+	popw	%ES
+
+	movb	$0x24,%ah	# remove
+	int 	$0x91
+
+	popw	%bp
+	ret
+
     .global	open
 open:
 	pushw	%bp
@@ -17,8 +32,6 @@ open:
 
 	movb	$0x20,%ah	# fn open
 	int	$0x91
-
-#	call	sayr_proc
 
 	popw	%bp
 	ret
