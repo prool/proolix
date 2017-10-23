@@ -456,6 +456,8 @@ interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 	je	l_91_23
 	  			# function 0x24 - delete file
 
+				# function 0x25 - append file
+
 	  			# function 0x30 - exec file
 
 	  jmp	l_91_unknown_fn

@@ -16,6 +16,8 @@
 #define MAX_LEN_STR 256 
 #define MAXLEN 256 
 
+#define CARGO 509 // 512-3=509 // полезный объем, занимаемый данными в 512-байтовом блоке
+
 void test91 (void)
 {
 puts0("test of int 91\r\n");
@@ -2961,97 +2963,6 @@ for (i=0;i<MAX_LEN_STR;i++)
 close_(0);
 }
 
-#if 0
-void create_file2(void)
-{
-unsigned short int i;
-unsigned short int j;
-unsigned short int equal;
-unsigned char device;
-unsigned char g_buffer512 [512];
-unsigned char filename[FILENAME_LEN+2];
-unsigned char str[MAX_LEN_STR];
-unsigned short int rc;
-
-// ввод имени файла
-puts0("filename ? ");
-for (i=0;i<FILENAME_LEN;i++) str[i]=0;
-getsn(str,MAX_LEN_STR);
-
-for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
-filename[FILENAME_LEN]=0;
-
-puts0("\r\n'"); puts0(filename); puts0("'\r\n");
-
-if (filename[0]==0) {return;}
-
-i=open_(filename,O_CREAT);
-if (i==1) puts0("open_ OK\r\n");
-else puts0("open not ok\r\n");
-
-puts0("close rc=");putdec(close_(0));puts0("\r\n");
-
-}
-#endif
-
-#if 0
-void create_file (void)
-{
-unsigned short int i;
-unsigned short int j;
-unsigned short int equal;
-unsigned char device;
-unsigned char g_buffer512 [512];
-unsigned char filename[FILENAME_LEN+2];
-unsigned char str[MAX_LEN_STR];
-
-// ввод имени файла
-puts0("filename ? ");
-for (i=0;i<FILENAME_LEN;i++) str[i]=0;
-getsn(str,MAX_LEN_STR);
-
-for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
-filename[FILENAME_LEN]=0;
-
-puts0("\r\n'"); puts0(filename); puts0("'\r\n");
-
-if (filename[0]==0) {return;}
-
-i=get_boot_drive();
-if (i==0xAAAA) device=0; else device=0x80;
-
-rc=secread(device, ROOT_DIR, g_buffer512);
-if (rc!=1) {puts0("Root dir read error!\r\n"); return;}
-
-// ищем такое же имя
-for (i=0;i<ROOT_SIZE;i++)
-	{
-	if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]!=0)
-		{// not empty dir record
-		equal=1;
-		for (j=0;j<FILENAME_LEN;j++) if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]!=filename[j]) {equal=0;break;}
-		if (equal)	{
-				puts0("file exists!\r\n");
-				return;
-				}
-		}
-	}
-
-for (i=0;i<ROOT_SIZE;i++)
-	{
-	if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
-		{// empty dir record
-		puts0("create dir rec #");putdec(i+1);puts0("\r\n");
-		for (j=0;j<FILENAME_LEN;j++) g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)+j]=filename[j];
-		rc=secwrite(device, ROOT_DIR, g_buffer512);
-		if (rc!=1) {puts0("Root dir read error!\r\n"); return;}
-		return;
-		}
-	}
-puts0("No space in root dir\r\n");
-}
-#endif
-
 int remove_(char *filename)
 {
 unsigned short int i;
@@ -3293,6 +3204,17 @@ if (flag==O_READ)
 	FCB[4]=0;
 	return 1;
 	}
+else if (flag==O_APPEND)
+	{
+	if (file_exist==0) {/*puts0("File not found\r\n");*/ return -1;}
+	// 1. перемещаем номер тек. блока файла на последний блок $$$
+	// 1.1 читаем текущий блок файла
+	// 1.2 переходим на следующий, если он есть
+	// 2. устанавливаем указатель файла (offset) в filelen, чтобы работало append
+	FCB[3]=FCB[6];
+	FCB[4]=FCB[7];
+	return 1;
+	}
 else
 	{
 	puts0("open_: unknown flag\r\n");
@@ -3318,7 +3240,7 @@ if (FCB[0])
 	offset=FCB[4];
 	offset=(offset<<16)|FCB[3];
 	//puts0("offset=");putdec(offset);puts0("\r\n");
-	if (offset%499==0)
+	if (offset%CARGO==0)
 		{// надо добавлять блок
 		// ищем свободный блок на диске (до первой ошибки, которая наверное конец диска)
 		// еще ни один свободный блок не выдан?
@@ -3423,7 +3345,7 @@ if (FCB[0])
 		rc=secread(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
 		// пишем в него
-		g_buffer512[offset%499+3]=c;
+		g_buffer512[offset%CARGO+3]=c;
 		offset++;
 		FCB[3]=offset;
 		FCB[4]=offset>>16;
@@ -3458,14 +3380,14 @@ if (FCB[0])
 	if (offset>=file_len) return -1;
 	// offset == 0 читаем текущий блок
 	// offset == [1..497] тек бл
-	if ((offset%499) || (offset==0))
+	if ((offset%CARGO) || (offset==0))
 		{// читаем из тек.бл
 		// читаем текущий блок
 		rc=secread(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
 			//int i0; puts0("debug: readc(): [");for (i0=1;i0<256;i0++) putch(g_buffer512[i0]);puts0(" ] ");
 		// копируем байт из него
-		*c = g_buffer512[offset%499+3];
+		*c = g_buffer512[offset%CARGO+3];
 		// инкрементируем оффсет
 		offset++;
 		FCB[3]=offset;
@@ -3484,7 +3406,7 @@ if (FCB[0])
 		rc=secread(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
 		// копируем байт из него
-		*c = g_buffer512[offset%499+3];
+		*c = g_buffer512[offset%CARGO+3];
 		// инкрементируем оффсет
 		offset++;
 		FCB[3]=offset;
