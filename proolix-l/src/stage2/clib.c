@@ -2914,6 +2914,55 @@ for (i=0;i<ROOT_SIZE;i++)
 	}
 }
 
+void append(void)
+{
+unsigned short int i;
+unsigned short int j;
+unsigned short int equal;
+unsigned char device;
+//unsigned char g_buffer512 [512];
+unsigned char filename[FILENAME_LEN+2];
+unsigned char str[MAX_LEN_STR];
+int first_line;
+
+// ввод имени файла
+puts0("file ? ");
+for (i=0;i<FILENAME_LEN;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+for (i=0;i<FILENAME_LEN;i++) filename[i]=str[i];
+filename[FILENAME_LEN]=0;
+
+puts0("\r\n'"); puts0(filename); puts0("'\r\n");
+
+i=open_(filename,O_APPEND);
+if (i==1) {puts0("open OK\r\n");}
+else {puts0("open not ok\r\n"); return;}
+
+first_line=1;
+
+while (1)
+{
+// ввод строки
+puts0("data to file (] - end of text) ? ");
+for (i=0;i<MAX_LEN_STR;i++) str[i]=0;
+getsn(str,MAX_LEN_STR);
+
+puts0("\r\n'"); puts0(str); puts0("'\r\n");
+
+if (str[0]==']') break;
+
+if (first_line==0) writec(0,'\n');
+else first_line=0;
+
+for (i=0;i<MAX_LEN_STR;i++)
+	if (str[i]) {writec(0,str[i]); putch(str[i]); }
+	else break;
+} // end while (1)
+
+close_(0);
+}
+
 void create_file3(void)
 {
 unsigned short int i;
@@ -3090,6 +3139,7 @@ int open_ (char *filename, int flag)
 unsigned short int i, ii;
 unsigned short int j;
 unsigned short int equal;
+unsigned short int next_bl;
 unsigned char device;
 //unsigned char g_buffer512 [512];
 //unsigned char str[MAX_LEN_STR];
@@ -3207,9 +3257,19 @@ if (flag==O_READ)
 else if (flag==O_APPEND)
 	{
 	if (file_exist==0) {/*puts0("File not found\r\n");*/ return -1;}
-	// 1. перемещаем номер тек. блока файла на последний блок $$$
-	// 1.1 читаем текущий блок файла
-	// 1.2 переходим на следующий, если он есть
+	// 1. перемещаем номер тек. блока файла на последний блок
+	if (FCB[2]==0) {FCB[3]=0;FCB[4]=0;return 1;} // файл без блоков, длины 0
+		while (1) {
+		if (FCB[2]==0) {FCB[3]=0;FCB[4]=0;return 1;} // файл без блоков, длины 0
+		// 1.1 читаем текущий блок файла
+		rc=secread(device, FCB[2], g_buffer512);
+		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
+		// 1.2 переходим на следующий, если он есть
+		next_bl=g_buffer512[2];
+		next_bl=next_bl<<8 | g_buffer512[1];
+		if (next_bl==0) break;
+		FCB[2]=next_bl;
+		}
 	// 2. устанавливаем указатель файла (offset) в filelen, чтобы работало append
 	FCB[3]=FCB[6];
 	FCB[4]=FCB[7];

@@ -244,6 +244,7 @@ while (1)
 	else if (!strcmp(command,"super")) view_superblock();
 	else if (!strcmp(command,"ls")) ls();
 	else if (!strcmp(command,"create")) create_file3();
+	else if (!strcmp(command,"append")) append();
 	else if (!strcmp(command,"tofile")) tofile();
 	else if (!strcmp(command,"tofile2")) tofile2();
 	else if (!strcmp(command,"rm")) remove_file();
