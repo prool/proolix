@@ -849,14 +849,14 @@ int21p:
 	cmpb	$0x37,%ah	# DOS 2+ - SWITCHAR - GET SWITCH CHARACTER
 	jz	l_21_37
 
+	cmpb	$0x3c,%ah	# DOS 2+ - CREAT - CREATE OR TRUNCATE FILE
+	jz	l_21_3c
+
 	cmpb	$0x3d,%ah	# DOS 2+ - OPEN - OPEN EXISTING FILE
 	jz	l_21_3d
 
 	cmpb	$0x3f,%ah	# DOS 2+ - READ - READ FROM FILE OR DEVICE
 	jz	l_21_3f
-
-	cmpb	$0x40,%ah	# DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
-	jz	l_21_40
 
 	cmpb	$0x44,%ah	# DOS 2+ - IOCTL - GET DEVICE INFORMATION
 	jz	l_21_44
@@ -1072,6 +1072,42 @@ l_21_37:	# DOS 2+ - SWITCHAR - GET SWITCH CHARACTER
 	movb	$'/',%dl
 	jmp	l_21_exit
 
+l_21_3c:	# DOS 2+ - CREAT - CREATE OR TRUNCATE FILE
+		# ds:dx - filename
+		# cx - attr
+		/* Return:
+			CF clear if successful
+			AX = file handle
+			CF set on error
+			AX = error code (03h,04h,05h) */
+	pushw	%CS
+	popw	%ES
+
+	movw	%dx,%si
+	movw	$g_filename,%di
+	movw	$16,%cx
+1:
+	movb	(%si),%al
+	movb	%al,%ES:(%di)
+	testb	%al,%al
+	jz	2f
+	incw	%si
+	incw	%di
+
+	loop	1b
+2:
+	pushl	$2	# O_CREAT
+	pushl	$g_filename
+	call	open_
+	addw	$8,%sp
+
+	stc
+	cmpw	$0xFFFF,%ax
+	je	3f
+	clc
+3:
+	jmp	l_21_exit
+
 l_21_3d:	# DOS 2+ - OPEN - OPEN EXISTING FILE
 	movw	$2,%ax	# err: file not found
 	stc
@@ -1079,11 +1115,6 @@ l_21_3d:	# DOS 2+ - OPEN - OPEN EXISTING FILE
 
 l_21_3f:	# DOS 2+ - READ - READ FROM FILE OR DEVICE
 	movw	$5,%ax # err: access denied
-	stc
-	jmp	l_21_exit
-
-l_21_40: # DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
-	movw	$5,%ax # err
 	stc
 	jmp	l_21_exit
 

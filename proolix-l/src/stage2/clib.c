@@ -3151,7 +3151,7 @@ unsigned int c3;
 unsigned int c4;
 unsigned int file_len;
 
-#if 0 // debug
+#if 1 // debug
 
 puts0("open_ array=[");
 for (i=0;i<FILENAME_LEN;i++) putch(filename[i]);
@@ -3160,6 +3160,8 @@ puts0(filename);
 puts0("' flag=");
 puthex(flag);
 puts0("\r\n");
+
+puts0("press any key "); getch();
 #endif
 
 if (filename==0) {puts0("open_: err 1\r\n"); return -1;}
