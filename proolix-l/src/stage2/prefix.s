@@ -825,23 +825,14 @@ int21p:
 	cmpb	$0xb,%ah	# GET STDIN STATUS
 	jz	l_21_b
 
-	cmpb	$0x1a,%ah	# DOS 1+ - SET DISK TRANSFER AREA ADDRESS
-	jz	l_21_1a
-
 	cmpb	$0x25,%ah	# DOS 1+ - SET INTERRUPT VECTOR
 	jz	l_21_25
-
-	cmpb	$0x29,%ah	# DOS 1+ - PARSE FILENAME INTO FCB
-	jz	l_21_29
 
 	cmpb	$0x2a,%ah	# DOS 1+ - GET SYSTEM DATE
 	jz	l_21_2a
 
 	cmpb	$0x30,%ah	# DOS 2+ - GET DOS VERSION
 	jz	l_21_30
-
-	cmpb	$0x34,%ah	# DOS 2+ - GET ADDRESS OF INDOS FLAG
-	jz	l_21_34
 
 	cmpb	$0x35,%ah	# DOS 2+ - GET INTERRUPT VECTOR
 	jz	l_21_35
@@ -855,44 +846,17 @@ int21p:
 	cmpb	$0x3d,%ah	# DOS 2+ - OPEN - OPEN EXISTING FILE
 	jz	l_21_3d
 
+	cmpb	$0x3e,%ah	# DOS 2+ - CLOSE - CLOSE FILE
+	jz	l_21_3e
+
 	cmpb	$0x3f,%ah	# DOS 2+ - READ - READ FROM FILE OR DEVICE
 	jz	l_21_3f
 
-	cmpb	$0x44,%ah	# DOS 2+ - IOCTL - GET DEVICE INFORMATION
-	jz	l_21_44
-
-	cmpb	$0x48,%ah	# DOS 2+ - ALLOCATE MEMORY
-	jz	l_21_48
-
-	cmpb	$0x49,%ah	# DOS 2+ - FREE MEMORY
-	jz	l_21_49
-
-	cmpb	$0x4a,%ah	# DOS 2+ - RESIZE MEMORY BLOCK
-	jz	l_21_4a
-
-	cmpb	$0x4b,%ah	# DOS 2+ - EXEC - LOAD AND/OR EXECUTE PROGRAM
-	jz	l_21_4b
+	cmpb	$0x40,%ah	# DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
+	jz	l_21_40
 
 	cmpb	$0x4c,%ah	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
 	jz	l_21_4c
-
-	cmpb	$0x50,%ah	# DOS 2+ internal - SET CURRENT PROCESS ID (SET PSP ADDRESS)
-	jz	l_21_50
-
-	cmpb	$0x52,%ah	# DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY
-	jz	l_21_52
-
-	cmpb	$0x55,%ah	# DOS 2+ internal - CREATE CHILD PSP
-	jz	l_21_55
-
-	cmpb	$0x5d,%ah	# DOS 3.1+ internal - SERVER FUNCTION CALL
-	jz	l_21_5d
-
-	cmpb	$0x58,%ah	# DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY
-	jz	l_21_58
-
-	cmpb	$0x60,%ah	# DOS 3.0+ - TRUENAME - CANONICALIZE FILENAME OR PATH
-	jz	l_21_60
 
 	jmp	l_21_unkn_fn
 
@@ -942,9 +906,6 @@ l_21_b_symbol_here:
 	movb	$0xFF,%al
 	jmp	l_21_exit
 
-l_21_1a: # DOS 1+ - SET DISK TRANSFER AREA ADDRESS
-	jmp	l_21_exit
-
 l_21_25: # DOS 1+ - SET INTERRUPT VECTOR
 	pushw	%ES
 	pushw	%cx
@@ -968,10 +929,6 @@ l_21_25: # DOS 1+ - SET INTERRUPT VECTOR
 
 	popw	%cx
 	popw	%ES
-	jmp	l_21_exit
-
-l_21_29:	# DOS 1+ - PARSE FILENAME INTO FCB
-#call	sayr_proc
 	jmp	l_21_exit
 
 l_21_2a:	# DOS 1+ - GET SYSTEM DATE
@@ -1042,9 +999,6 @@ l_21_30:	# DOS 2+ - GET DOS VERSION
 	xorw	%ax,%ax		# DOS 1.x ;-)
 	jmp	l_21_exit
 
-l_21_34:	# DOS 2+ - GET ADDRESS OF INDOS FLAG
-	jmp	l_21_exit	# prool: ;-)
-
 l_21_35: # DOS 2+ - GET INTERRUPT VECTOR
 	pushw	%cx
 
@@ -1096,10 +1050,17 @@ l_21_3c:	# DOS 2+ - CREAT - CREATE OR TRUNCATE FILE
 
 	loop	1b
 2:
+
+	pushw	%DS
+	pushw	%CS
+	popw	%DS
+
 	pushl	$2	# O_CREAT
 	pushl	$g_filename
 	call	open_
 	addw	$8,%sp
+
+	popw	%DS
 
 	stc
 	cmpw	$0xFFFF,%ax
@@ -1108,41 +1069,116 @@ l_21_3c:	# DOS 2+ - CREAT - CREATE OR TRUNCATE FILE
 3:
 	jmp	l_21_exit
 
-l_21_3d:	# DOS 2+ - OPEN - OPEN EXISTING FILE
-	movw	$2,%ax	# err: file not found
-	stc
-	jmp	l_21_exit
+l_21_3d:	/* DOS 2+ - OPEN - OPEN EXISTING FILE
+		AL = access and sharing modes (see #01402)
+		DS:DX -> ASCIZ filename
+		CL = attribute mask of files to look for (server call only)
 
-l_21_3f:	# DOS 2+ - READ - READ FROM FILE OR DEVICE
-	movw	$5,%ax # err: access denied
-	stc
-	jmp	l_21_exit
+		Return:
+		CF clear if successful
+		AX = file handle
+		CF set on error
+		AX = error code (01h,02h,03h,04h,05h,0Ch,56h) */
 
-l_21_44: # INT 21 - DOS 2+ - IOCTL - GET DEVICE INFORMATION
-	movw	$5,%ax	# error 5: access denied
-	stc
-	jmp	l_21_exit
+	pushw	%CS
+	popw	%ES
 
-l_21_48:	# DOS 2+ - ALLOCATE MEMORY
-	movw	$0, %bx
-	movw	$8, %ax # err: insuff. memory
-	stc
-	jmp	l_21_exit
+	movw	%dx,%si
+	movw	$g_filename,%di
+	movw	$16,%cx
+1:
+	movb	(%si),%al
+	movb	%al,%ES:(%di)
+	testb	%al,%al
+	jz	2f
+	incw	%si
+	incw	%di
 
-l_21_49:	# DOS 2+ - FREE MEMORY
-	movw	%ES,%ax
-	stc
-	movw	$7,%ax	# error: memory block destroyed
-	jmp	l_21_exit
+	loop	1b
+2:
 
-l_21_4a:	# DOS 2+ - RESIZE MEMORY BLOCK
+	pushw	%DS
+	pushw	%CS
+	popw	%DS
+
+	pushl	$0	# O_READ
+	pushl	$g_filename
+	call	open_
+	addw	$8,%sp
+
+	popw	%DS
+
+	stc
+	cmpw	$0xFFFF,%ax
+	je	3f
 	clc
-	movw	$1,%bx
+3:
 	jmp	l_21_exit
 
-l_21_4b:	# DOS 2+ - EXEC - LOAD AND/OR EXECUTE PROGRAM
-	movw	$5,%ax	# err: file not found
-	stc
+l_21_3e:	# DOS 2+ - CLOSE - CLOSE FILE
+		# Input: BX = file handle
+
+	pushl	%ebx
+	call	close_
+	addw	$4,%sp
+	clc
+	
+	jmp	l_21_exit
+
+l_21_3f:	/* DOS 2+ - READ - READ FROM FILE OR DEVICE
+		BX = file handle
+		CX = number of bytes to read
+		DS:DX -> buffer for data
+
+			Return:
+		CF clear if successful
+		AX = number of bytes actually read (0 if at EOF before call)
+		CF set on error
+		AX = error code (05h,06h) */
+
+		mov	%dx,%di
+
+		xorw	%si,%si
+1:
+		leal	char_buffer,%eax
+		pushl	%eax
+		pushl	%ebx
+		call	readc
+		addw	$8,%sp
+		cmpw	$0xFFFF,%ax
+		je	2f
+		movb	char_buffer,%al
+		movb	%al,(%di)
+		incw	%di
+		incw	%si
+		loop	1b
+2:
+		movw	%si,%ax
+		clc
+	jmp	l_21_exit
+
+l_21_40:	/* DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
+		BX = file handle
+		CX = number of bytes to write
+		DS:DX -> data to write
+		Return:
+		CF clear if successful
+		AX = number of bytes actually written
+		CF set on error
+		AX = error code (05h,06h) */
+
+		mov	%dx,%si
+		movw	%cx,%dx
+		xorw	%ax,%ax
+1:		movb	(%si),%al
+		pushl	%eax
+		pushl	%ebx
+		call	writec
+		addw	$8,%sp
+		loop	1b
+		clc		# пока делаем тупую заглушку: запись всегда заканчивается как бы без ошибок
+		movw	%dx,%ax
+
 	jmp	l_21_exit
 
 l_21_4c:	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
@@ -1159,31 +1195,6 @@ l_21_4c:	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
 
 #	call	print_registers
 	jmp	main
-
-l_21_50:	# DOS 2+ internal - SET CURRENT PROCESS ID (SET PSP ADDRESS)
-	clc
-	jmp	l_21_exit
-
-l_21_52: # DOS 2+ internal - SYSVARS - GET LIST OF LISTS
-	# ничего не делаем! потом разберемся!
-	jmp l_21_exit
-
-l_21_55: # DOS 2+ internal - CREATE CHILD PSP
-	stc
-	jmp	l_21_exit
-
-l_21_58: # DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY
-	movw	$1,%ax # error code "invalid function"
-	stc	# set CF flag (error)
-	jmp	l_21_exit
-
-l_21_5d:	# DOS 3.1+ internal - SERVER FUNCTION CALL
-	jmp	l_21_exit	# ;-)
-
-l_21_60: # DOS 3.0+ - TRUENAME - CANONICALIZE FILENAME OR PATH
-	movw	$2,%ax	# err 2: invalid component in directory path or drive letter only
-	stc		# err
-	jmp	l_21_exit
 
 l_21_unkn_fn:
 	  pushw		%CS
