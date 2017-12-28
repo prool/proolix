@@ -100,17 +100,20 @@ if (firstboot)
  {// begin firstboot
  firstboot=0;
 
+#ifndef PEMU
 //putch('/');
 putch_color('@', 4);
+#endif
 
 #ifdef PEMU
 
+printf("Proolix emulator--------------------------------------------------\n");
 mytimezone=0;
 
 cfg=fopen("pemu.cfg","r");
 
-if (cfg==NULL) printf("pemu.cfg not found\n");
-else printf("pemu.cfg found\n");
+if (cfg==NULL) printf("\npemu.cfg not found\n");
+else printf("\npemu.cfg found\n");
 
 if (cfg)
 	{

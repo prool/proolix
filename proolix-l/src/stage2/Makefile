@@ -15,7 +15,7 @@ FLASHDIR = /media/prool/202B-A342
 
 ASFLAG =
 
-all:	ct
+all:	ct pemu
 install:	installvmfloppy iso
 
 iso:
