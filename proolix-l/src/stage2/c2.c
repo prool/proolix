@@ -109,11 +109,24 @@ putch_color('@', 4);
 
 printf("Proolix emulator--------------------------------------------------\n");
 mytimezone=0;
+buf[0]=0;
+cfg=0;
 
-cfg=fopen("pemu.cfg","r");
+switch (argc)
+	{
+	case 1: /* pemu */
+		cfg=fopen("pemu.cfg","r");
 
-if (cfg==NULL) printf("\npemu.cfg not found\n");
-else printf("\npemu.cfg found\n");
+		if (cfg==NULL) printf("\npemu.cfg not found\n");
+		else printf("\npemu.cfg found\n");
+		break;
+	case 2: /* pemu imagename */
+		break;
+	case 3: /* pemu imagename command */
+		break;
+	default: /* argc>2 :: pemu imagename command parameters... */
+		;
+	}
 
 if (cfg)
 	{
@@ -126,7 +139,7 @@ if (cfg)
 	}
 else
 	{
-	if (argc!=2) {puts0("Usage: pemu fddimage\n"); return 1;}
+	if (argc==1) {printf("Usage: pemu [imagename] [command] [parameters]\n"); return 1;}
 	disk_a=open(argv[1],O_RDWR);
 	printf("disk A = '%s'\n", argv[1]);
 	}
@@ -192,6 +205,32 @@ puts0("\r\n");
 }
 
  }//end firstboot
+
+#ifdef PEMU
+if (argc>2)
+	if (argv[2])
+		{
+		//printf("argv[2]='%s'\n", argv[2]);
+		if (!strcmp(argv[2],"exit")) return 0;
+		else if (!strcmp(argv[2],"fromhost"))
+			{
+			if (argc<4) {printf("no filename\n"); return 4;}
+			if (argv[3])
+				{
+				printf("parameter='%s'\n", argv[3]);
+				from_host2(argv[3]);
+				}
+			else
+				printf("empty parameter\n");
+			return 0;
+			}
+		else
+			{
+			printf("Invalid batch command '%s'\n", argv[2]);
+			return 3;
+			}
+		}
+#endif
 
 while (1)
 	{

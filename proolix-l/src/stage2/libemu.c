@@ -131,3 +131,40 @@ if (close_(fo)==-1) {printf("Can't close virtual file '%s'\n",virtual_file); ret
 void to_host (void)
 {
 }
+
+void from_host2 (char *host_file) // copy file from host machine to disk image
+{
+char virtual_file [MAXLEN];
+char *cc;
+char c;
+int i, fi, fo;
+
+for (i=0;i<MAXLEN;i++) virtual_file[i]=0;
+
+printf("from_host2() :: Host file '%s'\n", host_file);
+
+fi=open(host_file,O_READ);
+if (fi==-1) {printf("Can't open host file '%s'\n",host_file); return;}
+
+strcpy(virtual_file,host_file);
+printf("Virtual file '%s'\n", virtual_file);
+
+fo=open_(virtual_file,O_READ);
+if (fo!=-1)
+{// target file exitst: need to remove old file
+close_(fo);
+remove_(virtual_file);
+}
+
+fo=open_(virtual_file,O_CREAT);
+if (fo==-1) {printf("Can't create virtual file '%s'\n",virtual_file); return;}
+
+while(1)
+	{
+	if (read(fi,&c,1)!=1) {break;}
+	if (writec(fo,c)==-1) {printf("Can't write virtual file '%s'\n",virtual_file); break;}
+	}
+
+close(fi);
+if (close_(fo)==-1) {printf("Can't close virtual file '%s'\n",virtual_file); return;}
+}
