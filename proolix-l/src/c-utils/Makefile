@@ -44,7 +44,7 @@ ctest:	ctmp.s
 
 # clean
 clean:
-	rm *.o *.a c1.S *.lst *.map ctmp.s c1 ctest *.orig ctmp.sBAK ctmp.s.bak
+	rm *.o *.a c1.S *.lst *.map ctmp.s c1 ctest *.orig ctmp.sBAK ctmp.s.bak tmp.S
 
 # make .objs
 
