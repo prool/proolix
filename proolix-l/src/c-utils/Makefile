@@ -95,6 +95,11 @@ getsn.o:	getsn.c headers.h
 	./britva2.sh tmp.S
 	as -o $@ -a=tmp.lst ctmp.s
 
+strcmp.o:	strcmp.c headers.h
+	gcc -m16 -S -o tmp.S $<
+	./britva2.sh tmp.S
+	as -o $@ -a=tmp.lst ctmp.s
+
 # make libc
-libc.a:		sayr.o saycsip.o ohw.o stop.o syscall_test.o getchar.o putch.o puts0.o puts.o peek.o puthex.o files.o getsn.o
+libc.a:		sayr.o saycsip.o ohw.o stop.o syscall_test.o getchar.o putch.o puts0.o puts.o peek.o puthex.o files.o getsn.o strcmp.o
 	ar r libc.a $^

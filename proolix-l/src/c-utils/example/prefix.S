@@ -3,8 +3,6 @@
 
     .code16gcc
 
-/*    .include "macros.S" */
-
     .text
 
 _start:
@@ -31,7 +29,7 @@ l_continue:
 	sti
 
     call	main
-
+_exit:
     int		$0x90
 
 /* end of prool prefix */

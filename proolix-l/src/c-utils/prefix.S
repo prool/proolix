@@ -31,7 +31,7 @@ l_continue:
 	sti
 
     call	main
-
+_exit:
     int		$0x90
 
 /* end of prool prefix */

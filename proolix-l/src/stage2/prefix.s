@@ -417,6 +417,7 @@ s_txt92:	.asciz " int 92 say "
 s_txt91:	.asciz " int 91 !!!111 "
 */
 
+# System Calls
 interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 
 	  pushw	%DS # save DS
