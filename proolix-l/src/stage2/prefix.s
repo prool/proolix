@@ -580,17 +580,6 @@ l_91_exit:
 	  iret
 	  .code16gcc
 
-	  /* composite IRET ;) */
-	  /*
-	  incw	%SP
-	  incw	%SP
-	  incw	%SP
-	  incw	%SP
-	  incw	%SP
-	  incw	%SP
-
-	  ljmp	*%SS:(%bp)
-	  */
 /*
 s_interrupt_90:	.ascii	"exit"
 		.byte	13,10,0
@@ -859,6 +848,9 @@ int21p:
 	cmpb	$0x4c,%ah	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
 	jz	l_21_4c
 
+	cmpb	$0xFF,%ah	# Proolix DOS emulator - test function - read 1 byte from opened file, using readc()
+	jz	l_21_ff		# return: al - byte, ah - error code (0 - no error, other value - error)
+
 	jmp	l_21_unkn_fn
 
 l_21_0: # DOS 1+ - TERMINATE PROGRAM
@@ -1109,11 +1101,12 @@ l_21_3d:	/* DOS 2+ - OPEN - OPEN EXISTING FILE
 
 	popw	%DS
 
-	stc
 	cmpw	$0xFFFF,%ax
 	je	3f
 	clc
-3:
+	jmp	4f
+3:	stc
+4:
 	jmp	l_21_exit
 
 l_21_3e:	# DOS 2+ - CLOSE - CLOSE FILE
@@ -1125,6 +1118,15 @@ l_21_3e:	# DOS 2+ - CLOSE - CLOSE FILE
 	clc
 	
 	jmp	l_21_exit
+
+l_21_ff:	/* Proolix DOS emulator test function - readc() - output: al - readed byte, ah - err code (0 - no err) */
+		movl	$char_buffer,%eax
+		pushl	%eax
+		pushl	$0
+		call	readc
+		addw	$8,%sp
+		movb	char_buffer,%al
+		jmp	l_21_exit
 
 l_21_3f:	/* DOS 2+ - READ - READ FROM FILE OR DEVICE
 		BX = file handle
@@ -1139,6 +1141,10 @@ l_21_3f:	/* DOS 2+ - READ - READ FROM FILE OR DEVICE
 
 		mov	%dx,%di
 
+		pushw	%cx
+		xorl	%ecx,%ecx
+		popw	%cx
+
 		xorw	%si,%si
 1:
 		leal	char_buffer,%eax
@@ -1146,8 +1152,9 @@ l_21_3f:	/* DOS 2+ - READ - READ FROM FILE OR DEVICE
 		pushl	%ebx
 		call	readc
 		addw	$8,%sp
-		cmpw	$0xFFFF,%ax
-		je	2f
+		/*call	ohw*/
+		testw	%ax,%ax
+		jne	2f
 		movb	char_buffer,%al
 		movb	%al,(%di)
 		incw	%di
@@ -1155,6 +1162,7 @@ l_21_3f:	/* DOS 2+ - READ - READ FROM FILE OR DEVICE
 		loop	1b
 2:
 		movw	%si,%ax
+		/*call	ohw*/
 		clc
 	jmp	l_21_exit
 
@@ -1214,10 +1222,13 @@ l_21_unkn_fn:
 l_21_exit:
 
 	  /* composite IRET ;) */
-	
-	  popw	%ax
-	  popw	%ax
-	  popw	%ax	# SP-=6
+
+		incw	%sp
+		incw	%sp
+		incw	%sp
+		incw	%sp
+		incw	%sp
+		incw	%sp
 
 	  ljmp	*%SS:(%bp)
 

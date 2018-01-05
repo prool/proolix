@@ -3177,6 +3177,8 @@ FCB[5]=flag;
 FCB[2]=0;
 FCB[3]=0;
 FCB[4]=0;
+FCB[6]=0;
+FCB[7]=0;
 
 file_exist=0;
 
@@ -3428,7 +3430,7 @@ unsigned short int i,j, device,newbl, end_formatted_bl;
 unsigned short int rc;
 unsigned int offset, file_len, next_bl;
 
-//putch('C'); // debug
+putch('C'); // debug
 
 i=get_boot_drive();
 if (i==0xAAAA) device=0; else device=0x80;
@@ -3437,11 +3439,11 @@ if (i==0xAAAA) device=0; else device=0x80;
 if (FCB[0])
 	{
 	// если номер блока=0 то выход
-	if (FCB[2]==0) return -1;
+	if (FCB[2]==0) {puts0("readc1\r\n");return -1;}
 	// если offset >= file_len то выход
 	offset=(FCB[4]<<16)|FCB[3];
 	file_len=(FCB[7]<<16)|FCB[6];
-	if (offset>=file_len) return -1;
+	if (offset>=file_len) {puts0("readc2 offset;filelen=");putdec(offset);puts0(";");putdec(file_len);puts0("\r\n");return -1;}
 	// offset == 0 читаем текущий блок
 	// offset == [1..497] тек бл
 	if ((offset%CARGO) || (offset==0))
@@ -3465,7 +3467,7 @@ if (FCB[0])
 		next_bl=g_buffer512[2];
 		next_bl=next_bl<<8 | g_buffer512[1];
 		if (next_bl==0) // следующего блока нет
-			return -1;
+			{puts0("readc3\r\n");return -1;}
 		FCB[2]=next_bl;
 		rc=secread(device, FCB[2], g_buffer512);
 		if (rc!=1) {puts0("Sec read error!\r\n"); return -1;}
@@ -3476,10 +3478,15 @@ if (FCB[0])
 		FCB[3]=offset;
 		FCB[4]=offset>>16;
 		}
+	//puts0("readc+");
 	return 0;
 	}
 else
+	{
+	puts("readc0");
 	return -1;
+	}
+puts0("SYSTEM ERROR\r\n");
 }
 
 int close_(int h)
@@ -3514,6 +3521,10 @@ if ((FCB[5]==O_CREAT) || (FCB[5]==O_APPEND) || (FCB[5]==O_WRITE))
 	}
 // освободжаем FCB
 FCB[0]=0;
+FCB[3]=0;
+FCB[4]=0;
+FCB[6]=0;
+FCB[7]=0;
 return 0;
 }
 
