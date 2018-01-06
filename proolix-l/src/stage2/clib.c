@@ -3225,12 +3225,17 @@ file_exist=0;
 l_1:
 if (flag==O_CREAT)
 	{// пишем
-		if (file_exist)	{// пока писать в уже существующий файл в режиме O_CREAT нельзя
-				puts0("open_: file exists!\r\n");
-				FCB[0]=0;
-				return -1;
+		if (file_exist)	{// если файл сущ., то удаляем его
+				puts0("open_: file exists! removed!\r\n");
+				//FCB[0]=0;
+				remove_(filename);
+				//return -1;
 				}
 	// файла нет
+	rc=secread(device, ROOT_DIR, g_buffer512);
+	if (rc!=1) {puts0("open_: root dir read#2 error "); puthex(rc);
+		if ((rc&0xFF00)==0x0900) puts0(" (data boundary error, only for FDD)");puts0("\r\n"); return -1;}
+
 	for (i=0;i<ROOT_SIZE;i++)
 		{
 		if (g_buffer512[3+i*(FILENAME_LEN+FLAGS_LEN)]==0)
@@ -3430,7 +3435,7 @@ unsigned short int i,j, device,newbl, end_formatted_bl;
 unsigned short int rc;
 unsigned int offset, file_len, next_bl;
 
-putch('C'); // debug
+//putch('C'); // debug
 
 i=get_boot_drive();
 if (i==0xAAAA) device=0; else device=0x80;
@@ -3443,7 +3448,7 @@ if (FCB[0])
 	// если offset >= file_len то выход
 	offset=(FCB[4]<<16)|FCB[3];
 	file_len=(FCB[7]<<16)|FCB[6];
-	if (offset>=file_len) {puts0("readc2 offset;filelen=");putdec(offset);puts0(";");putdec(file_len);puts0("\r\n");return -1;}
+	if (offset>=file_len) {puts0(" readc2 offset;filelen=");putdec(offset);puts0(";");putdec(file_len);puts0("\r\n");return -1;}
 	// offset == 0 читаем текущий блок
 	// offset == [1..497] тек бл
 	if ((offset%CARGO) || (offset==0))

@@ -1027,6 +1027,7 @@ l_21_3c:	# DOS 2+ - CREAT - CREATE OR TRUNCATE FILE
 			AX = file handle
 			CF set on error
 			AX = error code (03h,04h,05h) */
+
 	pushw	%CS
 	popw	%ES
 
@@ -1055,11 +1056,12 @@ l_21_3c:	# DOS 2+ - CREAT - CREATE OR TRUNCATE FILE
 
 	popw	%DS
 
-	stc
 	cmpw	$0xFFFF,%ax
 	je	3f
 	clc
-3:
+	jmp	4f
+3:	stc
+4:
 	jmp	l_21_exit
 
 l_21_3d:	/* DOS 2+ - OPEN - OPEN EXISTING FILE
