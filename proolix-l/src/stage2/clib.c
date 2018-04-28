@@ -519,7 +519,8 @@ while(*s1)
   }
 return i;
 }
-/****************************************************************************/
+
+#if 0
 char  *strstr(const char  *s1, const char  *s2)
 {
 size_t l;
@@ -533,9 +534,8 @@ while(*s1)
   }
 return NULL;
 }
-/****************************************************************************/
 
-#if 0
+
 static char  *strtok_ptr;
 /****************************************************************************/
 char  *strtok(char  *s1, const char  *s2)
@@ -594,7 +594,6 @@ while(i1<i2)
 return ret;
 }
 
-#endif
 
 char  *strlwr(char  *s)
 {
@@ -629,6 +628,8 @@ int isalpha (int c) {return islower(c)||isupper(c);}
 int iscntrl (int c) {return c<' ';}
 int isdigit (int c) {return (c>='0')&&(c<='9');}
 int islower (int c) {return (c>='a')&&(c<='z');}
+#endif
+
 #if 0
 int ispunct (int c)
 {
@@ -664,15 +665,13 @@ switch(c)
   default:  return 0;
   }
 }
-#endif
-/****************************************************************************/
+
 int isspace (int c) {if ((c==' ')||(c=='\t')) return 1; else return 0;}
 int isupper (int c) {return (c>='A')&&(c<='Z');}
 int isxdigit(int c)
   {return ((c>='0')&&(c<='9'))||((c>='a')&&(c<='f'))||((c>='A')&&(c<='F'));}
 
 
-/****************************************************************************/
 void  *memcpy(void  *dest, const void  *src, size_t n)
 {size_t i; void  *ret;
 /* if (dest==NULL) return NULL; */
@@ -746,6 +745,7 @@ void  *memset  (void  *str, int c, size_t n)
 for(i=0;i<n;i++) *((char  *)str+(unsigned int)i)=c;
 return str;
 }
+#endif
 
 #if 0 // printf package
 

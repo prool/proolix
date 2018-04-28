@@ -386,6 +386,8 @@ run_msdos:
 	movb	$0x0D,%al
 	movb	%al,%ES:(83)
 
+	xorw	%ax,%ax
+
         .byte      0xea    # JMP stage2_seg:0100
         .word      0x0100,0x4050
 /*
