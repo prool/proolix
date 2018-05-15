@@ -878,13 +878,26 @@ l_21_9:	# AH=9 DOS 1+ - WRITE STRING TO STANDARD OUTPUT
 	movw	%dx,%si
 l_21_9_0:
 	movb	%DS:(%si),%al
+	cmpb	$10, %al
+	je	l_21_9_10
 	cmpb	$'$', %al
 	je	l_21_9_exit
 	movb $0x0e,%ah
 	int  $0x10	# putch
-
+l_21_9_00:
 	incw	%si
 	jmp	l_21_9_0
+
+l_21_9_10:
+	movb $13,%al
+	movb $0x0e,%ah
+	int  $0x10	# putch
+
+	movb $10,%al
+	movb $0x0e,%ah
+	int  $0x10	# putch
+	jmp	l_21_9_00
+
 l_21_9_exit:
 	movb	$0x24,%al
 	popw	%si
