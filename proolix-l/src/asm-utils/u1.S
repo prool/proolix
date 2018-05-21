@@ -4,20 +4,48 @@
 
     .include "macros.S"
 
+    .text
+
     .global	_start
 
 _start:
 
-	jmp	l_continue
-signature:	.word	0xDDDD
-arguments_offset:	.word	0
-arguments_seg:		.word	0
-l_continue:
+#	jmp	l_continue
+#signature:	.word	0xDDDD
+#arguments_offset:	.word	0
+#arguments_seg:		.word	0
+#l_continue:
+
+	pushw	%cs
+	popw	%ds
+
+	pushw	%cs
+	popw	%es
+
+	pushw	%cs
+	popw	%bx
+
+	cli
+	movw	%bx,%SS
+	movw	$0xFFFC,%SP
+	sti
+
+
+#    xorb	%ah,%ah
+#    int		$0x91 # test function
+
+    int		$0x90	# quit
+
+#    xorb	%ah,%ah
+#    int		$0x16	# getchar
+
+#    movb	$1,%ah
+#    int		$0x91	#getchar
+
+    int		$0x90
 
     print str1
-
-    movb	$0,%ah	# fn 0 - test
-    int		$0x91
+    print str1
 
     print str2
 
@@ -39,7 +67,7 @@ l_continue:
 	.include "ohw.S"
 	.include "saycsip.S"
 
-str1:	.ascii	" First assembler utility for OS Proolix"
+str1:	.ascii	" First assembler utility for OS Proolix======================================================================="
 	.byte	13,10,0
 str2:	.ascii	"Press any key "
 	.byte	13,10,0

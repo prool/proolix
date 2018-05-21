@@ -4,5 +4,6 @@
 
 void main(void)
 {
-puts("test");
+puts("test1");
+puts("test2");
 }

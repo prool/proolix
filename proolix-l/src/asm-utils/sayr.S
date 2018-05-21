@@ -13,7 +13,8 @@ sayr_proc: # proc       Ver 0.0.2 19-Oct-2004
 	
 #       cld
 sayr_l1:
-        lodsb
+#        lodsb
+	movb	(%si),%al
         orb     %al,%al
         jz      sayrret
         movb    $0x0e,%ah

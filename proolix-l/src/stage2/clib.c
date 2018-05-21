@@ -3448,7 +3448,7 @@ if (FCB[0])
 	// если offset >= file_len то выход
 	offset=(FCB[4]<<16)|FCB[3];
 	file_len=(FCB[7]<<16)|FCB[6];
-	if (offset>=file_len) {puts0(" readc2 offset;filelen=");putdec(offset);puts0(";");putdec(file_len);puts0("\r\n");return -1;}
+	if (offset>=file_len) {/*puts0(" readc2 offset;filelen=");putdec(offset);puts0(";");putdec(file_len);puts0("\r\n");*/return -1;}
 	// offset == 0 читаем текущий блок
 	// offset == [1..497] тек бл
 	if ((offset%CARGO) || (offset==0))

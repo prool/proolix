@@ -427,10 +427,10 @@ interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 	  pushw %CS
 	  popw	%DS # DS:=CS
 
-/*
+
 	  cmpb	$0,%ah		# function 0 - test
 	  je	l_91_0
-*/
+
 	  cmpb	$1,%ah		# function 1 - input character from console
 	  je	l_91_1
 	  cmpb	$2,%ah		# function 2 - output character from %al
@@ -463,11 +463,13 @@ interrupt_91:	# Proolix functions (similar to int 21h in MSDOS)
 	  			# function 0x30 - exec file
 
 	  jmp	l_91_unknown_fn
-/*
-l_91_0:		call	test91
-#putch	$'@'
+
+l_91_0:		
+#	call	print_registers
+	call	test91
+	putch	$'@'
 		jmp	l_91_exit
-*/
+
 l_91_1:
 	xorb	%ah,%ah
 	int	$0x16
@@ -586,7 +588,7 @@ l_91_exit:
 s_interrupt_90:	.ascii	"exit"
 		.byte	13,10,0
 */
-interrupt_90:	# 
+interrupt_90:	#
 
 	pushw	%CS
 	popw	%DS	# DS:=CS
