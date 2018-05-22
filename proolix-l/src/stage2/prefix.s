@@ -870,6 +870,21 @@ int21p:
 	cmpb	$0x4c,%ah	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
 	jz	l_21_4c
 
+	cmpb	$0x50,%ah	# DOS 2+ internal - SET CURRENT PROCESS ID (SET PSP ADDRESS) -- fake. for insight
+	jz	l_21_exit
+
+	cmpb	$0x52,%ah	# DOS 2+ internal - SYSVARS - GET LIST OF LISTS -- FAKE, for debugger insight.com
+	jz	l_21_exit
+
+	cmpb	$0x55,%ah	# DOS 2+ internal - CREATE CHILD PSP -- fake
+	jz	l_21_exit
+
+	cmpb	$0x58,%ah	# DOS 2.11+ - GET OR SET MEMORY ALLOCATION STRATEGY -- Fake. for insight.com
+	jz	l_21_exit
+
+	cmpb	$0x60,%ah	# DOS 3.0+ - TRUENAME - CANONICALIZE FILENAME OR PATH - fake, for insight
+	jz	l_21_exit
+
 	cmpb	$0xFF,%ah	# Proolix DOS emulator - test function - read 1 byte from opened file, using readc()
 	jz	l_21_ff		# return: al - byte, ah - error code (0 - no error, other value - error)
 
