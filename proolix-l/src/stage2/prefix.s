@@ -374,17 +374,20 @@ run_msdos:
 	movb	%al,%ES:(81)
 */
 
-	movb	$3,%al
+	movb	$4,%al
 	movb	%al,%ES:(80)
 
-	movb	$'/',%al
+	movb	$'1',%al
 	movb	%al,%ES:(81)
 
-	movb	$'?',%al
+	movb	$' ',%al
 	movb	%al,%ES:(82)
 
-	movb	$0x0D,%al
+	movb	$'2',%al
 	movb	%al,%ES:(83)
+
+	movb	$0x0D,%al
+	movb	%al,%ES:(84)
 
 	xorw	%ax,%ax
 
@@ -819,8 +822,17 @@ int21p:
 	cmpb	$0xb,%ah	# GET STDIN STATUS
 	jz	l_21_b
 
+	cmpb	$0x19,%ah	# DOS 1+ - GET CURRENT DEFAULT DRIVE
+	jz	l_21_19
+
+	cmpb	$0x1a,%ah	# DOS 1+ - SET DISK TRANSFER AREA ADDRESS (FAKE)
+	jz	l_21_exit
+
 	cmpb	$0x25,%ah	# DOS 1+ - SET INTERRUPT VECTOR
 	jz	l_21_25
+
+	cmpb	$0x26,%ah	# DOS 1+ - CREATE NEW PROGRAM SEGMENT PREFIX (fake)
+	jz	l_21_exit
 
 	cmpb	$0x2a,%ah	# DOS 1+ - GET SYSTEM DATE
 	jz	l_21_2a
@@ -848,6 +860,12 @@ int21p:
 
 	cmpb	$0x40,%ah	# DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
 	jz	l_21_40
+
+	cmpb	$0x48,%ah	# DOS 2+ - ALLOCATE MEMORY
+	jz	l_21_48
+
+	cmpb	$0x4a,%ah	# DOS 2+ - RESIZE MEMORY BLOCK
+	jz	l_21_4a
 
 	cmpb	$0x4c,%ah	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
 	jz	l_21_4c
@@ -914,6 +932,10 @@ l_21_b: # GET STDIN STATUS Return: AL = status 00h if no character available FFh
 	jmp	l_21_exit
 l_21_b_symbol_here:
 	movb	$0xFF,%al
+	jmp	l_21_exit
+
+l_21_19:	# DOS 1+ - GET CURRENT DEFAULT DRIVE
+	movb	$0,%al
 	jmp	l_21_exit
 
 l_21_25: # DOS 1+ - SET INTERRUPT VECTOR
@@ -1207,6 +1229,16 @@ l_21_40:	/* DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
 		clc		# пока делаем тупую заглушку: запись всегда заканчивается как бы без ошибок
 		movw	%dx,%ax
 
+	jmp	l_21_exit
+
+l_21_48:	# DOS 2+ - ALLOCATE MEMORY - FAKE
+	movw	$0x5050,%ax
+	clc
+	jmp	l_21_exit
+
+l_21_4a:	# DOS 2+ - RESIZE MEMORY BLOCK - ЗАГЛУШКА (FAKE)
+	movw	$0xFFFF,%bx
+	clc
 	jmp	l_21_exit
 
 l_21_4c:	# DOS 2+ - EXIT - TERMINATE WITH RETURN CODE
