@@ -3151,15 +3151,14 @@ unsigned int c3;
 unsigned int c4;
 unsigned int file_len;
 
-#if 0 // debug
-
-puts0("open_ array=[");
-for (i=0;i<FILENAME_LEN;i++) putch(filename[i]);
-puts0("] filename='");
+#if 1 // debug
+puts0("open filename='");
 puts0(filename);
-puts0("' flag=");
-puthex(flag);
+puts0("'");
 puts0("\r\n");
+
+// prool fool code: если что-то было открыто, но не закрыто, то закрываем. это для fasm
+close_(0);
 
 //puts0("press any key "); getch();
 #endif
@@ -3500,6 +3499,10 @@ unsigned short int i, offset;
 //unsigned char g_buffer512[512];
 unsigned char device;
 unsigned short int rc;
+
+#if 1
+puts("close_()");
+#endif
 
 // если хандлер не открыт, то эррор
 if (FCB[0]==0) return -1;

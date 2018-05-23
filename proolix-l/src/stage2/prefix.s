@@ -366,28 +366,21 @@ run_msdos:
 
 	movw	$0x5050,%ax
 	movw	%ax,%ES:(2)
-/*
-	movb	$0,%al
-	movb	%al,%ES:(80)
 
-	movb	$0x0D,%al
-	movb	%al,%ES:(81)
-*/
+	movb	$3,%al
+	movb	%al,%ES:(0x80)
 
-	movb	$4,%al
-	movb	%al,%ES:(80)
-
-	movb	$'1',%al
-	movb	%al,%ES:(81)
+	movb	$'f',%al
+	movb	%al,%ES:(0x81)
 
 	movb	$' ',%al
-	movb	%al,%ES:(82)
+	movb	%al,%ES:(0x82)
 
 	movb	$'2',%al
-	movb	%al,%ES:(83)
+	movb	%al,%ES:(0x83)
 
 	movb	$0x0D,%al
-	movb	%al,%ES:(84)
+	movb	%al,%ES:(0x84)
 
 	xorw	%ax,%ax
 
@@ -861,6 +854,15 @@ int21p:
 	cmpb	$0x40,%ah	# DOS 2+ - WRITE - WRITE TO FILE OR DEVICE
 	jz	l_21_40
 
+	cmpb	$0x43,%ah	# DOS 2+ - GET FILE ATTRIBUTES - - FAKE
+	xorw	%cx,%cx
+	clc
+	jz	l_21_exit
+
+	cmpb	$0x44,%ah	# INT 21 - DOS 2+ - IOCTL - GET DEVICE INFORMATION -- FAKE
+	stc
+	jz	l_21_exit
+
 	cmpb	$0x48,%ah	# DOS 2+ - ALLOCATE MEMORY
 	jz	l_21_48
 
@@ -1043,7 +1045,8 @@ century:	.word	0
 year:		.word	0
 
 l_21_30:	# DOS 2+ - GET DOS VERSION
-	xorw	%ax,%ax		# DOS 1.x ;-)
+	movb	$6,%al	# major number
+	movb	$20,%ah # minor number
 	jmp	l_21_exit
 
 l_21_35: # DOS 2+ - GET INTERRUPT VECTOR
