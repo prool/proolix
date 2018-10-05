@@ -2,9 +2,10 @@
 
 Simple hobby POSIX-compatible OS for i8086
 
-![screenshot1](http://prool.kharkov.org/proolix/blog/wp-content/uploads/proolix-machine-300x167.png "After booting")
+---
 
-[More screenshots...] (http://prool.kharkov.org/proolix/blog/screenshots)
+Proolix repo is moved to Gitlab: https://gitlab.com/prool/proolix
+Репозиторий Пруликса по техническим причинам с 30.09.2018 ведется на Гитлабе.
 
 ---
 
@@ -31,5 +32,3 @@ Prool
 ---
 
 Proolix maillist http://subscribe.ru/catalog/comp.soft.othos.proolix
-
-Proolix blog http://prool.kharkov.org/proolix/blog
