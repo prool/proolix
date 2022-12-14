@@ -28,7 +28,3 @@ Russian comments in sources
 - in new files in UTF-8 codetable
 
 Prool
-
----
-
-Proolix maillist http://subscribe.ru/catalog/comp.soft.othos.proolix
